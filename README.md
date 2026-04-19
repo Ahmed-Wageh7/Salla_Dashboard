@@ -1,59 +1,51 @@
-# Salla
+# Salla Dashboard
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
+Angular dashboard project prepared for GitHub-based CI and GitHub Pages deployment.
 
-## Development server
+## Local development
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Install dependencies and start the app:
 
 ```bash
-ng generate component component-name
+npm ci
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+The app runs at `http://localhost:4200/`.
+
+## Quality checks
+
+Run the unit tests:
 
 ```bash
-ng generate --help
+npm run test:ci
 ```
 
-## Building
-
-To build the project run:
+Build the production-ready static bundle:
 
 ```bash
-ng build
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The build output is generated inside `dist/<project>/browser`.
 
-## Running unit tests
+## GitHub deployment
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+This repository now includes:
 
-```bash
-ng test
-```
+- `CI` workflow for install, test, and build validation on pushes and pull requests
+- `Deploy To GitHub Pages` workflow for publishing the built app from `main`
 
-## Running end-to-end tests
+To enable deployment on GitHub:
 
-For end-to-end (e2e) testing, run:
+1. Push this repository to GitHub.
+2. Open `Settings` > `Pages`.
+3. Under `Build and deployment`, choose `GitHub Actions`.
+4. Push to `main` again, or run the `Deploy To GitHub Pages` workflow manually.
 
-```bash
-ng e2e
-```
+After deployment, GitHub Pages will publish the static Angular app automatically.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Notes
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- The production build uses a relative base href, so it works on GitHub Pages project URLs without hardcoding the repository name.
+- The app already uses hash-based routing, which keeps deep links working correctly on static hosting.

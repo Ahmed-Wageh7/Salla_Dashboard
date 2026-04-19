@@ -1,13 +1,14 @@
 {
-  "name": "salla",
+  "name": "salla-dashboard",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --prebundle=false",
-    "build": "ng build",
+    "build": "ng build --output-mode static --base-href ./",
+    "build:github": "npm run build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:salla": "node dist/salla/server/server.mjs"
+    "test:ci": "ng test --watch=false --progress=false"
   },
   "private": true,
   "packageManager": "npm@10.8.2",
