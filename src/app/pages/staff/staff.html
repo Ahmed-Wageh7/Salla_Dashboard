@@ -1,0 +1,48 @@
+<section class="admin-page">
+  <section class="panel staff-hero">
+    <div class="staff-hero__content">
+      <p class="admin-page__eyebrow">Staff operations</p>
+      <h1>Staff workspace</h1>
+      <p class="admin-page__subtitle">
+        Move between attendance, deductions, and salary without losing context. Each workflow now
+        has a dedicated screen and a shared workspace switcher.
+      </p>
+
+      <div class="staff-hero__chips">
+        <span class="staff-chip">3 focused workflows</span>
+        <span class="staff-chip">Sidebar stays in sync</span>
+        <span class="staff-chip">Faster switching</span>
+      </div>
+    </div>
+
+    <div class="staff-hero__aside">
+      <p class="staff-hero__aside-label">Recommended flow</p>
+      <h2>Start the day with attendance, then review deductions and finalize salary actions.</h2>
+      <p>
+        Use the switcher below or the sidebar to jump between tasks without hunting for the right
+        page.
+      </p>
+    </div>
+  </section>
+
+  <div class="module-grid">
+    @for (module of modules; track module.route) {
+      <a class="panel module-card" [routerLink]="module.route">
+        <div class="module-card__icon">
+          <i [class]="'fas ' + module.icon"></i>
+        </div>
+        <div class="module-card__body">
+          <p class="module-card__eyebrow">{{ module.eyebrow }}</p>
+          <h2>{{ module.title }}</h2>
+          <p>{{ module.description }}</p>
+        </div>
+        <div class="module-card__footer">
+          <span class="module-card__cta">{{ module.ctaLabel }}</span>
+          <span class="module-card__cta-icon">
+            <i class="fas fa-arrow-right"></i>
+          </span>
+        </div>
+      </a>
+    }
+  </div>
+</section>

@@ -1,0 +1,249 @@
+<section class="admin-page">
+  <header class="admin-page__header">
+    <div class="admin-page__intro">
+      <div class="admin-page__count">{{ filteredSubcategories().length }}</div>
+      <div>
+        <h1>Subcategories</h1>
+        <p class="admin-page__subtitle">
+          Group products under the right parent category and manage them from one table.
+        </p>
+      </div>
+    </div>
+
+    <div class="admin-page__actions">
+      <button class="btn btn--ghost" type="button" routerLink="/products">Products</button>
+      <button class="btn btn--ghost" type="button" routerLink="/products/categories">
+        Categories
+      </button>
+      <button class="btn btn--ghost" type="button" (click)="loadData()">Refresh</button>
+      <button class="btn btn--secondary" type="button" (click)="openCreateModal()">
+        New subcategory
+      </button>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="feedback feedback--error">{{ errorMessage() }}</div>
+  }
+
+  <div class="grid">
+    <section class="panel panel--list">
+      <div class="panel__header panel__header--split">
+        <div>
+          <h2>Subcategory list</h2>
+          <small>Search, filter, view, edit, and delete from one place.</small>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-field">
+            <i class="fas fa-search"></i>
+            <input
+              type="search"
+              placeholder="Search subcategories"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+            />
+          </div>
+
+          <select
+            class="filter-select"
+            [ngModel]="categoryFilter()"
+            (ngModelChange)="categoryFilter.set($event)"
+          >
+            <option value="all">All categories</option>
+            @for (category of categories(); track categoryId(category)) {
+              <option [ngValue]="categoryId(category)">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (isLoading()) {
+        <div class="state-card loading-state">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <div class="loading-copy">
+            <strong>Loading subcategories</strong>
+            <p>Fetching subcategory data ..</p>
+          </div>
+        </div>
+      } @else if (filteredSubcategories().length === 0) {
+        <div class="state-card">No subcategories matched the current filters.</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name <span>ID</span></th>
+                <th>Parent category</th>
+                <th>Description</th>
+                <th>Created <span>Updated</span></th>
+                <th class="table-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (subcategory of filteredSubcategories(); track id(subcategory)) {
+                <tr>
+                  <td>
+                    <div class="cell-stack">
+                      <a
+                        class="entity-link"
+                        [routerLink]="['/products/subcategories', id(subcategory)]"
+                      >
+                        {{ subcategory.name || 'Untitled subcategory' }}
+                      </a>
+                      <small>{{ id(subcategory) || 'No ID' }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge">{{ categoryLabel(subcategory) || 'No category' }}</span>
+                  </td>
+                  <td>{{ subcategory.description || '--' }}</td>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ subcategory.createdAt || '--' | slice: 0 : 10 }}</strong>
+                      <small>{{
+                        subcategory.updatedAt || subcategory.createdAt || '--' | slice: 0 : 10
+                      }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="row-actions row-actions--product">
+                      <a
+                        class="btn btn--ghost"
+                        [routerLink]="['/products/subcategories', id(subcategory)]"
+                      >
+                        View
+                      </a>
+                      <button
+                        class="btn btn--primary"
+                        type="button"
+                        (click)="selectSubcategory(subcategory)"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        class="btn btn--danger"
+                        type="button"
+                        (click)="requestDelete(subcategory)"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+</section>
+
+@if (isFormModalOpen()) {
+  <div class="modal-backdrop" (click)="closeFormModal()"></div>
+  <section class="modal" role="dialog" aria-modal="true" aria-label="Subcategory form">
+    <div class="modal__header">
+      <div>
+        <p class="modal__eyebrow">Catalog structure</p>
+        <h2>{{ form().id ? 'Edit subcategory' : 'Create subcategory' }}</h2>
+      </div>
+
+      <button
+        class="modal__close"
+        type="button"
+        (click)="closeFormModal()"
+        aria-label="Close modal"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form class="form-grid" (ngSubmit)="saveSubcategory()">
+      <label>
+        <span>Name</span>
+        <input
+          type="text"
+          [ngModel]="form().name"
+          name="name"
+          (ngModelChange)="updateForm('name', $event)"
+          placeholder="Smartphones"
+          required
+        />
+      </label>
+
+      <label>
+        <span>Parent category</span>
+        <select
+          [ngModel]="form().category"
+          name="category"
+          (ngModelChange)="updateForm('category', $event)"
+          required
+        >
+          <option value="">Select category</option>
+          @for (category of categories(); track categoryId(category)) {
+            <option [ngValue]="categoryId(category)">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="form-grid__wide">
+        <span>Description</span>
+        <textarea
+          rows="4"
+          [ngModel]="form().description"
+          name="description"
+          (ngModelChange)="updateForm('description', $event)"
+          placeholder="Products inside this subcategory"
+        ></textarea>
+      </label>
+
+      <div class="form-grid__actions">
+        <button class="btn btn--ghost" type="button" (click)="closeFormModal()">Cancel</button>
+        <button class="btn btn--primary" type="submit" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : form().id ? 'Update subcategory' : 'Create subcategory' }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+
+@if (isDeleteModalOpen()) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
+  <section
+    class="modal modal--confirm"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Delete subcategory"
+  >
+    <div class="modal__header modal__header--compact">
+      <div>
+        <p class="modal__eyebrow modal__eyebrow--danger">Delete subcategory</p>
+        <h2>Remove {{ pendingDeleteSubcategory()?.name || 'this subcategory' }}?</h2>
+      </div>
+
+      <button
+        class="modal__close"
+        type="button"
+        (click)="closeDeleteModal()"
+        aria-label="Close modal"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <p class="modal__text">This action cannot be undone.</p>
+
+    <div class="form-grid__actions">
+      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">Cancel</button>
+      <button
+        class="btn btn--danger"
+        type="button"
+        [disabled]="isDeleting()"
+        (click)="confirmDelete()"
+      >
+        {{ isDeleting() ? 'Deleting...' : 'Delete subcategory' }}
+      </button>
+    </div>
+  </section>
+}

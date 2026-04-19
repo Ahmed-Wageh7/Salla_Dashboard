@@ -1,0 +1,408 @@
+// ── Design tokens ─────────────────────────────────────────────────────────────
+$sidebar-width: 260px;
+$purple: #6c3deb;
+$purple-dark: #5730c9;
+$purple-light: #ede9ff;
+$purple-hover: #f5f2ff;
+$border: #e8eaf0;
+$text: #1a1d2e;
+$muted: #6b7280;
+$light: #9ca3af;
+$transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// ── Backdrop ──────────────────────────────────────────────────────────────────
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 39;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+// ── Shell ─────────────────────────────────────────────────────────────────────
+.sidebar {
+  // Desktop: sticky column
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: $sidebar-width;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid $border; // LTR border
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 40;
+  will-change: transform;
+
+  // Mobile: slide-in drawer
+  &--mobile {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    width: min(82vw, 320px);
+    max-width: 320px;
+    height: 100vh;
+    transform: translateX(-105%);
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 6px 0 30px rgba(108, 61, 235, 0.1);
+
+    &.sidebar--open {
+      transform: translateX(0);
+    }
+  }
+
+  // Desktop: always visible — hide mobile-specific
+  &:not(&--mobile) {
+    transform: none !important;
+  }
+}
+
+// ── Logo row ──────────────────────────────────────────────────────────────────
+.sidebar__logo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 14px 13px;
+  border-bottom: 1px solid $border;
+  flex-shrink: 0;
+}
+
+.sidebar__logo-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar__brand-icon {
+  width: 34px;
+  height: 34px;
+  // background: linear-gradient(135deg, $purple 0%, #8b5cf6 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  // box-shadow: 0 4px 10px rgba($purple, 0.3);
+}
+
+.sidebar__brand-name {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f113e;
+  letter-spacing: -0.4px;
+}
+
+.sidebar__brand-dot {
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: $light;
+  padding: 1px 6px;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.sidebar__close-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  background: transparent;
+  color: $light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all $transition;
+  flex-shrink: 0;
+
+  &:hover {
+    background: $purple-light;
+    color: $purple;
+    border-color: rgba($purple, 0.3);
+  }
+}
+
+// ── Nav container ─────────────────────────────────────────────────────────────
+.sidebar__nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: $border transparent;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $border;
+    border-radius: 4px;
+  }
+}
+
+.sidebar__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar__divider {
+  height: 1px;
+  background: $border;
+  margin: 6px 4px;
+  opacity: 0.8;
+}
+
+// ── Nav item ──────────────────────────────────────────────────────────────────
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  margin-bottom: 1px;
+  text-decoration: none;
+  color: $muted;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  text-align: left;
+  transition:
+    background $transition,
+    color $transition;
+  position: relative;
+
+  &:hover {
+    background: $purple-hover;
+    color: $text;
+
+    .sidebar__icon {
+      color: $purple;
+    }
+  }
+
+  // Active — from routerLinkActive
+  &--active {
+    background: $purple-light;
+    color: $purple;
+    font-weight: 600;
+
+    .sidebar__icon {
+      color: $purple;
+    }
+
+    // Right accent bar
+    &::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      top: 20%;
+      height: 60%;
+      width: 3px;
+      background: $purple;
+      border-radius: 3px 0 0 3px;
+    }
+  }
+
+  &--expanded {
+    color: $purple;
+    background: $purple-hover;
+    .sidebar__icon {
+      color: $purple;
+    }
+  }
+
+  &--btn {
+    cursor: pointer;
+  }
+}
+
+.sidebar__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: $light;
+  transition: color $transition;
+}
+
+.sidebar__label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 2;
+  font-size: 14px;
+}
+
+.sidebar__badge {
+  background: $purple;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  padding: 1px 7px;
+  border-radius: 100px;
+  min-width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1.7;
+  letter-spacing: 0.2px;
+}
+
+.sidebar__chevron {
+  display: flex;
+  align-items: center;
+  color: $light;
+  flex-shrink: 0;
+  transition:
+    transform $transition,
+    color $transition;
+
+  &--rotated {
+    transform: rotate(90deg);
+    color: $purple;
+  }
+}
+
+// ── Submenu ───────────────────────────────────────────────────────────────────
+.sidebar__sublist {
+  list-style: none;
+  padding: 2px 0 4px 0;
+  margin: 0;
+}
+
+.sidebar__subitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px 7px 14px;
+  margin: 1px 0;
+  border-radius: 8px;
+  text-decoration: none;
+  color: $muted;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  transition:
+    background $transition,
+    color $transition;
+
+  &:hover {
+    background: $purple-hover;
+    color: $text;
+    .sidebar__subdot {
+      background: $purple;
+    }
+  }
+
+  &--active {
+    color: $purple;
+    font-weight: 600;
+    .sidebar__subdot {
+      background: $purple;
+    }
+  }
+}
+
+.sidebar__subdot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: $border;
+  flex-shrink: 0;
+  transition: background $transition;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.sidebar__footer {
+  padding: 10px;
+  border-top: 1px solid $border;
+  flex-shrink: 0;
+}
+
+.sidebar__store {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background $transition;
+
+  &:hover {
+    background: $purple-hover;
+  }
+}
+
+.sidebar__store-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, $purple 0%, #9b6fff 100%);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar__store-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar__store-name {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: $text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.sidebar__store-sub {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 10.5px;
+  color: $light;
+  margin: 0;
+}
+
+.sidebar__store-arrow {
+  color: $light;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 1023px) {
+  // Hide desktop-pinned sidebar — the mobile drawer takes over
+  .sidebar:not(.sidebar--mobile) {
+    display: none;
+  }
+
+  .sidebar__item,
+  .sidebar__subitem {
+    min-height: 44px;
+  }
+}

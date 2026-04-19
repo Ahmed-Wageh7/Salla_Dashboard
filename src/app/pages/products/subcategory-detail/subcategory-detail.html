@@ -1,0 +1,90 @@
+<section class="catalog-detail">
+  <header class="catalog-detail__header">
+    <div>
+      <p class="catalog-detail__eyebrow">Catalog item</p>
+      <h1>Subcategory details</h1>
+      <p class="catalog-detail__subtitle">
+        Review one subcategory and its parent category connection.
+      </p>
+    </div>
+
+    <div class="catalog-detail__actions">
+      <a class="btn btn--ghost" routerLink="/products/categories">Categories</a>
+      <a class="btn btn--ghost" routerLink="/products">Products</a>
+      <a class="btn btn--secondary" routerLink="/products/subcategories">Back to subcategories</a>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="catalog-detail__feedback catalog-detail__feedback--error">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <section class="catalog-detail__panel">
+      <div class="catalog-detail__state">Loading subcategory details...</div>
+    </section>
+  } @else if (!subcategory()) {
+    <section class="catalog-detail__panel">
+      <div class="catalog-detail__state">Subcategory not found.</div>
+    </section>
+  } @else if (subcategory(); as currentSubcategory) {
+    <section class="catalog-detail__grid">
+      <article class="catalog-detail__panel">
+        <p class="catalog-detail__eyebrow">Subcategory summary</p>
+        <h2>{{ currentSubcategory.name || 'Untitled subcategory' }}</h2>
+        <p class="catalog-detail__description">
+          {{ currentSubcategory.description || 'No description has been added yet.' }}
+        </p>
+
+        <div class="catalog-detail__chips">
+          <span class="catalog-detail__chip">Related products: {{ relatedProducts().length }}</span>
+          @if (categoryId(currentSubcategory)) {
+            <a
+              class="catalog-detail__chip"
+              [routerLink]="['/products/categories', categoryId(currentSubcategory)]"
+            >
+              Parent: {{ categoryLabel(currentSubcategory) }}
+            </a>
+          }
+        </div>
+      </article>
+
+      <article class="catalog-detail__panel">
+        <h3>Details</h3>
+        <dl class="catalog-detail__list">
+          <div>
+            <dt>Subcategory ID</dt>
+            <dd>{{ id(currentSubcategory) || '--' }}</dd>
+          </div>
+          <div>
+            <dt>Parent category</dt>
+            <dd>
+              @if (categoryId(currentSubcategory)) {
+                <a
+                  class="catalog-detail__link"
+                  [routerLink]="['/products/categories', categoryId(currentSubcategory)]"
+                >
+                  {{ categoryLabel(currentSubcategory) }}
+                </a>
+              } @else {
+                --
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Created</dt>
+            <dd>{{ currentSubcategory.createdAt || '--' | slice: 0 : 19 }}</dd>
+          </div>
+          <div>
+            <dt>Updated</dt>
+            <dd>
+              {{
+                currentSubcategory.updatedAt || currentSubcategory.createdAt || '--' | slice: 0 : 19
+              }}
+            </dd>
+          </div>
+        </dl>
+      </article>
+    </section>
+  }
+</section>

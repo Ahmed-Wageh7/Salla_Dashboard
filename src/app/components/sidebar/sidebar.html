@@ -1,0 +1,257 @@
+@if (isMobile() && isOpen) {
+  <div class="sidebar-backdrop" [@fadeBackdrop] (click)="closeMenu.emit()"></div>
+}
+
+<aside class="sidebar" [class.sidebar--open]="isOpen" [class.sidebar--mobile]="isMobile()">
+  <!-- Logo -->
+  <div class="sidebar__logo">
+    <div class="sidebar__logo-brand">
+      <div class="sidebar__brand-icon">
+        <img src="images1.png" alt="" />
+      </div>
+      <span class="sidebar__brand-name">Salla</span>
+    </div>
+
+    <button class="sidebar__close-btn" (click)="closeMenu.emit()">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        width="16"
+        height="16"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="sidebar__nav">
+    <!-- Dashboard -->
+    <ul class="sidebar__list">
+      @for (item of mainNav; track item.id) {
+        <li>
+          <button
+            type="button"
+            class="sidebar__item"
+            [class.sidebar__item--active]="isItemRouteActive(item)"
+            (click)="navigate(item.route)"
+          >
+            <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
+            <span class="sidebar__label">{{ item.label }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <div class="sidebar__divider"></div>
+
+    <!-- MAIN EXPANDABLE -->
+    <ul class="sidebar__list">
+      @for (item of expandableNav; track item.id) {
+        <li>
+          @if (item.isExpandable) {
+            @if (item.route) {
+              <button
+                type="button"
+                class="sidebar__item sidebar__item--btn"
+                [class.sidebar__item--active]="isItemRouteActive(item)"
+                [class.sidebar__item--expanded]="isExpanded(item) && !isItemRouteActive(item)"
+                [attr.aria-expanded]="isExpanded(item)"
+                (click)="toggleExpand(item.id); navigate(item.route)"
+              >
+                <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
+                <span class="sidebar__label">{{ item.label }}</span>
+                <span class="sidebar__chevron" [class.sidebar__chevron--rotated]="isExpanded(item)">
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    width="13"
+                    height="13"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12l4-4-4-4" />
+                  </svg>
+                </span>
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="sidebar__item sidebar__item--btn"
+                [class.sidebar__item--expanded]="isExpanded(item)"
+                [attr.aria-expanded]="isExpanded(item)"
+                (click)="toggleExpand(item.id)"
+              >
+                <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
+                <span class="sidebar__label">{{ item.label }}</span>
+                <span class="sidebar__chevron" [class.sidebar__chevron--rotated]="isExpanded(item)">
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    width="13"
+                    height="13"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12l4-4-4-4" />
+                  </svg>
+                </span>
+              </button>
+            }
+            <div [@submenu]="isExpanded(item) ? 'open' : 'closed'">
+              @if (item.children) {
+                <ul class="sidebar__sublist">
+                  @for (child of item.children; track child.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="sidebar__subitem"
+                        [class.sidebar__subitem--active]="isItemRouteActive(child)"
+                        (click)="navigate(child.route)"
+                      >
+                        <span class="sidebar__subdot"></span>
+                        {{ child.label }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          } @else {
+            <button
+              type="button"
+              class="sidebar__item"
+              [class.sidebar__item--active]="isItemRouteActive(item)"
+              (click)="navigate(item.route)"
+            >
+              <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
+              <span class="sidebar__label">{{ item.label }}</span>
+            </button>
+          }
+        </li>
+      }
+    </ul>
+
+    <div class="sidebar__divider sidebar__divider--space"></div>
+
+    <!-- EXTRA NAV -->
+    <ul class="sidebar__list sidebar__list--extra">
+      @for (item of extraNav; track item.id) {
+        <li>
+          @if (item.isExpandable) {
+            <button
+              type="button"
+              class="sidebar__item sidebar__item--extra"
+              (click)="toggleExpand(item.id)"
+            >
+              <span class="sidebar__label">{{ item.label }}</span>
+              <span class="sidebar__chevron" [class.sidebar__chevron--rotated]="isExpanded(item)">
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  width="13"
+                  height="13"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 12l4-4-4-4" />
+                </svg>
+              </span>
+            </button>
+
+            <div [@submenu]="isExpanded(item) ? 'open' : 'closed'">
+              <ul class="sidebar__sublist">
+                @for (child of item.children; track child.id) {
+                  <li>
+                    @if (child.isExpandable) {
+                      <button
+                        type="button"
+                        class="sidebar__subitem sidebar__item--btn"
+                        (click)="toggleExpand(child.id)"
+                      >
+                        {{ child.label }}
+                        <span
+                          class="sidebar__chevron"
+                          [class.sidebar__chevron--rotated]="isExpanded(child)"
+                        >
+                          <svg
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            width="13"
+                            height="13"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M6 12l4-4-4-4"
+                            />
+                          </svg>
+                        </span>
+                      </button>
+                      <div [@submenu]="isExpanded(child) ? 'open' : 'closed'">
+                        <ul class="sidebar__sublist">
+                          @for (subChild of child.children; track subChild.id) {
+                            <li>
+                              <button
+                                type="button"
+                                class="sidebar__subitem"
+                                [class.sidebar__subitem--active]="isItemRouteActive(subChild)"
+                                (click)="navigate(subChild.route)"
+                              >
+                                {{ subChild.label }}
+                              </button>
+                            </li>
+                          }
+                        </ul>
+                      </div>
+                    } @else {
+                      <button
+                        type="button"
+                        class="sidebar__subitem"
+                        [class.sidebar__subitem--active]="isItemRouteActive(child)"
+                        (click)="navigate(child.route)"
+                      >
+                        {{ child.label }}
+                      </button>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          } @else {
+            <button
+              type="button"
+              class="sidebar__item sidebar__item--extra"
+              [class.sidebar__item--active]="isRouteActive(item.route)"
+              (click)="navigate(item.route)"
+            >
+              {{ item.label }}
+            </button>
+          }
+        </li>
+      }
+    </ul>
+
+    <div class="sidebar__divider"></div>
+
+    <!-- SETTINGS -->
+    <ul class="sidebar__list">
+      @for (item of bottomNav; track item.id) {
+        <li>
+          <button
+            type="button"
+            class="sidebar__item"
+            [class.sidebar__item--active]="isRouteActive(item.route)"
+            (click)="navigate(item.route)"
+          >
+            <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
+            <span class="sidebar__label">{{ item.label }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  </nav>
+</aside>

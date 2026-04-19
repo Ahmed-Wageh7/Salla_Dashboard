@@ -1,0 +1,443 @@
+<section class="orders-page" (click)="closeMenu()">
+  <div class="orders-page__topbar">
+    <div class="orders-page__count-pill">
+      <span class="orders-page__count-icon"><i class="fas fa-wallet"></i></span>
+      {{ filteredOrders().length }}
+    </div>
+
+    <label class="orders-page__global-search">
+      <i class="fas fa-search"></i>
+      <input
+        type="search"
+        placeholder="Search by order, customer, phone or shipping"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="updateSearch($event)"
+        (click)="$event.stopPropagation()"
+      />
+    </label>
+
+    <div class="orders-page__quick-actions">
+      <button class="icon-button" type="button" aria-label="Language">AR</button>
+      <button class="icon-button" type="button" aria-label="Support"><i class="fas fa-headphones"></i></button>
+      <button class="icon-button" type="button" aria-label="Notifications"><i class="far fa-bell"></i></button>
+      <button class="icon-button" type="button" aria-label="Theme"><i class="far fa-moon"></i></button>
+    </div>
+  </div>
+
+  <header class="orders-page__header">
+    <div>
+      <h1>Orders</h1>
+      <p>Manage all of your store's orders</p>
+    </div>
+
+    <div class="orders-page__header-actions">
+      <button class="icon-button icon-button--ghost" type="button" aria-label="More actions">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+      <button class="action-button action-button--secondary" type="button" (click)="exportOrders()">Export orders</button>
+      <button class="action-button action-button--primary" type="button" (click)="openCreateModal()">Create</button>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="feedback feedback--error">{{ errorMessage() }}</div>
+  }
+
+  <section class="orders-shell">
+    <div class="orders-tabs">
+      @for (tab of orderedTabs(); track tab.key) {
+        <button
+          type="button"
+          class="orders-tab"
+          [class.orders-tab--active]="activeTab() === tab.key"
+          (click)="setActiveTab(tab.key)"
+        >
+          <span>{{ tab.label }}</span>
+          <strong>{{ tab.count }}</strong>
+        </button>
+      }
+    </div>
+
+    <div class="orders-toolbar">
+      <label class="orders-toolbar__search">
+        <i class="fas fa-search"></i>
+        <input
+          type="search"
+          placeholder="Search"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="updateSearch($event)"
+          (click)="$event.stopPropagation()"
+        />
+      </label>
+
+      <div class="orders-toolbar__filters" (click)="$event.stopPropagation()">
+        <select [ngModel]="sourceFilter()" (ngModelChange)="updateSourceFilter($event)">
+          @for (source of sourceOptions; track source) {
+            <option [ngValue]="source">{{ source }}</option>
+          }
+        </select>
+
+        <select [ngModel]="paymentFilter()" (ngModelChange)="updatePaymentFilter($event)">
+          <option value="All">All payments</option>
+          @for (payment of paymentOptions; track payment) {
+            <option [ngValue]="payment">{{ payment }}</option>
+          }
+        </select>
+
+        <select [ngModel]="paymentStatusFilter()" (ngModelChange)="updatePaymentStatusFilter($event)">
+          <option value="All">All payment states</option>
+          @for (paymentStatus of paymentStatusOptions; track paymentStatus) {
+            <option [ngValue]="paymentStatus">{{ paymentStatus }}</option>
+          }
+        </select>
+
+        <button class="action-button action-button--secondary action-button--compact" type="button" (click)="clearFilters()">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="state-card loading-state">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <div class="loading-copy">
+          <strong>Loading orders</strong>
+          <p>Fetching the latest data from the backend.</p>
+        </div>
+      </div>
+    } @else if (filteredOrders().length === 0) {
+      <div class="state-card">No orders matched the current filters.</div>
+    } @else {
+      <div class="orders-table-wrap" [@pageSwap]="currentPage()">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th class="orders-table__expander"></th>
+              <th class="orders-table__checkbox"><input type="checkbox" aria-label="Select all orders" /></th>
+              <th>Order number <span>Source</span></th>
+              <th>Customer <span>Mobile</span></th>
+              <th>Payment</th>
+              <th>Payment status</th>
+              <th>Shipping</th>
+              <th>Total <span>Currency</span></th>
+              <th>Status</th>
+              <th>Tags</th>
+              <th>Created date <span>Updated date</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of paginatedOrders(); track trackById($index, order)) {
+              <tr>
+                <td class="orders-table__expander">
+                  <button class="chevron-button" type="button" aria-label="Expand order">
+                    <i class="fas fa-chevron-down"></i>
+                  </button>
+                </td>
+                <td class="orders-table__checkbox">
+                  <input type="checkbox" [attr.aria-label]="'Select order ' + order.orderNumber" />
+                </td>
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ order.orderNumber }}</strong>
+                    <span>{{ order.source }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ order.customer }}</strong>
+                    <span>{{ order.customerPhone }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="payment-pill" [class]="'payment-pill payment-pill--' + paymentMethodClass(order.payment)">
+                    {{ order.payment }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-pill" [class]="'status-pill status-pill--' + paymentTone(order.paymentStatus)">
+                    {{ order.paymentStatus }}
+                  </span>
+                </td>
+                <td>
+                  <div class="shipping-cell" [class]="'shipping-cell shipping-cell--' + shippingTone(order.shipping)">
+                    <i class="fas fa-truck"></i>
+                    <span>{{ order.shipping }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ order.total | number: '1.0-3' }}</strong>
+                    <span>{{ order.currency }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="inline-menu" (click)="$event.stopPropagation()">
+                    <button
+                      class="status-pill status-pill--button"
+                      type="button"
+                      [class]="'status-pill status-pill--button status-pill--' + statusTone(order.status)"
+                      (click)="toggleMenu(order.id)"
+                    >
+                      {{ order.status }}
+                      <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    @if (isMenuOpen(order.id)) {
+                      <div class="options-popover">
+                        @for (status of statusOptions; track status) {
+                          <button class="option-row" type="button" (click)="changeStatus(order, status)">
+                            <span class="option-row__radio" [class.option-row__radio--active]="order.status === status"></span>
+                            {{ status }}
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+                <td class="orders-table__tags">
+                  {{ order.tags?.length ? order.tags!.join(', ') : '--' }}
+                </td>
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ order.createdDate }}</strong>
+                    <span>{{ order.updatedDate }}</span>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <span class="pagination__summary">
+            {{ visibleRange().start }}-{{ visibleRange().end }} of {{ filteredOrders().length }}
+          </span>
+
+          <div class="pagination__controls">
+            <button
+              class="pagination__arrow"
+              type="button"
+              aria-label="Previous page"
+              [disabled]="currentPage() === 1"
+              (click)="previousPage()"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+
+            @for (page of paginationItems(); track page) {
+              <button
+                class="pagination__page"
+                type="button"
+                [class.pagination__page--active]="page === currentPage()"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+
+            <button
+              class="pagination__arrow"
+              type="button"
+              aria-label="Next page"
+              [disabled]="currentPage() === totalPages()"
+              (click)="nextPage()"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+</section>
+
+@if (isCreateModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCreateModal()"></div>
+  <section class="modal" role="dialog" aria-modal="true" aria-label="Create order">
+    <div class="modal__header">
+      <div>
+        <p class="modal__eyebrow">Admin orders</p>
+        <h2>Create new order</h2>
+        <p class="modal__subtitle">Add the customer details, payment info, and order source in one place.</p>
+      </div>
+
+      <button class="modal__close" type="button" (click)="closeCreateModal()" aria-label="Close modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form class="form-grid" (ngSubmit)="createOrder()">
+      <div class="form-grid__body">
+        <label>
+          <span>Order number</span>
+          <input
+            type="text"
+            [ngModel]="form().orderNumber"
+            name="orderNumber"
+            (ngModelChange)="updateForm('orderNumber', $event)"
+            placeholder="Optional"
+          />
+        </label>
+
+        <label>
+          <span>Customer name</span>
+          <input
+            type="text"
+            [ngModel]="form().customer"
+            name="customer"
+            (ngModelChange)="updateForm('customer', $event)"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Phone</span>
+          <input
+            type="text"
+            [ngModel]="form().customerPhone"
+            name="customerPhone"
+            (ngModelChange)="updateForm('customerPhone', $event)"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input
+            type="email"
+            [ngModel]="form().customerEmail"
+            name="customerEmail"
+            (ngModelChange)="updateForm('customerEmail', $event)"
+          />
+        </label>
+
+        <label>
+          <span>Total</span>
+          <input
+            type="number"
+            [ngModel]="form().total"
+            name="total"
+            (ngModelChange)="updateForm('total', $event)"
+            min="0"
+            step="0.001"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Currency</span>
+          <input
+            type="text"
+            [ngModel]="form().currency"
+            name="currency"
+            (ngModelChange)="updateForm('currency', $event)"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Payment method</span>
+          <select [ngModel]="form().payment" name="payment" (ngModelChange)="updateForm('payment', $event)">
+            @for (payment of checkoutPaymentOptions; track payment) {
+              <option [ngValue]="payment">{{ payment }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Payment status</span>
+          <select
+            [ngModel]="form().paymentStatus"
+            name="paymentStatus"
+            (ngModelChange)="updateForm('paymentStatus', $event)"
+          >
+            @for (paymentStatus of paymentStatusOptions; track paymentStatus) {
+              <option [ngValue]="paymentStatus">{{ paymentStatus }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Order status</span>
+          <select [ngModel]="form().status" name="status" (ngModelChange)="updateForm('status', $event)">
+            @for (status of statusOptions; track status) {
+              <option [ngValue]="status">{{ status }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Source</span>
+          <select [ngModel]="form().source" name="source" (ngModelChange)="updateForm('source', $event)">
+            <option value="Manual">Manual</option>
+            <option value="Store">Store</option>
+            <option value="App">App</option>
+          </select>
+        </label>
+
+        <label class="form-grid__wide">
+          <span>Street</span>
+          <input
+            type="text"
+            [ngModel]="form().shipping"
+            name="shipping"
+            (ngModelChange)="updateForm('shipping', $event)"
+          />
+        </label>
+
+        <label>
+          <span>City</span>
+          <input
+            type="text"
+            [ngModel]="form().shippingCity"
+            name="shippingCity"
+            (ngModelChange)="updateForm('shippingCity', $event)"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Country</span>
+          <input
+            type="text"
+            [ngModel]="form().shippingCountry"
+            name="shippingCountry"
+            (ngModelChange)="updateForm('shippingCountry', $event)"
+            required
+          />
+        </label>
+
+        <label class="form-grid__wide">
+          <span>Postal code</span>
+          <input
+            type="text"
+            [ngModel]="form().shippingPostalCode"
+            name="shippingPostalCode"
+            (ngModelChange)="updateForm('shippingPostalCode', $event)"
+            required
+          />
+        </label>
+
+        <label class="form-grid__wide">
+          <span>Tags</span>
+          <input
+            type="text"
+            [ngModel]="form().tags"
+            name="tags"
+            (ngModelChange)="updateForm('tags', $event)"
+            placeholder="vip, priority, fragile"
+          />
+        </label>
+      </div>
+
+      <div class="form-grid__actions">
+        <button class="action-button action-button--secondary" type="button" (click)="closeCreateModal()">Cancel</button>
+        <button class="action-button action-button--primary modal__submit" type="submit" [disabled]="isSaving()">
+          {{ isSaving() ? 'Creating...' : 'Create order' }}
+        </button>
+      </div>
+    </form>
+  </section>
+}

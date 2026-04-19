@@ -1,0 +1,25 @@
+<nav class="workspace-nav" aria-label="Staff workspaces">
+  @for (section of sections; track section.id) {
+    <a
+      class="workspace-nav__card"
+      [routerLink]="section.route"
+      routerLinkActive="workspace-nav__card--active"
+      [routerLinkActiveOptions]="{ exact: section.exact }"
+    >
+      <span class="workspace-nav__icon">
+        <i [class]="'fas ' + section.icon"></i>
+      </span>
+
+      <span class="workspace-nav__body">
+        <span class="workspace-nav__eyebrow">{{ section.eyebrow }}</span>
+        <span class="workspace-nav__title">{{ section.title }}</span>
+        <span class="workspace-nav__description">{{ section.description }}</span>
+      </span>
+
+      <span class="workspace-nav__action">
+        {{ section.ctaLabel }}
+        <i class="fas fa-arrow-right"></i>
+      </span>
+    </a>
+  }
+</nav>

@@ -1,0 +1,345 @@
+<section class="admin-page">
+  <header class="admin-page__header">
+    <div class="admin-page__intro">
+      <div class="admin-page__count">{{ filteredProducts().length }}</div>
+      <div>
+        <h1>Products</h1>
+        <p class="admin-page__subtitle">Control your catalog, stock, and pricing from one place.</p>
+      </div>
+    </div>
+
+    <div class="admin-page__actions">
+      <button class="btn btn--ghost" type="button" routerLink="/products/categories">
+        Categories
+      </button>
+      <button class="btn btn--ghost" type="button" routerLink="/products/subcategories">
+        Subcategories
+      </button>
+      <button class="btn btn--ghost" type="button" (click)="loadProducts()">Refresh</button>
+      <button class="btn btn--secondary" type="button" (click)="openCreateModal()">
+        New product
+      </button>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="feedback feedback--error">{{ errorMessage() }}</div>
+  }
+
+  <div class="grid">
+    <section class="panel panel--list">
+      <div class="panel__header panel__header--split">
+        <div>
+          <h2>products</h2>
+          <small>Manage all of your store's products.</small>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-field">
+            <i class="fas fa-search"></i>
+            <input
+              type="search"
+              placeholder="Search products"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+            />
+          </div>
+
+          <select [ngModel]="sort()" (ngModelChange)="updateSort($event)">
+            <option value="-createdAt">Newest</option>
+            <option value="price">Price: low to high</option>
+            <option value="-price">Price: high to low</option>
+            <option value="name">Name A-Z</option>
+          </select>
+        </div>
+      </div>
+
+      @if (isLoading()) {
+        <div class="state-card loading-state">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <div class="loading-copy">
+            <strong>Loading products</strong>
+            <p>Fetching product data ..</p>
+          </div>
+        </div>
+      } @else if (filteredProducts().length === 0) {
+        <div class="state-card">No products were returned by the current API filters.</div>
+      } @else {
+        <div class="table-wrap" [@pageSwap]="currentPage()">
+          <table>
+            <thead>
+              <tr>
+                <th class="table-check">
+                  <input type="checkbox" aria-label="Select all products" />
+                </th>
+                <th>Name <span>SKU code</span></th>
+                <th>Quantity</th>
+                <th>Price <span>Currency</span></th>
+                <th class="table-head-accent">Status</th>
+                <th>Created date <span>Updated date</span></th>
+                <th class="table-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of filteredProducts(); track trackById($index, product)) {
+                <tr>
+                  <td class="table-check">
+                    <input
+                      type="checkbox"
+                      [attr.aria-label]="'Select ' + (product.name || 'product')"
+                    />
+                  </td>
+                  <td>
+                    <div class="product-cell">
+                      <div class="product-cell__thumb">
+                        <i class="far fa-image"></i>
+                      </div>
+                      <div class="cell-stack">
+                        <a class="entity-link" [routerLink]="['/products', id(product)]">
+                          {{ product.name || 'Untitled product' }}
+                        </a>
+                        <small
+                          >{{ categoryLabel(product) || 'No category' }} /
+                          {{ subcategoryLabel(product) || 'No subcategory' }}</small
+                        >
+                        <small>{{ id(product) || 'No SKU code' }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ quantityLabel(stockValue(product)) }}</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ priceValue(product) | number: '1.2-2' }}</strong>
+                      <small>﷼</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-stack cell-stack--status">
+                      <span
+                        class="stock-state"
+                        [class]="'stock-state stock-state--' + productVisibility(product)"
+                      >
+                        {{ productVisibilityLabel(product) }}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{
+                        product.createdAt || product.updatedAt || '-' | slice: 0 : 10
+                      }}</strong>
+                      <small>{{
+                        product.updatedAt || product.createdAt || '-' | slice: 0 : 10
+                      }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="row-actions row-actions--product">
+                      <a class="btn btn--ghost" [routerLink]="['/products', id(product)]"> View </a>
+                      <button
+                        class="btn btn--danger"
+                        type="button"
+                        (click)="requestDelete(product)"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        class="btn btn--primary"
+                        type="button"
+                        (click)="selectProduct(product)"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <button
+            class="pagination__arrow"
+            type="button"
+            aria-label="Previous page"
+            [disabled]="currentPage() === 1 || isLoading()"
+            (click)="previousPage()"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="pagination__pages">
+            @for (page of paginationItems(); track page) {
+              <button
+                class="pagination__page"
+                type="button"
+                [class.pagination__page--active]="page === currentPage()"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            class="pagination__arrow"
+            type="button"
+            aria-label="Next page"
+            [disabled]="!hasNextPage() || isLoading()"
+            (click)="nextPage()"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      }
+    </section>
+  </div>
+</section>
+
+@if (isFormModalOpen()) {
+  <div class="modal-backdrop" (click)="resetForm()"></div>
+  <section class="modal" role="dialog" aria-modal="true" aria-label="Product form">
+    <div class="modal__header">
+      <div>
+        <p class="modal__eyebrow">Salla catalog</p>
+        <h2>{{ form().id ? 'Edit product' : 'Create product' }}</h2>
+      </div>
+
+      <button class="modal__close" type="button" (click)="resetForm()" aria-label="Close modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form class="form-grid" (ngSubmit)="saveProduct()">
+      <label>
+        <span>Name</span>
+        <input
+          type="text"
+          [ngModel]="form().name"
+          name="name"
+          (ngModelChange)="updateForm('name', $event)"
+          required
+        />
+      </label>
+
+      <label>
+        <span>Price</span>
+        <input
+          type="number"
+          [ngModel]="form().price"
+          name="price"
+          (ngModelChange)="updateForm('price', $event)"
+          required
+        />
+      </label>
+
+      <label>
+        <span>Stock</span>
+        <input
+          type="number"
+          [ngModel]="form().stock"
+          name="stock"
+          (ngModelChange)="updateForm('stock', $event)"
+          required
+        />
+      </label>
+
+      <label>
+        <span>Category</span>
+        <select
+          [ngModel]="form().category"
+          name="category"
+          (ngModelChange)="updateForm('category', $event)"
+        >
+          <option value="">Select category</option>
+          @for (category of categories(); track categoryId(category)) {
+            <option [ngValue]="categoryId(category)">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Subcategory</span>
+        <select
+          [ngModel]="form().subcategory"
+          name="subcategory"
+          (ngModelChange)="updateForm('subcategory', $event)"
+          [disabled]="!form().category || !availableSubcategories().length"
+        >
+          <option value="">Select subcategory</option>
+          @for (subcategory of availableSubcategories(); track subcategoryId(subcategory)) {
+            <option [ngValue]="subcategoryId(subcategory)">{{ subcategory.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="form-grid__wide">
+        <span>Description</span>
+        <textarea
+          rows="4"
+          [ngModel]="form().description"
+          name="description"
+          (ngModelChange)="updateForm('description', $event)"
+        ></textarea>
+      </label>
+
+      <label class="form-grid__wide">
+        <span>Images</span>
+        <input
+          type="text"
+          [ngModel]="form().images"
+          name="images"
+          (ngModelChange)="updateForm('images', $event)"
+          placeholder="https://..., https://..."
+        />
+      </label>
+
+      <div class="form-grid__actions">
+        <button class="btn btn--ghost" type="button" (click)="resetForm()">Cancel</button>
+        <button class="btn btn--primary" type="submit" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : form().id ? 'Update product' : 'Create product' }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+
+@if (isDeleteModalOpen()) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
+  <section class="modal modal--confirm" role="dialog" aria-modal="true" aria-label="Delete product">
+    <div class="modal__header modal__header--compact">
+      <div>
+        <p class="modal__eyebrow modal__eyebrow--danger">Delete product</p>
+        <h2>Remove {{ pendingDeleteProduct()?.name || 'this product' }}?</h2>
+      </div>
+
+      <button
+        class="modal__close"
+        type="button"
+        (click)="closeDeleteModal()"
+        aria-label="Close modal"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <p class="modal__text">This action cannot be undone.</p>
+
+    <div class="form-grid__actions">
+      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">Cancel</button>
+      <button
+        class="btn btn--danger"
+        type="button"
+        [disabled]="isDeleting()"
+        (click)="confirmDelete()"
+      >
+        {{ isDeleting() ? 'Deleting...' : 'Delete product' }}
+      </button>
+    </div>
+  </section>
+}

@@ -1,0 +1,54 @@
+<section class="order-detail">
+  <div class="order-detail__header">
+    <div>
+      <h1>Order Details</h1>
+      <p>Loaded from the admin orders API when available.</p>
+    </div>
+
+    <a class="order-detail__back" routerLink="/orders">Back to Orders</a>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="order-detail__feedback order-detail__feedback--error">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <section class="order-detail__panel">
+      <div class="order-detail__state">Loading order details...</div>
+    </section>
+  } @else if (!order()) {
+    <section class="order-detail__panel">
+      <div class="order-detail__state">Order not found.</div>
+    </section>
+  } @else if (order(); as currentOrder) {
+    <section class="order-detail__grid">
+      <article class="order-detail__panel">
+        <h2>Summary</h2>
+        <dl class="order-detail__list">
+          <div><dt>Order number</dt><dd>{{ currentOrder.orderNumber }}</dd></div>
+          <div><dt>Source</dt><dd>{{ currentOrder.source }}</dd></div>
+          <div><dt>Status</dt><dd>{{ currentOrder.status }}</dd></div>
+          <div><dt>Payment status</dt><dd>{{ currentOrder.paymentStatus }}</dd></div>
+          <div><dt>Payment method</dt><dd>{{ currentOrder.payment }}</dd></div>
+          <div><dt>Total</dt><dd>{{ currentOrder.total | number: '1.0-3' }} {{ currentOrder.currency }}</dd></div>
+        </dl>
+      </article>
+
+      <article class="order-detail__panel">
+        <h2>Customer</h2>
+        <dl class="order-detail__list">
+          <div><dt>Name</dt><dd>{{ currentOrder.customer }}</dd></div>
+          <div><dt>Phone</dt><dd>{{ currentOrder.customerPhone }}</dd></div>
+          <div><dt>Email</dt><dd>{{ currentOrder.customerEmail || '--' }}</dd></div>
+          <div><dt>Shipping</dt><dd>{{ currentOrder.shipping }}</dd></div>
+          <div><dt>Created</dt><dd>{{ currentOrder.createdDate }}</dd></div>
+          <div><dt>Updated</dt><dd>{{ currentOrder.updatedDate }}</dd></div>
+        </dl>
+      </article>
+    </section>
+  } @else {
+    <section class="order-detail__panel">
+      <div class="order-detail__state">Order not found.</div>
+    </section>
+  }
+</section>

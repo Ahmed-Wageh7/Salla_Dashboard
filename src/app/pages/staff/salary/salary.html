@@ -1,0 +1,133 @@
+<section class="admin-page">
+  <header class="admin-page__header">
+    <div>
+      <p class="admin-page__eyebrow">Staff operations</p>
+      <h1>Salary</h1>
+      <p class="admin-page__subtitle">
+        Review salary payloads, adjust amounts, and complete payroll actions while keeping the
+        current section obvious at a glance.
+      </p>
+    </div>
+  </header>
+
+  <app-staff-workspace-nav></app-staff-workspace-nav>
+
+  <section class="panel filters">
+    <label>
+      <span>Staff ID</span>
+      <input
+        type="text"
+        [ngModel]="staffId()"
+        (ngModelChange)="staffId.set($event)"
+        placeholder="64f..."
+      />
+    </label>
+
+    <label>
+      <span>Month</span>
+      <input type="month" [ngModel]="month()" (ngModelChange)="month.set($event)" />
+    </label>
+
+    <div class="filters__actions">
+      <button class="btn btn--secondary" type="button" (click)="loadSalary()">Load salary</button>
+    </div>
+  </section>
+
+  @if (errorMessage()) {
+    <div class="feedback feedback--error">{{ errorMessage() }}</div>
+  }
+
+  @if (feedback()) {
+    <div class="feedback feedback--success">{{ feedback() }}</div>
+  }
+
+  <div class="summary-grid">
+    <section class="panel stat">
+      <p>Base salary</p>
+      <h2>{{ baseSalary() | number: '1.2-2' }}</h2>
+      <small>Read from the loaded salary payload.</small>
+    </section>
+
+    <section class="panel stat">
+      <p>Deductions</p>
+      <h2>{{ totalDeductions() | number: '1.2-2' }}</h2>
+      <small>Total deductions currently reflected in salary.</small>
+    </section>
+
+    <section class="panel stat">
+      <p>Status</p>
+      <h2>{{ salaryStatus() }}</h2>
+      <small>Combined from the salary payload and payment action.</small>
+    </section>
+  </div>
+
+  <div class="content-grid">
+    <section class="panel">
+      <div class="panel__header">
+        <h2>Salary payload</h2>
+        <p>Inspect the backend response before applying actions.</p>
+      </div>
+
+      <div class="salary-card">
+        @if (salary()) {
+          <pre>{{ salary() | json }}</pre>
+        } @else {
+          <div class="state-card">No salary payload loaded yet.</div>
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__header">
+        <h2>Salary actions</h2>
+        <p>Use the same staff ID and month shown above.</p>
+      </div>
+
+      <div class="salary-actions">
+        <label>
+          <span>Adjustment amount</span>
+          <input
+            type="number"
+            [ngModel]="adjustmentAmount()"
+            (ngModelChange)="adjustmentAmount.set($event)"
+          />
+        </label>
+
+        <label>
+          <span>Adjustment reason</span>
+          <input
+            type="text"
+            [ngModel]="adjustmentReason()"
+            (ngModelChange)="adjustmentReason.set($event)"
+            placeholder="Bonus adjustment"
+          />
+        </label>
+
+        <section class="panel stat">
+          <p>Net salary</p>
+          <h2>{{ netSalary() | number: '1.2-2' }}</h2>
+          <small>Based on the current salary payload.</small>
+        </section>
+
+        <div class="salary-actions__buttons">
+          <button
+            class="btn btn--secondary"
+            type="button"
+            [disabled]="isBusy()"
+            (click)="adjustSalary()"
+          >
+            Adjust salary
+          </button>
+          <button
+            class="btn btn--primary"
+            type="button"
+            [disabled]="isBusy()"
+            (click)="paySalary()"
+          >
+            Mark as paid
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

@@ -1,0 +1,31 @@
+<section class="login-page">
+  <div class="login-page__panel">
+    <div class="login-page__brand">
+      <img src="images1.png" alt="Salla logo" class="login-page__logo" />
+      <div>
+        <p class="login-page__eyebrow">Salla</p>
+        <h1>Sign in to Salla</h1>
+      </div>
+    </div>
+
+    <form class="login-form" [formGroup]="form" (ngSubmit)="submit()">
+      <label class="login-form__field">
+        <span>Email</span>
+        <input type="email" formControlName="email" placeholder="Enter your email" />
+      </label>
+
+      <label class="login-form__field">
+        <span>Password</span>
+        <input type="password" formControlName="password" placeholder="Enter your password" />
+      </label>
+
+      @if (errorMessage()) {
+        <p class="login-form__error">{{ errorMessage() }}</p>
+      }
+
+      <button class="login-form__submit" type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
+      </button>
+    </form>
+  </div>
+</section>

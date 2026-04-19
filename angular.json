@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "salla-dashboard": {
+    "salla": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -30,29 +30,28 @@
               }
             ],
             "styles": [
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
               "src/styles.scss"
             ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
             "security": {
               "allowedHosts": []
-            },
-            "ssr": {
-              "entry": "src/server.ts"
             }
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "fonts": false
+              },
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "16kB",
+                  "maximumError": "32kB"
                 }
               ],
               "outputHashing": "all"
@@ -69,10 +68,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "salla-dashboard:build:production"
+              "buildTarget": "salla:build:production"
             },
             "development": {
-              "buildTarget": "salla-dashboard:build:development"
+              "buildTarget": "salla:build:development"
             }
           },
           "defaultConfiguration": "development"

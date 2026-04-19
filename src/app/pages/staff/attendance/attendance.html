@@ -1,0 +1,71 @@
+<section class="admin-page">
+  <header class="admin-page__header">
+    <div>
+      <p class="admin-page__eyebrow">Staff operations</p>
+      <h1>Attendance</h1>
+      <p class="admin-page__subtitle">
+        Run check-in and check-out actions from one place and keep the active workspace visible in
+        both the page switcher and the sidebar.
+      </p>
+    </div>
+  </header>
+
+  <app-staff-workspace-nav></app-staff-workspace-nav>
+
+  @if (errorMessage()) {
+    <div class="feedback feedback--error">{{ errorMessage() }}</div>
+  }
+
+  @if (feedback()) {
+    <div class="feedback feedback--success">{{ feedback() }}</div>
+  }
+
+  <div class="summary-grid">
+    <section class="panel stat">
+      <p>Check in</p>
+      <h2>Start shift</h2>
+      <small>Creates a check-in record for the current staff context.</small>
+      <div class="action-row">
+        <button class="btn btn--primary" type="button" [disabled]="isBusy()" (click)="checkIn()">
+          Check in
+        </button>
+      </div>
+    </section>
+
+    <section class="panel stat">
+      <p>Check out</p>
+      <h2>End shift</h2>
+      <small>Closes the active attendance session and returns worked hours.</small>
+      <div class="action-row">
+        <button class="btn btn--secondary" type="button" [disabled]="isBusy()" (click)="checkOut()">
+          Check out
+        </button>
+      </div>
+    </section>
+
+    <section class="panel stat">
+      <p>Latest response</p>
+      <h2>{{ lastPayload() ? 'Captured' : 'Waiting' }}</h2>
+      <small>{{
+        lastPayload()
+          ? 'The latest backend payload is shown below.'
+          : 'Run an attendance action to inspect the payload.'
+      }}</small>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel__header">
+      <h2>Latest API payload</h2>
+      <p>This helps verify exactly what the attendance endpoint returned.</p>
+    </div>
+
+    <div class="salary-card">
+      @if (lastPayload()) {
+        <pre>{{ lastPayload() | json }}</pre>
+      } @else {
+        <div class="state-card">No attendance request has been sent yet.</div>
+      }
+    </div>
+  </section>
+</section>

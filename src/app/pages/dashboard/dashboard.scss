@@ -1,0 +1,1776 @@
+// Variables
+$primary-purple: #5b2e91;
+$dark-purple: #3d1f6b;
+$light-purple: #8b5cf6;
+$bg-color: #f8f7fb;
+$card-bg: #ffffff;
+$text-primary: #1f2937;
+$text-secondary: #6b7280;
+$text-muted: #9ca3af;
+$border-color: #e5e7eb;
+$success-green: #10b981;
+
+// Mixins
+@mixin card-shadow {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Main Content Container
+.main-content {
+  background-color: $bg-color;
+  min-height: 100vh;
+  padding: 0;
+}
+
+// Promo Banner
+.promo-banner {
+  background: linear-gradient(135deg, $primary-purple 0%, $dark-purple 100%);
+  padding: 16px 24px;
+
+  .banner-content {
+    @include flex-between;
+    max-width: 1400px;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+    }
+  }
+
+  .banner-text {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .banner-btn {
+    background: white;
+    color: $primary-purple;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #f3f4f6;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// Actions Bar
+.actions-bar {
+  @include flex-between;
+  padding: 16px 24px;
+  background: $bg-color;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notification-badge {
+    position: relative;
+    @include flex-center;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    @include card-shadow;
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      color: $text-secondary;
+    }
+
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: $primary-purple;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+  }
+
+  .search-box {
+    flex: 1;
+    max-width: 400px;
+    position: relative;
+
+    @media (max-width: 768px) {
+      max-width: 100%;
+      order: -1;
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: $text-muted;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 16px;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $light-purple;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+      }
+
+      &::placeholder {
+        color: $text-muted;
+      }
+    }
+  }
+
+  .actions-group {
+    @include flex-center;
+    gap: 8px;
+
+    .lang-btn {
+      padding: 8px 12px;
+      border: 1px solid $border-color;
+      background: white;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: $text-secondary;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: $light-purple;
+        color: $light-purple;
+      }
+    }
+
+    .icon-btn {
+      @include flex-center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid $border-color;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      svg {
+        width: 18px;
+        height: 18px;
+        color: $text-secondary;
+      }
+
+      &:hover {
+        border-color: $light-purple;
+
+        svg {
+          color: $light-purple;
+        }
+      }
+    }
+
+    .user-avatar {
+      @include flex-center;
+      width: 36px;
+      height: 36px;
+      background: $primary-purple;
+      border-radius: 8px;
+      cursor: pointer;
+
+      svg {
+        width: 20px;
+        height: 20px;
+        color: white;
+      }
+    }
+  }
+}
+
+// Welcome Section
+.welcome-section {
+  @include flex-between;
+  padding: 8px 24px 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .welcome-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0;
+
+    @media (max-width: 768px) {
+      font-size: 20px;
+    }
+  }
+
+  .date-range {
+    @include flex-center;
+    gap: 8px;
+    background: white;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid $border-color;
+
+    .date-btn {
+      padding: 8px 16px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: $text-secondary;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #e5e7eb;
+      }
+    }
+
+    .date-display {
+      font-size: 13px;
+      color: $text-secondary;
+      padding: 0 8px;
+    }
+
+    .calendar-btn {
+      @include flex-center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        color: $text-secondary;
+      }
+
+      &:hover svg {
+        color: $light-purple;
+      }
+    }
+  }
+}
+
+// Stats Grid
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 0 24px 24px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Stat Card
+.stat-card {
+  background: $card-bg;
+  border-radius: 12px;
+  padding: 20px;
+  @include card-shadow;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+
+  .stat-header {
+    @include flex-between;
+    margin-bottom: 16px;
+
+    .stat-info {
+      .stat-label {
+        display: block;
+        font-size: 13px;
+        color: $text-secondary;
+        margin-bottom: 8px;
+      }
+
+      .stat-value {
+        @include flex-center;
+        gap: 4px;
+
+        .currency {
+          font-size: 16px;
+          color: $text-primary;
+          font-weight: 600;
+        }
+
+        .amount {
+          font-size: 24px;
+          font-weight: 700;
+          color: $text-primary;
+        }
+      }
+    }
+
+    .stat-icon {
+      @include flex-center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      &.sales-icon {
+        background: rgba(139, 92, 246, 0.1);
+        color: $light-purple;
+      }
+
+      &.orders-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: $success-green;
+      }
+
+      &.visits-icon {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+
+      &.conversion-icon {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+    }
+  }
+
+  .stat-chart {
+    height: 50px;
+    margin-bottom: 16px;
+
+    .sparkline,
+    .area-chart {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .stat-footer {
+    @include flex-between;
+    padding-top: 12px;
+    border-top: 1px solid $border-color;
+
+    .dropdown-btn {
+      @include flex-center;
+      gap: 4px;
+      padding: 6px 10px;
+      border: 1px solid $border-color;
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+      color: $text-secondary;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      &:hover {
+        border-color: $light-purple;
+        color: $light-purple;
+      }
+    }
+
+    .view-report {
+      font-size: 12px;
+      color: $light-purple;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $primary-purple;
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Promo & Goals Section
+.promo-goals-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 0 24px 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// WhatsApp Card
+.whatsapp-card {
+  background: #1f1233;
+  border-radius: 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  min-height: 320px;
+  isolation: isolate;
+
+  .carousel-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .carousel-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.03);
+    transition:
+      opacity 0.55s ease,
+      transform 0.9s ease;
+  }
+
+  .image-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to top,
+      rgba(15, 12, 32, 0.88) 0%,
+      rgba(15, 12, 32, 0.66) 38%,
+      rgba(15, 12, 32, 0.24) 100%
+    );
+  }
+
+  .whatsapp-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px;
+    gap: 12px;
+  }
+
+  .carousel-controls {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    pointer-events: none;
+  }
+
+  .carousel-control {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(8, 8, 12, 0.48);
+    color: white;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    pointer-events: auto;
+    @include flex-center;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(8, 8, 12, 0.72);
+    }
+  }
+
+  .whatsapp-text {
+    max-width: 92%;
+    text-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+
+    h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      line-height: 1.3;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+      opacity: 0.96;
+    }
+  }
+
+  .carousel-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+    width: 100%;
+    padding-top: 6px;
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border: 1px solid #fff;
+      padding: 0;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      opacity: 0.7;
+
+      &.active {
+        width: 24px;
+        border-radius: 4px;
+        background: #fff;
+        opacity: 1;
+      }
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// Goals Card
+.goals-card {
+  background: $card-bg;
+  border-radius: 16px;
+  padding: 24px;
+  @include card-shadow;
+
+  .goals-header {
+    margin-bottom: 20px;
+
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: $text-primary;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+
+  .goals-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+
+    .tab-btn {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: $text-secondary;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &.active {
+        background: #f3f4f6;
+        color: $text-primary;
+      }
+
+      &:hover:not(.active) {
+        background: #f9fafb;
+        color: $text-primary;
+      }
+    }
+  }
+
+  .progress-section {
+    margin-bottom: 24px;
+
+    .progress-header {
+      @include flex-between;
+      margin-bottom: 12px;
+
+      span {
+        font-size: 13px;
+        font-weight: 500;
+        color: $text-primary;
+      }
+
+      .progress-percent {
+        color: $text-secondary;
+      }
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, $light-purple 0%, $primary-purple 100%);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+      }
+    }
+
+    .progress-labels {
+      @include flex-between;
+
+      span {
+        font-size: 11px;
+        color: $text-muted;
+      }
+    }
+  }
+
+  .goals-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .goal-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .stat-label-small {
+        font-size: 12px;
+        color: $text-secondary;
+      }
+
+      .stat-number {
+        font-size: 20px;
+        font-weight: 700;
+        color: $text-primary;
+      }
+    }
+  }
+
+  .goals-actions {
+    @include flex-between;
+    gap: 12px;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+    }
+
+    .edit-btn {
+      padding: 10px 20px;
+      border: 1px solid $border-color;
+      background: white;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: $text-secondary;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: $light-purple;
+        color: $light-purple;
+      }
+    }
+
+    .help-btn {
+      flex: 1;
+      padding: 10px 20px;
+      border: none;
+      background: $primary-purple;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: $dark-purple;
+        transform: translateY(-1px);
+      }
+
+      @media (max-width: 480px) {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Growth Section
+.growth-section {
+  padding: 0 24px 24px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0;
+  }
+}
+// Growth Section
+.growth-section {
+  padding: 0 24px 24px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0;
+  }
+}
+
+// Section Title (shared)
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: $text-primary;
+  margin: 0 0 20px 0;
+  padding: 0 24px;
+}
+
+// Growth Section Full
+.growth-section-full {
+  padding-bottom: 24px;
+
+  .section-title {
+    margin-bottom: 16px;
+  }
+
+  .growth-card {
+    background: $card-bg;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 0 24px;
+    @include card-shadow;
+  }
+
+  .growth-header {
+    @include flex-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .growth-total {
+      display: flex;
+      flex-direction: column;
+
+      .total-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: $text-primary;
+      }
+
+      .total-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      .total-sublabel {
+        font-size: 13px;
+        color: $text-secondary;
+        margin-top: 4px;
+      }
+    }
+
+    .growth-filters {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      @media (max-width: 768px) {
+        width: 100%;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        label {
+          font-size: 12px;
+          color: $text-muted;
+        }
+
+        .custom-select {
+          @include flex-between;
+          gap: 8px;
+          padding: 10px 14px;
+          border: 1px solid $border-color;
+          border-radius: 8px;
+          background: white;
+          font-size: 13px;
+          color: $text-primary;
+          cursor: pointer;
+          min-width: 140px;
+          transition: all 0.2s ease;
+
+          svg {
+            width: 16px;
+            height: 16px;
+            color: $text-secondary;
+          }
+
+          &:hover {
+            border-color: $light-purple;
+          }
+
+          &.small {
+            min-width: 100px;
+          }
+        }
+
+        .date-selectors {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+
+          .date-range-display {
+            @include flex-center;
+            gap: 8px;
+            padding: 10px 14px;
+            border: 1px solid $border-color;
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+            color: $text-primary;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            svg {
+              width: 16px;
+              height: 16px;
+              color: $text-secondary;
+            }
+
+            &:hover {
+              border-color: $light-purple;
+            }
+          }
+        }
+      }
+
+      .add-btn {
+        @include flex-center;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: $light-purple;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        svg {
+          width: 20px;
+          height: 20px;
+          color: white;
+        }
+
+        &:hover {
+          background: $primary-purple;
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+
+  .growth-chart-container {
+    display: flex;
+    gap: 16px;
+
+    .chart-y-axis {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 8px;
+      border-right: 1px solid $border-color;
+
+      span {
+        font-size: 12px;
+        color: $text-muted;
+      }
+    }
+
+    .chart-area {
+      flex: 1;
+      overflow-x: auto;
+
+      .growth-chart {
+        min-width: 800px;
+        height: 200px;
+      }
+
+      .chart-x-axis {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 12px;
+        border-top: 1px solid $border-color;
+        min-width: 800px;
+
+        span {
+          font-size: 11px;
+          color: $text-muted;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}
+
+// Orders Section
+.orders-section {
+  padding-bottom: 24px;
+
+  .orders-card {
+    background: $card-bg;
+    border-radius: 16px;
+    margin: 0 24px;
+    @include card-shadow;
+    overflow: hidden;
+  }
+
+  .orders-table-header {
+    display: grid;
+    grid-template-columns: 100px 1.2fr 1fr 1.2fr 80px 100px 120px 80px;
+    gap: 16px;
+    padding: 16px 24px;
+    background: #fafafa;
+    border-bottom: 1px solid $border-color;
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-primary;
+
+    @media (max-width: 1200px) {
+      display: none;
+    }
+
+    > div {
+      display: flex;
+      flex-direction: column;
+
+      span {
+        font-size: 11px;
+        color: $text-muted;
+        font-weight: 400;
+        margin-top: 2px;
+      }
+    }
+  }
+
+  .orders-table-body {
+    .order-row {
+      display: grid;
+      grid-template-columns: 100px 1.2fr 1fr 1.2fr 80px 100px 120px 80px;
+      gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid $border-color;
+      align-items: center;
+      transition: background 0.2s ease;
+
+      @media (max-width: 1200px) {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      &:hover {
+        background: #fafafa;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .col-order {
+        font-size: 13px;
+        font-weight: 500;
+        color: $text-primary;
+      }
+
+      .col-customer {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .customer-name {
+          font-size: 13px;
+          font-weight: 500;
+          color: $text-primary;
+        }
+
+        .customer-mobile {
+          font-size: 12px;
+          color: $text-secondary;
+        }
+      }
+
+      .col-payment {
+        .payment-method {
+          @include flex-center;
+          gap: 6px;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 500;
+          width: fit-content;
+
+          svg {
+            width: 16px;
+            height: 16px;
+          }
+
+          &.apple-pay {
+            background: #f3f4f6;
+            color: $text-primary;
+          }
+
+          &.bank-transfer {
+            background: #e0f2fe;
+            color: #0369a1;
+          }
+        }
+      }
+
+      .col-shipping {
+        .shipping-info {
+          @include flex-center;
+          gap: 8px;
+          font-size: 12px;
+          color: $text-secondary;
+
+          svg {
+            width: 18px;
+            height: 18px;
+            color: $text-muted;
+            flex-shrink: 0;
+          }
+
+          span {
+            line-height: 1.4;
+          }
+        }
+      }
+
+      .col-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        .price-value {
+          font-size: 14px;
+          font-weight: 600;
+          color: $text-primary;
+        }
+
+        .price-currency {
+          font-size: 11px;
+          color: $text-muted;
+        }
+      }
+
+      .col-status {
+        .status-badge {
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 500;
+
+          &.new {
+            background: #f3f4f6;
+            color: $text-secondary;
+          }
+        }
+      }
+
+      .col-date {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .date-value {
+          font-size: 12px;
+          color: $text-primary;
+        }
+
+        .time-value {
+          font-size: 11px;
+          color: $text-muted;
+        }
+      }
+
+      .col-action {
+        .view-btn {
+          padding: 8px 20px;
+          border: none;
+          background: $primary-purple;
+          border-radius: 8px;
+          font-size: 12px;
+          font-weight: 500;
+          color: white;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: $dark-purple;
+          }
+        }
+      }
+    }
+  }
+
+  .orders-footer {
+    padding: 16px 24px;
+    border-top: 1px solid $border-color;
+    text-align: right;
+
+    .view-all-link {
+      font-size: 13px;
+      font-weight: 500;
+      color: $text-secondary;
+      text-decoration: none;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $light-purple;
+      }
+    }
+  }
+}
+
+// ==================== NEW SECTIONS ====================
+
+// Dashboard Row Two (for side-by-side cards)
+.dashboard-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 0 24px 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Dashboard Card (shared styles)
+.dashboard-card {
+  background: $card-bg;
+  border-radius: 16px;
+  @include card-shadow;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .card-header {
+    @include flex-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid $border-color;
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: $text-primary;
+      margin: 0;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: $text-secondary;
+      margin: 4px 0 0 0;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .live-counter {
+      @include flex-center;
+      gap: 8px;
+
+      .live-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      .live-number {
+        font-size: 24px;
+        font-weight: 700;
+        color: $text-primary;
+      }
+    }
+  }
+
+  .card-body {
+    flex: 1;
+    padding: 20px 24px;
+
+    &.no-padding {
+      padding: 0;
+    }
+  }
+
+  .card-footer {
+    padding: 16px 24px;
+    border-top: 1px solid $border-color;
+    text-align: right;
+  }
+}
+
+// Loading State
+.loading-state {
+  @include flex-center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 40px;
+  color: $text-secondary;
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid $border-color;
+    border-top-color: $light-purple;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+// Empty State
+.empty-state {
+  @include flex-center;
+  flex-direction: column;
+  gap: 16px;
+  padding: 60px 40px;
+  text-align: center;
+
+  .empty-icon {
+    @include flex-center;
+    width: 80px;
+    height: 80px;
+    background: #f9fafb;
+    border-radius: 50%;
+
+    svg {
+      width: 40px;
+      height: 40px;
+      color: $text-muted;
+    }
+  }
+
+  .empty-message {
+    font-size: 14px;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+// Sales by Channel
+.channels-content {
+  @include flex-center;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 0;
+
+  .pie-chart-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+
+    .pie-chart {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .pie-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+
+      .pie-total {
+        display: block;
+        font-size: 18px;
+        font-weight: 700;
+        color: $text-primary;
+      }
+
+      .pie-label {
+        font-size: 11px;
+        color: $text-secondary;
+      }
+    }
+  }
+
+  .channels-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+
+    .legend-item {
+      @include flex-between;
+      font-size: 13px;
+
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .legend-name {
+        flex: 1;
+        margin-left: 8px;
+        color: $text-primary;
+      }
+
+      .legend-value {
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      .legend-percent {
+        color: $text-secondary;
+        margin-left: 4px;
+      }
+    }
+  }
+}
+
+.view-report-btn {
+  padding: 10px 24px;
+  border: none;
+  background: $primary-purple;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $dark-purple;
+  }
+}
+
+// Live Visitors Map
+.map-container {
+  position: relative;
+  height: 250px;
+
+  .saudi-map {
+    width: 100%;
+    height: 100%;
+
+    .map-outline {
+      transition: all 0.3s ease;
+    }
+
+    .city-marker {
+      cursor: pointer;
+
+      circle {
+        transition: all 0.2s ease;
+
+        &:hover {
+          r: 6;
+        }
+      }
+    }
+  }
+
+  .map-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .map-btn {
+      @include flex-center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid $border-color;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        color: $text-secondary;
+      }
+
+      &:hover {
+        border-color: $light-purple;
+
+        svg {
+          color: $light-purple;
+        }
+      }
+    }
+  }
+}
+
+.view-analytics-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $light-purple;
+  }
+}
+
+// Reviews Stats
+.reviews-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .stat-row {
+    @include flex-between;
+    padding: 16px;
+    background: #fafafa;
+    border-radius: 12px;
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .stat-label {
+        font-size: 13px;
+        color: $text-secondary;
+      }
+
+      .stat-value-large {
+        font-size: 24px;
+        font-weight: 700;
+        color: $text-primary;
+      }
+    }
+
+    .stat-icon-box {
+      @include flex-center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      &.gray {
+        background: #f3f4f6;
+        color: $text-secondary;
+      }
+
+      &.green {
+        background: #d1fae5;
+        color: #059669;
+      }
+
+      &.orange {
+        background: #fef3c7;
+        color: #d97706;
+      }
+    }
+  }
+}
+
+// Recent Reviews
+.recent-reviews {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid $border-color;
+
+  .section-subtitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 12px 0;
+  }
+
+  .review-item {
+    padding: 12px 0;
+    border-bottom: 1px solid $border-color;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .review-header {
+      @include flex-between;
+      margin-bottom: 4px;
+
+      .reviewer-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      .review-rating {
+        font-size: 14px;
+        color: #f59e0b;
+      }
+    }
+
+    .review-comment {
+      font-size: 12px;
+      color: $text-secondary;
+      margin: 0 0 4px 0;
+      line-height: 1.5;
+    }
+
+    .review-product {
+      font-size: 11px;
+      color: $text-muted;
+    }
+  }
+}
+
+.manage-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $light-purple;
+  }
+}
+
+// Products Table
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background: #fafafa;
+
+    th {
+      padding: 12px 24px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: $text-primary;
+      border-bottom: 1px solid $border-color;
+    }
+  }
+
+  tbody {
+    .product-row {
+      border-bottom: 1px solid $border-color;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: #fafafa;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      td {
+        padding: 16px 24px;
+        vertical-align: middle;
+      }
+
+      .col-product {
+        .product-info {
+          @include flex-center;
+          gap: 12px;
+
+          .product-image {
+            @include flex-center;
+            width: 40px;
+            height: 40px;
+            background: #f3f4f6;
+            border-radius: 8px;
+
+            svg {
+              width: 20px;
+              height: 20px;
+              color: $text-muted;
+            }
+          }
+
+          .product-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: $text-primary;
+          }
+        }
+      }
+
+      .col-status {
+        .product-status {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 4px;
+
+          .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+
+            &.published {
+              background: #d1fae5;
+              color: #059669;
+            }
+
+            &.hidden {
+              background: #f3f4f6;
+              color: $text-secondary;
+            }
+          }
+
+          .stock-info {
+            font-size: 11px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dashboard Footer
+.dashboard-footer {
+  @include flex-between;
+  padding: 20px 24px;
+  border-top: 1px solid $border-color;
+  margin-top: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .footer-left {
+    font-size: 12px;
+    color: $text-muted;
+  }
+
+  .footer-right {
+    @include flex-center;
+    gap: 8px;
+    font-size: 12px;
+    color: $text-muted;
+
+    .footer-note {
+      font-weight: 600;
+      color: $primary-purple;
+    }
+  }
+}
+
+// Animations
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

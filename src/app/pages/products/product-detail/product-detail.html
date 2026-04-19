@@ -1,0 +1,125 @@
+<section class="catalog-detail">
+  <header class="catalog-detail__header">
+    <div>
+      <p class="catalog-detail__eyebrow">Catalog item</p>
+      <h1>Product details</h1>
+      <p class="catalog-detail__subtitle">
+        Review one product exactly as it comes back from the API.
+      </p>
+    </div>
+
+    <div class="catalog-detail__actions">
+      <a class="btn btn--ghost" routerLink="/products/categories">Categories</a>
+      <a class="btn btn--ghost" routerLink="/products/subcategories">Subcategories</a>
+      <a class="btn btn--secondary" routerLink="/products">Back to products</a>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="catalog-detail__feedback catalog-detail__feedback--error">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <section class="catalog-detail__panel">
+      <div class="catalog-detail__state">Loading product details...</div>
+    </section>
+  } @else if (!product()) {
+    <section class="catalog-detail__panel">
+      <div class="catalog-detail__state">Product not found.</div>
+    </section>
+  } @else if (product(); as currentProduct) {
+    <section class="catalog-detail__grid">
+      <article class="catalog-detail__panel">
+        <p class="catalog-detail__eyebrow">Product summary</p>
+        <h2>{{ currentProduct.name || 'Untitled product' }}</h2>
+        <p class="catalog-detail__description">
+          {{ currentProduct.description || 'No description has been added yet.' }}
+        </p>
+
+        <div class="catalog-detail__chips">
+          <span class="catalog-detail__chip"
+            >Price: {{ currentProduct.price | number: '1.2-2' }} SAR</span
+          >
+          <span class="catalog-detail__chip">Stock: {{ currentProduct.stock }}</span>
+          <span class="catalog-detail__chip">
+            {{ currentProduct.stock > 0 ? 'Published' : 'Hidden' }}
+          </span>
+        </div>
+
+        @if (currentProduct.images?.length) {
+          <div class="catalog-detail__image-grid">
+            @for (image of currentProduct.images; track image) {
+              <article class="catalog-detail__image-card">
+                @if (image) {
+                  <img [src]="image" [alt]="currentProduct.name || 'Product image'" />
+                  <a
+                    class="catalog-detail__image-link"
+                    [href]="image"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {{ image }}
+                  </a>
+                } @else {
+                  <div class="catalog-detail__image-fallback">
+                    <i class="far fa-image"></i>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        }
+      </article>
+
+      <article class="catalog-detail__panel">
+        <h3>Details</h3>
+        <dl class="catalog-detail__list">
+          <div>
+            <dt>Product ID</dt>
+            <dd>{{ id(currentProduct) || '--' }}</dd>
+          </div>
+          <div>
+            <dt>Category</dt>
+            <dd>
+              @if (categoryId(currentProduct)) {
+                <a
+                  class="catalog-detail__link"
+                  [routerLink]="['/products/categories', categoryId(currentProduct)]"
+                >
+                  {{ categoryLabel(currentProduct) }}
+                </a>
+              } @else {
+                --
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Subcategory</dt>
+            <dd>
+              @if (subcategoryId(currentProduct)) {
+                <a
+                  class="catalog-detail__link"
+                  [routerLink]="['/products/subcategories', subcategoryId(currentProduct)]"
+                >
+                  {{ subcategoryLabel(currentProduct) }}
+                </a>
+              } @else {
+                --
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Created</dt>
+            <dd>{{ currentProduct.createdAt || '--' | slice: 0 : 19 }}</dd>
+          </div>
+          <div>
+            <dt>Updated</dt>
+            <dd>
+              {{ currentProduct.updatedAt || currentProduct.createdAt || '--' | slice: 0 : 19 }}
+            </dd>
+          </div>
+        </dl>
+      </article>
+    </section>
+  }
+</section>
