@@ -1,0 +1,152 @@
+.members-panel__header,
+.members-toolbar,
+.search-field,
+.cell-stack,
+.staff-card,
+.staff-card__header,
+.staff-card__grid {
+  display: grid;
+}
+
+.members-panel__header {
+  gap: 14px;
+}
+
+.members-toolbar {
+  justify-items: end;
+}
+
+.search-field {
+  width: min(380px, 100%);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid #ddd7eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.search-field i {
+  color: #8d88a5;
+}
+
+.search-field input {
+  border: 0;
+  padding-left: 0;
+  box-shadow: none;
+}
+
+.cell-stack {
+  gap: 4px;
+}
+
+.cell-stack strong {
+  color: #2d2647;
+}
+
+.cell-stack small {
+  color: #7e7896;
+}
+
+.staff-detail,
+.staff-card {
+  gap: 18px;
+}
+
+.members-actions {
+  justify-content: flex-start;
+}
+
+.staff-card {
+  padding: 18px;
+  border: 1px solid #ece6f7;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f4ff 100%);
+}
+
+.staff-card__header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.staff-card__eyebrow {
+  margin: 0 0 6px;
+  color: #8a83a1;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.staff-card__header h3 {
+  margin: 0;
+}
+
+.staff-card__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.staff-card__grid dt {
+  margin-bottom: 6px;
+  color: #8d88a5;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.staff-card__grid dd {
+  margin: 0;
+  color: #2d2647;
+  word-break: break-word;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #eef8f0;
+  color: #2e7a47;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-pill--inactive {
+  background: #fff4e8;
+  color: #a7631f;
+}
+
+.members-checkbox {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.members-checkbox input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.members-delete-copy {
+  color: #6f6986;
+}
+
+@media (max-width: 768px) {
+  .staff-card__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .members-toolbar {
+    justify-items: stretch;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+}

@@ -11,6 +11,7 @@ export interface ApiEnvelope<T> {
   subcategory?: T;
   categories?: T;
   subcategories?: T;
+  staff?: T;
 }
 
 export interface CategoryReference {
@@ -114,6 +115,25 @@ export interface SalaryRecord {
   [key: string]: unknown;
 }
 
+export interface StaffUserRecord {
+  _id?: string;
+  id?: string;
+  name?: string;
+  email?: string;
+}
+
+export interface StaffRecord {
+  _id?: string;
+  id?: string;
+  user?: string | StaffUserRecord;
+  dailySalary: number;
+  joinDate: string;
+  department: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface ProductPayload {
   name: string;
   description: string;
@@ -146,3 +166,13 @@ export interface SalaryAdjustmentPayload {
   amount: number;
   reason?: string;
 }
+
+export interface StaffPayload {
+  user: string;
+  dailySalary: number;
+  joinDate: string;
+  department: string;
+  isActive: boolean;
+}
+
+export type StaffUpdatePayload = Partial<StaffPayload>;

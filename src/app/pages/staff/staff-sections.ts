@@ -1,5 +1,5 @@
 export interface StaffSection {
-  id: 'attendance' | 'deductions' | 'salary';
+  id: 'members' | 'attendance' | 'deductions' | 'salary';
   title: string;
   description: string;
   route: string;
@@ -10,6 +10,16 @@ export interface StaffSection {
 }
 
 export const STAFF_SECTIONS: StaffSection[] = [
+  {
+    id: 'members',
+    title: 'Staff members',
+    description: 'Create, inspect, edit, and delete staff records linked to backend users.',
+    route: '/staff/members',
+    icon: 'fa-users',
+    exact: false,
+    eyebrow: 'Admin records',
+    ctaLabel: 'Open members',
+  },
   {
     id: 'attendance',
     title: 'Attendance',

@@ -1,0 +1,232 @@
+<section class="admin-page">
+  <header class="admin-page__header">
+    <div class="admin-page__intro">
+      <div class="admin-page__count">{{ filteredStaff().length }}</div>
+      <div>
+        <p class="admin-page__eyebrow">Admin staff</p>
+        <h1>Staff members</h1>
+        <p class="admin-page__subtitle">
+          Create staff records, review account links, and manage payroll-ready profiles in one
+          workspace.
+        </p>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn--ghost" type="button" routerLink="/staff/attendance">
+        Attendance
+      </button>
+      <button class="btn btn--secondary" type="button" (click)="loadStaff()">Refresh</button>
+      <button class="btn btn--primary" type="button" (click)="openCreateModal()">
+        New staff member
+      </button>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="feedback feedback--error">{{ errorMessage() }}</div>
+  }
+
+  <app-staff-workspace-nav />
+
+  <div class="grid">
+    <section class="panel panel--list">
+      <div class="panel__header members-panel__header">
+        <div>
+          <h2>Staff list</h2>
+          <small>Browse, edit, or delete staff records from the admin API.</small>
+        </div>
+
+        <div class="members-toolbar">
+          <label class="search-field">
+            <i class="fas fa-search"></i>
+            <input
+              type="search"
+              placeholder="Search by name, email, ID, or department"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+            />
+          </label>
+        </div>
+      </div>
+
+      @if (isLoading()) {
+        <div class="state-card">Loading staff members...</div>
+      } @else if (filteredStaff().length === 0) {
+        <div class="state-card">No staff records matched the current search.</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Staff</th>
+                <th>Department</th>
+                <th>Salary</th>
+                <th>Status</th>
+                <th class="table-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (record of filteredStaff(); track id(record)) {
+                <tr>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ userName(record) }}</strong>
+                      <small>{{ userEmail(record) || userId(record) || 'No user details' }}</small>
+                      <small>ID: {{ id(record) || 'Missing ID' }}</small>
+                    </div>
+                  </td>
+                  <td>{{ record.department || '--' }}</td>
+                  <td>{{ record.dailySalary }}</td>
+                  <td>
+                    <span class="status-pill" [class.status-pill--inactive]="!record.isActive">
+                      {{ statusLabel(record) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="row-actions row-actions--product">
+                      <a class="btn btn--ghost" [routerLink]="['/staff/members', id(record)]">View</a>
+                      <button class="btn btn--danger" type="button" (click)="requestDelete(record)">
+                        Delete
+                      </button>
+                      <button class="btn btn--primary" type="button" (click)="openEditModal(record)">
+                        Edit
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+</section>
+
+@if (isFormModalOpen()) {
+  <div class="modal-backdrop" (click)="closeFormModal()"></div>
+  <section class="modal-card" role="dialog" aria-modal="true" aria-label="Staff form">
+    <div class="modal-card__header">
+      <div>
+        <p class="modal-card__eyebrow">Staff management</p>
+        <h2>{{ form().id ? 'Edit staff member' : 'Create staff member' }}</h2>
+      </div>
+
+      <button
+        class="modal-card__close"
+        type="button"
+        (click)="closeFormModal()"
+        aria-label="Close modal"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form class="form-grid" (ngSubmit)="saveStaff()">
+      @if (!form().id) {
+        <label class="form-grid__wide">
+          <span>User ID</span>
+          <input
+            type="text"
+            [ngModel]="form().user"
+            name="user"
+            (ngModelChange)="updateForm('user', $event)"
+            placeholder="Paste the backend user ID"
+            required
+          />
+        </label>
+      } @else {
+        <label class="form-grid__wide">
+          <span>Linked user</span>
+          <input type="text" [value]="form().user || 'Existing linked user'" readonly />
+        </label>
+      }
+
+      <label>
+        <span>Daily salary</span>
+        <input
+          type="number"
+          [ngModel]="form().dailySalary"
+          name="dailySalary"
+          (ngModelChange)="updateForm('dailySalary', $event)"
+          placeholder="300"
+          min="0"
+          required
+        />
+      </label>
+
+      <label>
+        <span>Join date</span>
+        <input
+          type="date"
+          [ngModel]="form().joinDate"
+          name="joinDate"
+          (ngModelChange)="updateForm('joinDate', $event)"
+          required
+        />
+      </label>
+
+      <label class="form-grid__wide">
+        <span>Department</span>
+        <input
+          type="text"
+          [ngModel]="form().department"
+          name="department"
+          (ngModelChange)="updateForm('department', $event)"
+          placeholder="Sales"
+          required
+        />
+      </label>
+
+      <label class="members-checkbox">
+        <input
+          type="checkbox"
+          [ngModel]="form().isActive"
+          name="isActive"
+          (ngModelChange)="updateForm('isActive', $event)"
+        />
+        <span>Staff member is active</span>
+      </label>
+
+      <div class="form-grid__actions">
+        <button class="btn btn--ghost" type="button" (click)="closeFormModal()">Cancel</button>
+        <button class="btn btn--primary" type="submit" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : form().id ? 'Update staff' : 'Create staff' }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+
+@if (isDeleteModalOpen()) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
+  <section class="modal-card" role="dialog" aria-modal="true" aria-label="Delete staff member">
+    <div class="modal-card__header">
+      <div>
+        <p class="modal-card__eyebrow">Delete staff</p>
+        <h2>Remove {{ userName(pendingDeleteStaff()) }}?</h2>
+      </div>
+
+      <button
+        class="modal-card__close"
+        type="button"
+        (click)="closeDeleteModal()"
+        aria-label="Close modal"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <p class="members-delete-copy">
+      This deletes the staff record from the admin API. The linked user account remains separate.
+    </p>
+
+    <div class="form-grid__actions">
+      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">Cancel</button>
+      <button class="btn btn--danger" type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+        {{ isDeleting() ? 'Deleting...' : 'Delete staff' }}
+      </button>
+    </div>
+  </section>
+}

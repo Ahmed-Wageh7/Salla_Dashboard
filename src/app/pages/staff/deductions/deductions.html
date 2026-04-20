@@ -1,227 +1,103 @@
 <section class="admin-page">
   <header class="admin-page__header">
-    <div>
-      <p class="admin-page__eyebrow">Staff operations</p>
-      <h1>Deductions</h1>
-      <p class="admin-page__subtitle">
-        Load a staff member, review monthly deductions, and move across the staff tools without
-        losing your place.
-      </p>
+    <div class="admin-page__intro">
+      <div class="admin-page__count">{{ filteredStaff().length }}</div>
+      <div>
+        <p class="admin-page__eyebrow">Staff operations</p>
+        <h1>Deductions</h1>
+        <p class="admin-page__subtitle">
+          Pick a staff member from the list, load deductions, and manage entries in a products-style
+          workflow.
+        </p>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn--secondary" type="button" (click)="loadStaffMembers()">Refresh</button>
     </div>
   </header>
 
-  <app-staff-workspace-nav></app-staff-workspace-nav>
-
-  <section class="panel filters">
-    <label>
-      <span>Staff ID</span>
-      <input
-        type="text"
-        [ngModel]="staffId()"
-        (ngModelChange)="staffId.set($event)"
-        placeholder="64f..."
-      />
-    </label>
-
-    <label>
-      <span>Month</span>
-      <input type="month" [ngModel]="month()" (ngModelChange)="setMonth($event)" />
-    </label>
-
-    <div class="filters__actions">
-      <button class="btn btn--secondary" type="button" (click)="loadDeductions()">
-        Load deductions
-      </button>
-      <button class="btn btn--primary" type="button" (click)="openCreateDeductionModal()">
-        Add deduction
-      </button>
-    </div>
-  </section>
+  <app-staff-workspace-nav />
 
   @if (errorMessage()) {
     <div class="feedback feedback--error">{{ errorMessage() }}</div>
   }
 
-  @if (feedback()) {
-    <div class="feedback feedback--success">{{ feedback() }}</div>
-  }
-
-  <div class="summary-grid">
-    <section class="panel stat">
-      <p>Total deductions</p>
-      <h2>{{ totalDeductions() | number: '1.2-2' }}</h2>
-      <small>For the currently selected month.</small>
-    </section>
-
-    <section class="panel stat">
-      <p>Records</p>
-      <h2>{{ visibleDeductions().length }}</h2>
-      <small>Deduction rows currently loaded.</small>
-    </section>
-
-    <section class="panel stat">
-      <p>Month</p>
-      <h2>{{ month() }}</h2>
-      <small>Used to filter the loaded results locally.</small>
-    </section>
-  </div>
-
-  <div class="content-grid">
-    <section class="panel">
-      <div class="panel__header">
-        <h2>Deduction records</h2>
-        <p>
-          Load a staff member to review, edit, and delete deduction entries for the selected month.
-        </p>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Reason</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (deduction of visibleDeductions(); track id(deduction)) {
-              <tr>
-                <td>{{ deduction.month }}</td>
-                <td>{{ deduction.reason }}</td>
-                <td>{{ deduction.amount | number: '1.2-2' }}</td>
-                <td>{{ deduction.date | slice: 0 : 10 }}</td>
-                <td>
-                  <div class="row-actions">
-                    <button
-                      class="btn btn--inline"
-                      type="button"
-                      (click)="editDeduction(deduction)"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      class="btn btn--danger"
-                      type="button"
-                      (click)="deleteDeduction(deduction)"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="empty-row">
-                  No deductions loaded for the selected month yet.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel__header">
-        <h2>Workspace tips</h2>
-        <p>Use the month selector to focus the table while keeping the full API payload loaded.</p>
-      </div>
-
-      <div class="salary-card">
-        <pre>{{
-          {
-            staffId: staffId() || 'Not selected',
-            month: month(),
-            loadedRows: visibleDeductions().length,
-            totalDeductions: totalDeductions(),
-          } | json
-        }}</pre>
-      </div>
-    </section>
-  </div>
-
-  @if (isDeductionModalOpen()) {
-    <div class="modal-backdrop" (click)="closeDeductionModal()"></div>
-
-    <section
-      class="modal-card"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="deduction-modal-title"
-    >
-      <div class="modal-card__header">
+  <div class="grid">
+    <section class="panel panel--list">
+      <div class="panel__header panel__header--split">
         <div>
-          <p class="modal-card__eyebrow">Deduction form</p>
-          <h2 id="deduction-modal-title">
-            {{ deductionForm().id ? 'Edit deduction' : 'Add deduction' }}
-          </h2>
-          <p>Create or update deductions for the selected staff member.</p>
+          <h2>Staff members</h2>
+          <small>Select a staff member, then click View to open full deduction details.</small>
         </div>
 
-        <button
-          class="modal-card__close"
-          type="button"
-          (click)="closeDeductionModal()"
-          aria-label="Close deduction form"
-        >
-          <i class="fas fa-times"></i>
-        </button>
+        <div class="toolbar">
+          <div class="search-field">
+            <i class="fas fa-search"></i>
+            <input
+              type="search"
+              placeholder="Search staff members"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+            />
+          </div>
+
+          <label>
+            <span>Month</span>
+            <input type="month" [ngModel]="month()" (ngModelChange)="setMonth($event)" />
+          </label>
+        </div>
       </div>
 
-      <form class="form-grid" (ngSubmit)="saveDeduction()">
-        <label>
-          <span>Month</span>
-          <input
-            type="month"
-            [ngModel]="deductionForm().month"
-            name="month"
-            (ngModelChange)="updateDeductionField('month', $event)"
-          />
-        </label>
-
-        <label>
-          <span>Amount</span>
-          <input
-            type="number"
-            [ngModel]="deductionForm().amount"
-            name="amount"
-            (ngModelChange)="updateDeductionField('amount', $event)"
-          />
-        </label>
-
-        <label class="form-grid__wide">
-          <span>Reason</span>
-          <input
-            type="text"
-            [ngModel]="deductionForm().reason"
-            name="reason"
-            (ngModelChange)="updateDeductionField('reason', $event)"
-          />
-        </label>
-
-        <label class="form-grid__wide">
-          <span>Date</span>
-          <input
-            type="date"
-            [ngModel]="deductionForm().date"
-            name="date"
-            (ngModelChange)="updateDeductionField('date', $event)"
-          />
-        </label>
-
-        <div class="form-grid__actions">
-          <button class="btn btn--ghost" type="button" (click)="resetDeductionForm()">Clear</button>
-          <button class="btn btn--secondary" type="button" (click)="closeDeductionModal()">
-            Cancel
-          </button>
-          <button class="btn btn--primary" type="submit" [disabled]="isBusy()">
-            {{ deductionForm().id ? 'Update deduction' : 'Save deduction' }}
-          </button>
+      @if (isLoadingStaff()) {
+        <div class="state-card">Loading staff members...</div>
+      } @else if (filteredStaff().length === 0) {
+        <div class="state-card">No staff members matched the current search.</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Staff</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Join date</th>
+                <th class="table-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (staff of filteredStaff(); track id(staff)) {
+                <tr>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ userName(staff) }}</strong>
+                      <small>{{ userEmail(staff) || userId(staff) || 'No user details' }}</small>
+                      <small>{{ id(staff) || 'No staff ID' }}</small>
+                    </div>
+                  </td>
+                  <td>{{ staff.department || '--' }}</td>
+                  <td>
+                    <span class="status-pill" [class.status-pill--inactive]="!staff.isActive">
+                      {{ statusLabel(staff) }}
+                    </span>
+                  </td>
+                  <td>{{ joinDateLabel(staff) }}</td>
+                  <td>
+                    <div class="row-actions row-actions--product">
+                      <a
+                        class="btn btn--ghost"
+                        [routerLink]="['/staff/deductions', id(staff)]"
+                      >
+                        View
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
-      </form>
+      }
     </section>
-  }
+  </div>
 </section>

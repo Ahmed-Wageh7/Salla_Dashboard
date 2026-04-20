@@ -15,6 +15,9 @@ import {
   ProductRecord,
   SalaryAdjustmentPayload,
   SalaryRecord,
+  StaffPayload,
+  StaffRecord,
+  StaffUpdatePayload,
   SubcategoryPayload,
   SubcategoryRecord,
 } from './admin.models';
@@ -317,6 +320,56 @@ export class AdminApiService {
       .pipe(map((response) => this.unwrap(response)));
   }
 
+  getAdminStaff(): Observable<StaffRecord[]> {
+    return this.http
+      .get<ApiEnvelope<StaffRecord[] | { items?: StaffRecord[]; staff?: StaffRecord[] }>>(
+        this.url('/admin/staff'),
+        { headers: this.headers() },
+      )
+      .pipe(
+        map((response) => {
+          const payload = this.unwrap(response);
+
+          if (Array.isArray(payload)) return payload;
+          if (payload && typeof payload === 'object') {
+            return payload.items ?? payload.staff ?? [];
+          }
+
+          return [];
+        }),
+      );
+  }
+
+  getAdminStaffById(id: string): Observable<StaffRecord> {
+    return this.http
+      .get<ApiEnvelope<StaffRecord>>(this.url(`/admin/staff/${id}`), {
+        headers: this.headers(),
+      })
+      .pipe(map((response) => this.unwrap(response)));
+  }
+
+  createStaff(payload: StaffPayload): Observable<StaffRecord> {
+    return this.http
+      .post<ApiEnvelope<StaffRecord>>(this.url('/admin/staff'), payload, {
+        headers: this.headers(),
+      })
+      .pipe(map((response) => this.unwrap(response)));
+  }
+
+  updateStaff(id: string, payload: StaffUpdatePayload): Observable<StaffRecord> {
+    return this.http
+      .put<ApiEnvelope<StaffRecord>>(this.url(`/admin/staff/${id}`), payload, {
+        headers: this.headers(),
+      })
+      .pipe(map((response) => this.unwrap(response)));
+  }
+
+  deleteStaff(id: string): Observable<void> {
+    return this.http
+      .delete<ApiEnvelope<unknown>>(this.url(`/admin/staff/${id}`), { headers: this.headers() })
+      .pipe(map(() => undefined));
+  }
+
   getDeductions(staffId: string): Observable<DeductionRecord[]> {
     return this.http
       .get<
@@ -464,6 +517,7 @@ export class AdminApiService {
       if (envelope.product !== undefined) return envelope.product;
       if (envelope.category !== undefined) return envelope.category;
       if (envelope.subcategory !== undefined) return envelope.subcategory;
+      if (envelope.staff !== undefined) return envelope.staff;
     }
 
     return response as T;

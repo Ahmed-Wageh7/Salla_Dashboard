@@ -1,0 +1,110 @@
+<section class="catalog-detail">
+  <header class="catalog-detail__header">
+    <div>
+      <p class="catalog-detail__eyebrow">Staff salary</p>
+      <h1>Salary details</h1>
+      <p class="catalog-detail__subtitle">
+        Review and manage salary data for one staff member in a full-width page.
+      </p>
+    </div>
+
+    <div class="catalog-detail__actions">
+      <a class="btn btn--ghost" routerLink="/staff/members">Staff members</a>
+      <a class="btn btn--ghost" routerLink="/staff/deductions">Deductions</a>
+      <a class="btn btn--secondary" routerLink="/staff/salary">Back to salary</a>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="catalog-detail__feedback catalog-detail__feedback--error">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <section class="catalog-detail__panel">
+      <div class="catalog-detail__state">Loading salary details...</div>
+    </section>
+  } @else if (!staff()) {
+    <section class="catalog-detail__panel">
+      <div class="catalog-detail__state">Staff member not found.</div>
+    </section>
+  } @else if (staff(); as currentStaff) {
+    <section class="catalog-detail__grid">
+      <article class="catalog-detail__panel">
+        <p class="catalog-detail__eyebrow">Staff summary</p>
+        <h2>{{ userName(currentStaff) }}</h2>
+        <p class="catalog-detail__description">{{ currentStaff.department || '--' }}</p>
+
+        <div class="catalog-detail__chips">
+          <span class="catalog-detail__chip">Base salary: {{ baseSalary() | number: '1.2-2' }}</span>
+          <span class="catalog-detail__chip">Net salary: {{ netSalary() | number: '1.2-2' }}</span>
+          <span class="catalog-detail__chip salary-detail__chip" [class.salary-detail__chip--inactive]="salaryStatus() !== 'Paid'">
+            {{ salaryStatus() }}
+          </span>
+        </div>
+
+        <div class="salary-detail__toolbar">
+          <label>
+            <span>Month</span>
+            <input type="month" [ngModel]="month()" (ngModelChange)="setMonth($event)" />
+          </label>
+          <button class="btn btn--secondary" type="button" (click)="loadSalary()">Load salary</button>
+        </div>
+      </article>
+
+      <article class="catalog-detail__panel">
+        <h3>Staff details</h3>
+        <dl class="catalog-detail__list">
+          <div><dt>Staff ID</dt><dd>{{ id(currentStaff) || '--' }}</dd></div>
+          <div><dt>User ID</dt><dd>{{ userId(currentStaff) || '--' }}</dd></div>
+          <div><dt>Email</dt><dd>{{ userEmail(currentStaff) || '--' }}</dd></div>
+          <div><dt>Join date</dt><dd>{{ joinDateLabel(currentStaff) }}</dd></div>
+          <div><dt>Daily salary</dt><dd>{{ currentStaff.dailySalary }}</dd></div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="catalog-detail__grid">
+      <article class="catalog-detail__panel">
+        <h3>Salary summary</h3>
+        @if (salary()) {
+          <dl class="catalog-detail__list">
+            <div><dt>Month</dt><dd>{{ month() }}</dd></div>
+            <div><dt>Base salary</dt><dd>{{ baseSalary() | number: '1.2-2' }}</dd></div>
+            <div><dt>Total deductions</dt><dd>{{ totalDeductions() | number: '1.2-2' }}</dd></div>
+            <div><dt>Final salary</dt><dd>{{ netSalary() | number: '1.2-2' }}</dd></div>
+            <div><dt>Status</dt><dd>{{ salaryStatus() }}</dd></div>
+          </dl>
+        } @else {
+          <div class="catalog-detail__state">No salary details loaded yet.</div>
+        }
+      </article>
+
+      <article class="catalog-detail__panel">
+        <h3>Actions</h3>
+        <div class="salary-actions">
+          <label>
+            <span>Adjustment amount</span>
+            <input type="number" [ngModel]="adjustmentAmount()" (ngModelChange)="adjustmentAmount.set($event)" />
+          </label>
+          <label>
+            <span>Adjustment reason</span>
+            <input type="text" [ngModel]="adjustmentReason()" (ngModelChange)="adjustmentReason.set($event)" placeholder="Bonus adjustment" />
+          </label>
+          <section class="panel stat">
+            <p>Deductions</p>
+            <h2>{{ totalDeductions() | number: '1.2-2' }}</h2>
+            <small>Read from the current salary payload.</small>
+          </section>
+          <div class="salary-actions__buttons">
+            <button class="btn btn--secondary" type="button" [disabled]="isBusy()" (click)="adjustSalary()">
+              Adjust salary
+            </button>
+            <button class="btn btn--primary" type="button" [disabled]="isBusy()" (click)="paySalary()">
+              Mark as paid
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+  }
+</section>

@@ -1,0 +1,17 @@
+.salary-detail__chip {
+  background: #eef8f0;
+  color: #2e7a47;
+}
+
+.salary-detail__chip--inactive {
+  background: #fff4e8;
+  color: #a7631f;
+}
+
+.salary-detail__toolbar {
+  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+  align-items: end;
+  flex-wrap: wrap;
+}

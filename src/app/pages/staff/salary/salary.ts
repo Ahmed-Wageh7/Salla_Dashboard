@@ -1,154 +1,125 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdminApiService } from '../../../core/api/admin-api.service';
-import { SalaryAdjustmentPayload, SalaryRecord } from '../../../core/api/admin.models';
+import { StaffRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { StaffWorkspaceNavComponent } from '../workspace-nav/staff-workspace-nav';
 
 @Component({
   selector: 'app-staff-salary',
   standalone: true,
-  imports: [CommonModule, FormsModule, JsonPipe, RouterModule, StaffWorkspaceNavComponent],
+  imports: [CommonModule, FormsModule, RouterModule, StaffWorkspaceNavComponent],
   templateUrl: './salary.html',
-  styleUrls: ['../staff.scss'],
+  styleUrls: ['../staff.scss', '../members/members.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StaffSalaryComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly toastService = inject(ToastService);
 
-  readonly staffId = signal('');
+  readonly staffMembers = signal<StaffRecord[]>([]);
+  readonly searchQuery = signal('');
   readonly month = signal(this.currentMonth());
-  readonly salary = signal<SalaryRecord | null>(null);
-  readonly adjustmentAmount = signal(0);
-  readonly adjustmentReason = signal('');
-  readonly isBusy = signal(false);
-  readonly feedback = signal('');
+  readonly isLoadingStaff = signal(true);
   readonly errorMessage = signal('');
 
-  readonly baseSalary = computed(() => this.numberValue('baseSalary', 'amount', 'total'));
-  readonly totalDeductions = computed(() => this.numberValue('deductions'));
-  readonly netSalary = computed(() => this.numberValue('netSalary', 'total', 'amount'));
-  readonly salaryStatus = computed(() => {
-    const salary = this.salary();
-    if (!salary) return 'Not loaded';
-    if (salary.paid === true) return 'Paid';
+  readonly filteredStaff = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    if (!query) return this.staffMembers();
 
-    const rawStatus = String(salary['status'] ?? '').toLowerCase();
-    return rawStatus === 'paid' ? 'Paid' : 'Pending';
+    return this.staffMembers().filter((record) =>
+      [
+        this.id(record),
+        this.userId(record),
+        this.userName(record),
+        this.userEmail(record),
+        record.department,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    );
   });
 
-  loadSalary(): void {
-    const staffId = this.staffId().trim();
-    const month = this.month().trim();
+  constructor() {
+    this.loadStaffMembers();
+  }
 
-    if (!staffId || !month) {
-      this.errorMessage.set('Enter a staff ID and month before loading salary.');
-      return;
-    }
-
-    this.isBusy.set(true);
+  loadStaffMembers(): void {
+    this.isLoadingStaff.set(true);
     this.errorMessage.set('');
 
-    this.adminApi.getSalary(staffId, month).subscribe({
-      next: (salary) => {
-        this.salary.set(salary);
-        this.isBusy.set(false);
+    this.adminApi.getAdminStaff().subscribe({
+      next: (staff) => {
+        this.staffMembers.set(
+          [...staff].sort((left, right) => this.userName(left).localeCompare(this.userName(right))),
+        );
+        this.isLoadingStaff.set(false);
       },
       error: (error) => {
-        const message = error?.error?.message || 'Unable to load salary details.';
+        const message = this.getApiErrorMessage(error, 'Unable to load staff members.');
         this.errorMessage.set(message);
         this.toastService.error(message);
-        this.isBusy.set(false);
+        this.isLoadingStaff.set(false);
       },
     });
   }
 
-  paySalary(): void {
-    const staffId = this.staffId().trim();
-    const month = this.month().trim();
-
-    if (!staffId || !month) {
-      this.errorMessage.set('Enter a staff ID and month before paying salary.');
-      return;
-    }
-
-    this.isBusy.set(true);
-    this.errorMessage.set('');
-
-    this.adminApi.paySalary(staffId, month).subscribe({
-      next: (salary) => {
-        this.salary.set({
-          ...(this.salary() ?? {}),
-          ...(salary ?? {}),
-          paid: true,
-        });
-        this.feedback.set('Salary payment sent successfully.');
-        this.toastService.success('Salary payment sent successfully.');
-        this.isBusy.set(false);
-      },
-      error: (error) => {
-        const message = error?.error?.message || 'Unable to pay salary.';
-        this.errorMessage.set(message);
-        this.toastService.error(message);
-        this.isBusy.set(false);
-      },
-    });
+  updateSearch(query: string): void {
+    this.searchQuery.set(query);
   }
 
-  adjustSalary(): void {
-    const staffId = this.staffId().trim();
-    const month = this.month().trim();
-
-    if (!staffId || !month) {
-      this.errorMessage.set('Enter a staff ID and month before adjusting salary.');
-      return;
-    }
-
-    const payload: SalaryAdjustmentPayload = {
-      amount: Number(this.adjustmentAmount()),
-      reason: this.adjustmentReason().trim(),
-    };
-
-    this.isBusy.set(true);
-    this.errorMessage.set('');
-
-    this.adminApi.adjustSalary(staffId, month, payload).subscribe({
-      next: (salary) => {
-        this.salary.set({
-          ...(this.salary() ?? {}),
-          ...(salary ?? {}),
-        });
-        this.feedback.set('Salary adjusted successfully.');
-        this.toastService.success('Salary adjusted successfully.');
-        this.isBusy.set(false);
-      },
-      error: (error) => {
-        const message = error?.error?.message || 'Unable to adjust salary.';
-        this.errorMessage.set(message);
-        this.toastService.error(message);
-        this.isBusy.set(false);
-      },
-    });
+  setMonth(value: string): void {
+    this.month.set(value);
   }
 
-  private numberValue(...keys: string[]): number {
-    const salary = this.salary();
-    if (!salary) return 0;
+  id(record: StaffRecord | null | undefined): string {
+    if (!record) return '';
+    return record._id ?? record.id ?? '';
+  }
 
-    for (const key of keys) {
-      const candidate = Number(salary[key] ?? NaN);
-      if (Number.isFinite(candidate)) {
-        return candidate;
-      }
-    }
+  userId(record: StaffRecord | null | undefined): string {
+    const user = record?.user;
+    if (!user) return '';
+    return typeof user === 'string' ? user : user._id ?? user.id ?? '';
+  }
 
-    return 0;
+  userName(record: StaffRecord | null | undefined): string {
+    const user = record?.user;
+    if (!user) return 'Unknown user';
+    return typeof user === 'string' ? user : user.name?.trim() || user.email?.trim() || this.userId(record);
+  }
+
+  userEmail(record: StaffRecord | null | undefined): string {
+    const user = record?.user;
+    if (!user || typeof user === 'string') return '';
+    return user.email ?? '';
+  }
+
+  statusLabel(record: StaffRecord | null | undefined): string {
+    return record?.isActive ? 'Active' : 'Inactive';
+  }
+
+  joinDateLabel(record: StaffRecord | null | undefined): string {
+    return record?.joinDate ? String(record.joinDate).slice(0, 10) : '--';
   }
 
   private currentMonth(): string {
     return new Date().toISOString().slice(0, 7);
+  }
+
+  private getApiErrorMessage(error: unknown, fallback: string): string {
+    if (!error || typeof error !== 'object') return fallback;
+
+    const apiError = error as {
+      error?: { message?: string; details?: string[] };
+      message?: string;
+    };
+
+    return (
+      apiError.error?.details?.join(' ') || apiError.error?.message || apiError.message || fallback
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { CommonModule, TitleCasePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,12 +8,6 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import {
-  CurrencyFormatPipe,
-  NumberFormatPipe,
-  StarRatingPipe,
-  TruncatePipe,
-} from './dashboard-pipes';
 import { DashboardApiResponse, DashboardService } from '../../services/dashboard.service';
 
 interface StatCard {
@@ -131,14 +125,7 @@ interface Product {
   selector: 'app-main-content',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    TitleCasePipe,
-    NumberFormatPipe,
-    CurrencyFormatPipe,
-    StarRatingPipe,
-    TruncatePipe,
-  ],
+  imports: [CommonModule],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss'],
 })

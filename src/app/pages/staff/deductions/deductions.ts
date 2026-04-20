@@ -3,200 +3,123 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdminApiService } from '../../../core/api/admin-api.service';
-import { DeductionPayload, DeductionRecord } from '../../../core/api/admin.models';
+import { StaffRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { StaffWorkspaceNavComponent } from '../workspace-nav/staff-workspace-nav';
-
-interface DeductionFormState {
-  id: string | null;
-  month: string;
-  amount: number;
-  reason: string;
-  date: string;
-}
 
 @Component({
   selector: 'app-staff-deductions',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, StaffWorkspaceNavComponent],
   templateUrl: './deductions.html',
-  styleUrls: ['../staff.scss'],
+  styleUrls: ['../staff.scss', '../members/members.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StaffDeductionsComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly toastService = inject(ToastService);
 
-  readonly staffId = signal('');
+  readonly staffMembers = signal<StaffRecord[]>([]);
+  readonly searchQuery = signal('');
   readonly month = signal(this.currentMonth());
-  readonly deductions = signal<DeductionRecord[]>([]);
-  readonly deductionForm = signal<DeductionFormState>(this.emptyDeduction());
-  readonly isDeductionModalOpen = signal(false);
-  readonly isBusy = signal(false);
-  readonly feedback = signal('');
+  readonly isLoadingStaff = signal(true);
   readonly errorMessage = signal('');
 
-  readonly visibleDeductions = computed(() => {
-    const selectedMonth = this.month().trim();
-    if (!selectedMonth) return this.deductions();
+  readonly filteredStaff = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    if (!query) return this.staffMembers();
 
-    return this.deductions().filter((deduction) => deduction.month?.startsWith(selectedMonth));
+    return this.staffMembers().filter((record) =>
+      [
+        this.id(record),
+        this.userId(record),
+        this.userName(record),
+        this.userEmail(record),
+        record.department,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    );
   });
 
-  readonly totalDeductions = computed(() =>
-    this.visibleDeductions().reduce((sum, deduction) => sum + Number(deduction.amount ?? 0), 0),
-  );
+  constructor() {
+    this.loadStaffMembers();
+  }
 
-  loadDeductions(): void {
-    const staffId = this.staffId().trim();
-    if (!staffId) {
-      this.errorMessage.set('Enter a staff ID before loading deductions.');
-      return;
-    }
-
-    this.isBusy.set(true);
+  loadStaffMembers(): void {
+    this.isLoadingStaff.set(true);
     this.errorMessage.set('');
 
-    this.adminApi.getDeductions(staffId).subscribe({
-      next: (deductions) => {
-        this.deductions.set(deductions);
-        this.feedback.set(
-          `Loaded ${deductions.length} deduction${deductions.length === 1 ? '' : 's'}.`,
+    this.adminApi.getAdminStaff().subscribe({
+      next: (staff) => {
+        this.staffMembers.set(
+          [...staff].sort((left, right) => this.userName(left).localeCompare(this.userName(right))),
         );
-        this.isBusy.set(false);
+        this.isLoadingStaff.set(false);
       },
       error: (error) => {
-        const message = error?.error?.message || 'Unable to load deductions.';
+        const message = this.getApiErrorMessage(error, 'Unable to load staff members.');
         this.errorMessage.set(message);
         this.toastService.error(message);
-        this.isBusy.set(false);
+        this.isLoadingStaff.set(false);
       },
     });
   }
 
-  saveDeduction(): void {
-    const staffId = this.staffId().trim();
-    if (!staffId) {
-      this.errorMessage.set('Enter a staff ID before saving deductions.');
-      return;
-    }
-
-    const form = this.deductionForm();
-    const payload: DeductionPayload = {
-      month: form.month,
-      amount: Number(form.amount),
-      reason: form.reason.trim(),
-      date: form.date,
-    };
-
-    this.isBusy.set(true);
-    this.errorMessage.set('');
-
-    const request = form.id
-      ? this.adminApi.updateDeduction(staffId, form.id, payload)
-      : this.adminApi.addDeduction(staffId, payload);
-
-    request.subscribe({
-      next: () => {
-        const message = form.id
-          ? 'Deduction updated successfully.'
-          : 'Deduction created successfully.';
-        this.feedback.set(message);
-        this.toastService.success(message);
-        this.closeDeductionModal();
-        this.loadDeductions();
-      },
-      error: (error) => {
-        const message = error?.error?.message || 'Unable to save deduction.';
-        this.errorMessage.set(message);
-        this.toastService.error(message);
-        this.isBusy.set(false);
-      },
-    });
-  }
-
-  editDeduction(deduction: DeductionRecord): void {
-    this.deductionForm.set({
-      id: this.id(deduction),
-      month: deduction.month,
-      amount: Number(deduction.amount),
-      reason: deduction.reason,
-      date: deduction.date?.slice(0, 10) ?? '',
-    });
-    this.isDeductionModalOpen.set(true);
-  }
-
-  deleteDeduction(deduction: DeductionRecord): void {
-    const staffId = this.staffId().trim();
-    if (!staffId) {
-      this.errorMessage.set('Enter a staff ID before deleting deductions.');
-      return;
-    }
-
-    this.isBusy.set(true);
-    this.errorMessage.set('');
-
-    this.adminApi.deleteDeduction(staffId, this.id(deduction)).subscribe({
-      next: () => {
-        this.feedback.set('Deduction deleted successfully.');
-        this.toastService.success('Deduction deleted successfully.');
-        this.loadDeductions();
-      },
-      error: (error) => {
-        const message = error?.error?.message || 'Unable to delete deduction.';
-        this.errorMessage.set(message);
-        this.toastService.error(message);
-        this.isBusy.set(false);
-      },
-    });
-  }
-
-  resetDeductionForm(): void {
-    this.deductionForm.set(this.emptyDeduction());
-  }
-
-  openCreateDeductionModal(): void {
-    this.errorMessage.set('');
-    this.feedback.set('');
-    this.deductionForm.set(this.emptyDeduction());
-    this.isDeductionModalOpen.set(true);
-  }
-
-  closeDeductionModal(): void {
-    this.isDeductionModalOpen.set(false);
-    this.resetDeductionForm();
+  updateSearch(query: string): void {
+    this.searchQuery.set(query);
   }
 
   setMonth(value: string): void {
     this.month.set(value);
-
-    if (!this.deductionForm().id) {
-      this.updateDeductionField('month', value);
-    }
   }
 
-  updateDeductionField<K extends keyof DeductionFormState>(
-    key: K,
-    value: DeductionFormState[K],
-  ): void {
-    this.deductionForm.update((current) => ({ ...current, [key]: value }));
-  }
-
-  id(record: DeductionRecord): string {
+  id(record: StaffRecord | null | undefined): string {
+    if (!record) return '';
     return record._id ?? record.id ?? '';
   }
 
-  private emptyDeduction(): DeductionFormState {
-    return {
-      id: null,
-      month: this.month(),
-      amount: 0,
-      reason: '',
-      date: new Date().toISOString().slice(0, 10),
-    };
+  userId(record: StaffRecord | null | undefined): string {
+    const user = record?.user;
+    if (!user) return '';
+    return typeof user === 'string' ? user : user._id ?? user.id ?? '';
+  }
+
+  userName(record: StaffRecord | null | undefined): string {
+    const user = record?.user;
+    if (!user) return 'Unknown user';
+    return typeof user === 'string' ? user : user.name?.trim() || user.email?.trim() || this.userId(record);
+  }
+
+  userEmail(record: StaffRecord | null | undefined): string {
+    const user = record?.user;
+    if (!user || typeof user === 'string') return '';
+    return user.email ?? '';
+  }
+
+  statusLabel(record: StaffRecord | null | undefined): string {
+    return record?.isActive ? 'Active' : 'Inactive';
+  }
+
+  joinDateLabel(record: StaffRecord | null | undefined): string {
+    return record?.joinDate ? String(record.joinDate).slice(0, 10) : '--';
   }
 
   private currentMonth(): string {
     return new Date().toISOString().slice(0, 7);
+  }
+
+  private getApiErrorMessage(error: unknown, fallback: string): string {
+    if (!error || typeof error !== 'object') return fallback;
+
+    const apiError = error as {
+      error?: { message?: string; details?: string[] };
+      message?: string;
+    };
+
+    return (
+      apiError.error?.details?.join(' ') || apiError.error?.message || apiError.message || fallback
+    );
   }
 }

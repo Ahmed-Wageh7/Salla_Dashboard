@@ -1,133 +1,97 @@
 <section class="admin-page">
   <header class="admin-page__header">
-    <div>
-      <p class="admin-page__eyebrow">Staff operations</p>
-      <h1>Salary</h1>
-      <p class="admin-page__subtitle">
-        Review salary payloads, adjust amounts, and complete payroll actions while keeping the
-        current section obvious at a glance.
-      </p>
+    <div class="admin-page__intro">
+      <div class="admin-page__count">{{ filteredStaff().length }}</div>
+      <div>
+        <p class="admin-page__eyebrow">Staff operations</p>
+        <h1>Salary</h1>
+        <p class="admin-page__subtitle">
+          Load salary details from a staff list, then adjust or pay from the selected record view.
+        </p>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn--secondary" type="button" (click)="loadStaffMembers()">Refresh</button>
     </div>
   </header>
 
-  <app-staff-workspace-nav></app-staff-workspace-nav>
-
-  <section class="panel filters">
-    <label>
-      <span>Staff ID</span>
-      <input
-        type="text"
-        [ngModel]="staffId()"
-        (ngModelChange)="staffId.set($event)"
-        placeholder="64f..."
-      />
-    </label>
-
-    <label>
-      <span>Month</span>
-      <input type="month" [ngModel]="month()" (ngModelChange)="month.set($event)" />
-    </label>
-
-    <div class="filters__actions">
-      <button class="btn btn--secondary" type="button" (click)="loadSalary()">Load salary</button>
-    </div>
-  </section>
+  <app-staff-workspace-nav />
 
   @if (errorMessage()) {
     <div class="feedback feedback--error">{{ errorMessage() }}</div>
   }
 
-  @if (feedback()) {
-    <div class="feedback feedback--success">{{ feedback() }}</div>
-  }
+  <div class="grid">
+    <section class="panel panel--list">
+      <div class="panel__header panel__header--split">
+        <div>
+          <h2>Staff members</h2>
+          <small>Select a staff member, then click View to open full salary details.</small>
+        </div>
 
-  <div class="summary-grid">
-    <section class="panel stat">
-      <p>Base salary</p>
-      <h2>{{ baseSalary() | number: '1.2-2' }}</h2>
-      <small>Read from the loaded salary payload.</small>
-    </section>
+        <div class="toolbar">
+          <div class="search-field">
+            <i class="fas fa-search"></i>
+            <input
+              type="search"
+              placeholder="Search staff members"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+            />
+          </div>
 
-    <section class="panel stat">
-      <p>Deductions</p>
-      <h2>{{ totalDeductions() | number: '1.2-2' }}</h2>
-      <small>Total deductions currently reflected in salary.</small>
-    </section>
-
-    <section class="panel stat">
-      <p>Status</p>
-      <h2>{{ salaryStatus() }}</h2>
-      <small>Combined from the salary payload and payment action.</small>
-    </section>
-  </div>
-
-  <div class="content-grid">
-    <section class="panel">
-      <div class="panel__header">
-        <h2>Salary payload</h2>
-        <p>Inspect the backend response before applying actions.</p>
-      </div>
-
-      <div class="salary-card">
-        @if (salary()) {
-          <pre>{{ salary() | json }}</pre>
-        } @else {
-          <div class="state-card">No salary payload loaded yet.</div>
-        }
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel__header">
-        <h2>Salary actions</h2>
-        <p>Use the same staff ID and month shown above.</p>
-      </div>
-
-      <div class="salary-actions">
-        <label>
-          <span>Adjustment amount</span>
-          <input
-            type="number"
-            [ngModel]="adjustmentAmount()"
-            (ngModelChange)="adjustmentAmount.set($event)"
-          />
-        </label>
-
-        <label>
-          <span>Adjustment reason</span>
-          <input
-            type="text"
-            [ngModel]="adjustmentReason()"
-            (ngModelChange)="adjustmentReason.set($event)"
-            placeholder="Bonus adjustment"
-          />
-        </label>
-
-        <section class="panel stat">
-          <p>Net salary</p>
-          <h2>{{ netSalary() | number: '1.2-2' }}</h2>
-          <small>Based on the current salary payload.</small>
-        </section>
-
-        <div class="salary-actions__buttons">
-          <button
-            class="btn btn--secondary"
-            type="button"
-            [disabled]="isBusy()"
-            (click)="adjustSalary()"
-          >
-            Adjust salary
-          </button>
-          <button
-            class="btn btn--primary"
-            type="button"
-            [disabled]="isBusy()"
-            (click)="paySalary()"
-          >
-            Mark as paid
-          </button>
+          <label>
+            <span>Month</span>
+            <input type="month" [ngModel]="month()" (ngModelChange)="setMonth($event)" />
+          </label>
         </div>
       </div>
+
+      @if (isLoadingStaff()) {
+        <div class="state-card">Loading staff members...</div>
+      } @else if (filteredStaff().length === 0) {
+        <div class="state-card">No staff members matched the current search.</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Staff</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Join date</th>
+                <th class="table-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (staff of filteredStaff(); track id(staff)) {
+                <tr>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ userName(staff) }}</strong>
+                      <small>{{ userEmail(staff) || userId(staff) || 'No user details' }}</small>
+                      <small>{{ id(staff) || 'No staff ID' }}</small>
+                    </div>
+                  </td>
+                  <td>{{ staff.department || '--' }}</td>
+                  <td>
+                    <span class="status-pill" [class.status-pill--inactive]="!staff.isActive">
+                      {{ statusLabel(staff) }}
+                    </span>
+                  </td>
+                  <td>{{ joinDateLabel(staff) }}</td>
+                  <td>
+                    <div class="row-actions row-actions--product">
+                      <a class="btn btn--ghost" [routerLink]="['/staff/salary', id(staff)]">View</a>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     </section>
   </div>
 </section>
