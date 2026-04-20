@@ -15,6 +15,17 @@ import { AccessControlService } from '../core/auth/access-control.service';
 export class Layout {
   private readonly accessControl = inject(AccessControlService);
   readonly sidebarOpen = signal(false);
+  readonly hasAttendanceWriteOnlyAccess = computed(
+    () =>
+      this.accessControl.can('attendance.write') &&
+      !this.accessControl.canAny([
+        'products.write',
+        'orders.write',
+        'staff.write',
+        'salary.write',
+        'deductions.write',
+      ]),
+  );
   readonly isReadOnlyWorkspace = computed(
     () =>
       !this.accessControl.canAny([

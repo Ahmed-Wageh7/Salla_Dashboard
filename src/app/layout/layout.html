@@ -10,6 +10,11 @@
           <strong>Read-only workspace.</strong>
           Your current role can browse data, but write actions are restricted.
         </div>
+      } @else if (hasAttendanceWriteOnlyAccess()) {
+        <div class="layout-banner">
+          <strong>Limited workspace access.</strong>
+          You can use staff check-in and check-out, but other write actions remain restricted.
+        </div>
       }
       <router-outlet></router-outlet>
     </main>

@@ -41,7 +41,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'deductions.write',
     'audit.read',
   ],
-  staff: ['dashboard.view', 'products.read', 'orders.read', 'staff.read'],
+  staff: ['dashboard.view', 'products.read', 'orders.read', 'staff.read', 'attendance.write'],
 };
 
 @Injectable({ providedIn: 'root' })
