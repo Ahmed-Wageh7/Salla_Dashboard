@@ -1,44 +1,4 @@
 <section class="orders-page" (click)="closeMenu()">
-  <div class="orders-page__topbar">
-    <div class="orders-page__count-pill">
-      <span class="orders-page__count-icon"><i class="fas fa-wallet"></i></span>
-      {{ filteredOrders().length }}
-    </div>
-
-    <label class="orders-page__global-search">
-      <i class="fas fa-search"></i>
-      <input
-        type="search"
-        placeholder="Search by order, customer, phone or shipping"
-        [ngModel]="searchQuery()"
-        (ngModelChange)="updateSearch($event)"
-        (click)="$event.stopPropagation()"
-      />
-    </label>
-
-    <div class="orders-page__quick-actions">
-      <button class="icon-button" type="button" aria-label="Language">AR</button>
-      <button class="icon-button" type="button" aria-label="Support"><i class="fas fa-headphones"></i></button>
-      <button class="icon-button" type="button" aria-label="Notifications"><i class="far fa-bell"></i></button>
-      <button class="icon-button" type="button" aria-label="Theme"><i class="far fa-moon"></i></button>
-    </div>
-  </div>
-
-  <header class="orders-page__header">
-    <div>
-      <h1>Orders</h1>
-      <p>Manage all of your store's orders</p>
-    </div>
-
-    <div class="orders-page__header-actions">
-      <button class="icon-button icon-button--ghost" type="button" aria-label="More actions">
-        <i class="fas fa-ellipsis-v"></i>
-      </button>
-      <button class="action-button action-button--secondary" type="button" (click)="exportOrders()">Export orders</button>
-      <button class="action-button action-button--primary" type="button" (click)="openCreateModal()" [appCanDisable]="'orders.write'" [appCanDisableReason]="'Requires orders.write permission'">Create</button>
-    </div>
-  </header>
-
   @if (errorMessage()) {
     <div class="feedback feedback--error">{{ errorMessage() }}</div>
   }

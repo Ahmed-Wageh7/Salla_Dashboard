@@ -35,8 +35,8 @@
         <p class="catalog-detail__description">{{ currentStaff.department || '--' }}</p>
 
         <div class="catalog-detail__chips">
-          <span class="catalog-detail__chip">Base salary: {{ baseSalary() | number: '1.2-2' }}</span>
-          <span class="catalog-detail__chip">Net salary: {{ netSalary() | number: '1.2-2' }}</span>
+          <span class="catalog-detail__chip">Base salary: {{ baseSalary() | number: '1.2-2' }} ريال</span>
+          <span class="catalog-detail__chip">Net salary: {{ netSalary() | number: '1.2-2' }} ريال</span>
           <span class="catalog-detail__chip salary-detail__chip" [class.salary-detail__chip--inactive]="salaryStatus() !== 'Paid'">
             {{ salaryStatus() }}
           </span>
@@ -58,7 +58,7 @@
           <div><dt>User ID</dt><dd>{{ userId(currentStaff) || '--' }}</dd></div>
           <div><dt>Email</dt><dd>{{ userEmail(currentStaff) || '--' }}</dd></div>
           <div><dt>Join date</dt><dd>{{ joinDateLabel(currentStaff) }}</dd></div>
-          <div><dt>Daily salary</dt><dd>{{ currentStaff.dailySalary }}</dd></div>
+          <div><dt>Daily salary</dt><dd>{{ currentStaff.dailySalary }} ريال</dd></div>
         </dl>
       </article>
     </section>
@@ -69,9 +69,9 @@
         @if (salary()) {
           <dl class="catalog-detail__list">
             <div><dt>Month</dt><dd>{{ month() }}</dd></div>
-            <div><dt>Base salary</dt><dd>{{ baseSalary() | number: '1.2-2' }}</dd></div>
-            <div><dt>Total deductions</dt><dd>{{ totalDeductions() | number: '1.2-2' }}</dd></div>
-            <div><dt>Final salary</dt><dd>{{ netSalary() | number: '1.2-2' }}</dd></div>
+            <div><dt>Base salary</dt><dd>{{ baseSalary() | number: '1.2-2' }} ريال</dd></div>
+            <div><dt>Total deductions</dt><dd>{{ totalDeductions() | number: '1.2-2' }} ريال</dd></div>
+            <div><dt>Final salary</dt><dd>{{ netSalary() | number: '1.2-2' }} ريال</dd></div>
             <div><dt>Status</dt><dd>{{ salaryStatus() }}</dd></div>
           </dl>
         } @else {
@@ -92,7 +92,7 @@
           </label>
           <section class="panel stat">
             <p>Deductions</p>
-            <h2>{{ totalDeductions() | number: '1.2-2' }}</h2>
+            <h2>{{ totalDeductions() | number: '1.2-2' }} ريال</h2>
             <small>Read from the current salary payload.</small>
           </section>
           <div class="salary-actions__buttons">

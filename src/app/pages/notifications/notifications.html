@@ -1,0 +1,58 @@
+<section class="notifications-page">
+  <header class="notifications-page__header">
+    <div>
+      <p class="notifications-page__eyebrow">Inbox</p>
+      <h1>Notifications</h1>
+      <p class="notifications-page__subtext">
+        Review the latest order activity in one dedicated place.
+      </p>
+    </div>
+
+    <div class="notifications-page__header-actions">
+      @if (orderNotifications.browserPermission() !== 'granted') {
+        <button type="button" class="notifications-page__ghost-btn" (click)="enableDesktopNotifications()">
+          Enable browser alerts
+        </button>
+      }
+      <a routerLink="/orders" class="notifications-page__primary-link">View all orders</a>
+    </div>
+  </header>
+
+  <div class="notifications-page__summary">
+    <article class="notifications-page__stat">
+      <span>Total notifications</span>
+      <strong>{{ orderNotifications.notifications().length }}</strong>
+    </article>
+    <article class="notifications-page__stat">
+      <span>Unread notifications</span>
+      <strong>{{ orderNotifications.unreadCount() }}</strong>
+    </article>
+  </div>
+
+  @if (orderNotifications.notifications().length) {
+    <div class="notifications-list">
+      @for (notification of orderNotifications.notifications(); track notification.id) {
+        <button
+          type="button"
+          class="notifications-list__item"
+          [class.notifications-list__item--unread]="!notification.read"
+          (click)="openOrder(notification)"
+        >
+          <div class="notifications-list__content">
+            <div class="notifications-list__meta">
+              <strong>{{ notification.title }}</strong>
+              <span>{{ formatTimestamp(notification.createdAt) }}</span>
+            </div>
+            <p>{{ notification.message }}</p>
+          </div>
+          <small>{{ notification.subject || notification.orderNumber }}</small>
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="notifications-page__empty">
+      <h2>No notifications yet</h2>
+      <p>New orders will appear here as soon as they arrive.</p>
+    </div>
+  }
+</section>

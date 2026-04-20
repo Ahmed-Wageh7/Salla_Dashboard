@@ -2,11 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { Router } from '@angular/router';
 import { Order, OrderSource, OrderStatus, PaymentMethod, PaymentStatus } from './orders.model';
 import { CreateOrderPayload, OrdersService } from './orders.service';
 import { AuditLogService } from '../../services/audit-log.service';
 import { CanDisableDirective } from '../../shared/access/can-disable.directive';
 import { ToastService } from '../../shared/toast/toast.service';
+import { OrderNotificationService } from '../../services/order-notification.service';
 
 interface OrderMenuState {
   id: string;
@@ -59,6 +61,8 @@ export class OrdersComponent {
   private readonly ordersService = inject(OrdersService);
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
+  readonly orderNotifications = inject(OrderNotificationService);
   private readonly pageSize = 10;
   private readonly pageWindowSize = 4;
 
@@ -160,8 +164,13 @@ export class OrdersComponent {
   });
 
   constructor() {
+    this.orderNotifications.start();
     this.currentPage.set(this.readPersistedPage());
     this.loadOrders();
+  }
+
+  openNotifications(): void {
+    void this.router.navigateByUrl('/notifications');
   }
 
   loadOrders(): void {
@@ -442,7 +451,7 @@ export class OrdersComponent {
       shippingCountry: 'Egypt',
       shippingPostalCode: '11765',
       total: 0,
-      currency: 'EGP',
+      currency: 'ريال',
       status: 'pending',
       source: 'Manual',
       tags: '',

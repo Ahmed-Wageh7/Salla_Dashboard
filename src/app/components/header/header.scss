@@ -227,25 +227,34 @@ $transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1;
 }
 
+.header__notifications {
+  position: relative;
+}
+
 // ── Language button ───────────────────────────────────────────────────────────
-.header__lang {
-  height: 32px;
-  padding: 0 11px;
+.header__phone {
+  height: 34px;
+  padding: 0 12px;
   border: 1.5px solid $border;
-  border-radius: 9px;
-  background: transparent;
-  color: $muted;
-  font-size: 11.5px;
+  border-radius: 10px;
+  background: $bg;
+  color: $text;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-size: 12px;
   font-weight: 700;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all $transition;
+  white-space: nowrap;
+  transition:
+    border-color $transition,
+    background $transition,
+    color $transition;
 
   &:hover {
-    border-color: $purple;
-    color: $purple;
+    border-color: rgba($purple, 0.28);
     background: #f5f2ff;
+    color: $purple;
   }
 }
 
@@ -277,7 +286,7 @@ $transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .header__balance,
-  .header__lang,
+  .header__phone,
   .header__logout {
     display: none;
   }

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { catchError, map, Observable, of, switchMap, throwError } from 'rxjs';
 import { AdminApiService } from '../../core/api/admin-api.service';
 import { AdminOrderRecord, CheckoutOrderPayload } from '../../core/api/admin.models';
+import { OrderNotificationService } from '../../services/order-notification.service';
 import { Order, OrderTab, OrderSource, OrderStatus, PaymentMethod, PaymentStatus } from './orders.model';
 
 export interface CreateOrderPayload {
@@ -31,6 +32,7 @@ export class OrdersService {
   constructor(
     private readonly adminApi: AdminApiService,
     private readonly http: HttpClient,
+    private readonly orderNotifications: OrderNotificationService,
   ) {}
 
   getOrders(): Observable<Order[]> {
@@ -69,6 +71,10 @@ export class OrdersService {
     const requestPayload = this.toCheckoutPayload(payload);
 
     return this.adminApi.createOrder(requestPayload).pipe(
+      map((order) => {
+        this.orderNotifications.publishOrderCreated(order, 'local');
+        return order;
+      }),
       map((order) => this.mapOrder(order)),
       map((order) => this.persistUpsert(order)),
       catchError((error) => {
@@ -76,7 +82,9 @@ export class OrdersService {
           return throwError(() => error);
         }
 
-        return of(this.persistUpsert(this.createLocalOrder(payload)));
+        const localOrder = this.createLocalOrder(payload);
+        this.orderNotifications.publishOrderCreated(this.toAdminOrderRecord(localOrder), 'local');
+        return of(this.persistUpsert(localOrder));
       }),
     );
   }
@@ -130,7 +138,7 @@ export class OrdersService {
         : (fallback?.paymentStatus ?? 'Unpaid'),
       shipping,
       total: Number(order.totalAmount ?? order.totalPrice ?? order.total ?? fallback?.total ?? 0),
-      currency: order.currency ?? fallback?.currency ?? 'EGP',
+      currency: 'ريال',
       status: String(rawStatus).toLowerCase() as OrderStatus,
       createdDate: order.createdAt ? this.toDate(order.createdAt) : (fallback?.createdDate ?? this.toDate()),
       updatedDate: order.updatedAt ? this.toDate(order.updatedAt) : this.toDate(),
@@ -164,11 +172,33 @@ export class OrdersService {
       paymentStatus: payload.paymentStatus,
       shipping: payload.shipping.trim() || "Doesn't Require Shipping",
       total: Number(payload.total),
-      currency: payload.currency.trim() || 'EGP',
+      currency: 'ريال',
       status: payload.status,
       createdDate: now,
       updatedDate: now,
       tags: payload.tags ?? [],
+    };
+  }
+
+  private toAdminOrderRecord(order: Order): AdminOrderRecord {
+    return {
+      _id: order.id,
+      orderNumber: order.orderNumber,
+      source: order.source,
+      customer: {
+        name: order.customer,
+        phone: order.customerPhone,
+        email: order.customerEmail,
+      },
+      paymentMethod: order.payment,
+      paymentStatus: order.paymentStatus,
+      currency: order.currency,
+      shipping: order.shipping,
+      totalAmount: order.total,
+      orderStatus: order.status,
+      createdAt: order.createdDate,
+      updatedAt: order.updatedDate,
+      tags: order.tags,
     };
   }
 
@@ -273,7 +303,7 @@ export class OrdersService {
       paymentStatus: (parsed.paymentStatus ?? 'Unpaid') as PaymentStatus,
       shipping: parsed.shipping ?? "Doesn't Require Shipping",
       total: Number(parsed.total ?? 0),
-      currency: parsed.currency ?? 'EGP',
+      currency: 'ريال',
       status: this.normalizeStoredStatus(parsed.status),
       createdDate: parsed.createdDate ?? this.toDate(),
       updatedDate: parsed.updatedDate ?? this.toDate(),

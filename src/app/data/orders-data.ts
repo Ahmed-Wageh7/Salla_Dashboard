@@ -20,7 +20,7 @@ const PAYMENTS: Order['payment'][] = [
   'STC Pay',
 ];
 const SHIPPING = ["Doesn't Require Shipping", 'Fast', 'مندوب'];
-const CURRENCIES = ['﷼', 'KWD', 'OMR', 'AED'];
+const CURRENCIES = ['ريال'];
 const CUSTOMERS = [
   'Ahmed Al-Mutairi',
   'Sara Mohamed',
@@ -63,7 +63,7 @@ function generateOrders(total: number): Order[] {
       paymentStatus: 'Paid',
       shipping: "Doesn't Require Shipping",
       total: 8.149,
-      currency: 'KWD',
+      currency: 'ريال',
       status: 'New',
       createdDate: '2025-09-27',
       updatedDate: '2025-09-27',
@@ -78,7 +78,7 @@ function generateOrders(total: number): Order[] {
       paymentStatus: 'Unpaid',
       shipping: "Doesn't Require Shipping",
       total: 100,
-      currency: '﷼',
+      currency: 'ريال',
       status: 'New',
       createdDate: '2025-09-26',
       updatedDate: '2025-09-26',
@@ -93,7 +93,7 @@ function generateOrders(total: number): Order[] {
       paymentStatus: 'Unpaid',
       shipping: "Doesn't Require Shipping",
       total: 10.251,
-      currency: 'OMR',
+      currency: 'ريال',
       status: 'New',
       createdDate: '2025-09-23',
       updatedDate: '2025-09-23',

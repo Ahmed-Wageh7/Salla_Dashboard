@@ -117,6 +117,28 @@
   gap: 10px;
 }
 
+.icon-button--notification {
+  position: relative;
+}
+
+.icon-button__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
 .orders-page__header {
   justify-content: space-between;
   gap: 16px;

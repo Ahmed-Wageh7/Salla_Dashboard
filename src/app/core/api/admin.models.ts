@@ -79,6 +79,15 @@ export interface AdminOrderRecord {
   total?: number;
   orderStatus?: string;
   status?: string;
+  items?: Array<
+    | string
+    | {
+        name?: string;
+        title?: string;
+        productName?: string;
+        product?: string | { name?: string; title?: string };
+      }
+  >;
   createdAt?: string;
   updatedAt?: string;
 }

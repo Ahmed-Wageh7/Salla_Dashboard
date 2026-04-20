@@ -1,10 +1,22 @@
 <div class="toast-stack" aria-live="polite" aria-atomic="true">
   @for (toast of toastService.toasts(); track toast.id) {
     <div class="toast" [class]="'toast toast--' + toast.tone">
-      <span>{{ toast.message }}</span>
-      <button type="button" (click)="toastService.dismiss(toast.id)" aria-label="Dismiss notification">
-        <i class="fas fa-times"></i>
-      </button>
+      <div class="toast__body">
+        @if (toast.title) {
+          <strong>{{ toast.title }}</strong>
+        }
+        <span>{{ toast.message }}</span>
+      </div>
+      <div class="toast__actions">
+        @if (toast.actionLabel) {
+          <button type="button" class="toast__action-btn" (click)="toastService.triggerAction(toast.id)">
+            {{ toast.actionLabel }}
+          </button>
+        }
+        <button type="button" (click)="toastService.dismiss(toast.id)" aria-label="Dismiss notification">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
     </div>
   }
 </div>

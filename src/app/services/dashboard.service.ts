@@ -77,176 +77,6 @@ export interface Order {
   actionLabel: string;
 }
 
-const DASHBOARD_MOCK: DashboardApiResponse = {
-  welcomeTitle: 'Welcome back to Salla',
-  datePreset: 'Last 90 days',
-  dateDisplay: '06 Dec, 2025 - 06 Mar, 2026',
-  stats: [
-    {
-      id: 'sales',
-      label: 'Sales',
-      value: '0',
-      currency: 'ر.س',
-      chartType: 'line',
-      chartPoints: '0,35 40,30 80,32 120,25 160,28 200,20',
-      reportLabel: 'View report',
-    },
-    {
-      id: 'orders',
-      label: 'Orders',
-      value: '0',
-      chartType: 'line',
-      chartPoints: '0,35 40,30 80,32 120,25 160,28 200,20',
-      reportLabel: 'View report',
-    },
-    {
-      id: 'visits',
-      label: 'Visits',
-      value: '250',
-      chartType: 'area',
-      chartPoints: '0,40 50,38 100,25 150,30 200,20',
-      reportLabel: 'View report',
-    },
-    {
-      id: 'conversion',
-      label: 'Conversion',
-      value: '0.00%',
-      chartType: 'line',
-      chartPoints: '0,35 40,30 80,32 120,25 160,28 200,20',
-      reportLabel: 'View report',
-    },
-  ],
-  slides: [
-    {
-      image: '/carousel-1.png',
-      title: 'Communicate and target right with Salla WhatsApp',
-      description:
-        'Connect your store to WhatsApp and stay closer to customers with automated messages.',
-    },
-    {
-      image: '/carousel-2.png',
-      title: 'Recover abandoned carts with smart reminders',
-      description:
-        'Send personalized reminders at the right time to bring visitors back and increase orders.',
-    },
-    {
-      image: '/carousel-3.webp',
-      title: 'Launch campaign offers in minutes',
-      description:
-        'Create targeted offers and distribute them across channels from one dashboard view.',
-    },
-    {
-      image: '/carousel-4.png',
-      title: 'Track customer behavior and optimize journeys',
-      description:
-        'See where users drop off and improve your store funnel with actionable recommendations.',
-    },
-    {
-      image: '/carousel-5.png',
-      title: 'Scale faster with marketing automation',
-      description:
-        'Automate recurring notifications and promotions to grow your revenue with less manual work.',
-    },
-  ],
-  goals: {
-    title: 'Track your goals',
-    description:
-      "Setting order goals helps us provide personalized recommendations and insights to boost your business performance. We'll track your progress and suggest actionable steps to reach your targets.",
-    progressLabel: 'Progress towards your goal',
-    progressPercent: 0,
-    progressLabels: ['0k', '1.3k', '2.5k', '3.8k', '5.0k'],
-    currentOrders: 0,
-    goal: 5000,
-    ordersToGoal: 5000,
-    editLabel: 'Edit goals',
-    helpLabel: 'Get help to achieve your goals',
-  },
-  growth: {
-    title: 'Compare your growth',
-    totalValue: '0',
-    totalLabel: 'orders',
-    totalSubLabel: 'Total orders',
-    indicatorValue: 'Total orders',
-    dateLabel: 'Select date',
-    datePreset: 'Last 30 days',
-    dateRange: '04 Feb - 06 Mar, 2026',
-    chartPoints:
-      '0,100 50,100 100,100 150,100 200,100 250,100 300,100 350,100 400,100 450,100 500,100 550,100 600,100 650,100 700,100 750,100 800,100 850,100 900,100 950,100 1000,100',
-    xAxisLabels: [
-      'Feb 6, 2026',
-      'Feb 8, 2026',
-      'Feb 10, 2026',
-      'Feb 12, 2026',
-      'Feb 14, 2026',
-      'Feb 16, 2026',
-      'Feb 18, 2026',
-      'Feb 20, 2026',
-      'Feb 22, 2026',
-      'Feb 24, 2026',
-      'Feb 26, 2026',
-      'Feb 28, 2026',
-      'Mar 2, 2026',
-      'Mar 4, 2026',
-      'Mar 6, 2026',
-    ],
-  },
-  ordersTitle: 'Newest orders',
-  viewAllOrdersLabel: 'View all orders',
-  newestOrders: [
-    {
-      id: '58332475',
-      orderNumber: '#58332475',
-      customerName: 'علي الشمري',
-      customerMobile: '96599521252',
-      paymentMethod: 'Apple Pay',
-      paymentStatus: 'Paid',
-      paymentClass: 'apple-pay',
-      shippingLabel: "Doesn't Require Shipping",
-      priceValue: '8.149',
-      priceCurrency: 'KWD',
-      status: 'New',
-      statusClass: 'new',
-      createdDate: '2025-09-27',
-      createdTime: '07:50 am',
-      actionLabel: 'View',
-    },
-    {
-      id: '58278453',
-      orderNumber: '#58278453',
-      customerName: 'راشد المري',
-      customerMobile: '966546788700',
-      paymentMethod: 'Bank Transfer',
-      paymentStatus: 'Pending',
-      paymentClass: 'bank-transfer',
-      shippingLabel: "Doesn't Require Shipping",
-      priceValue: '100',
-      priceCurrency: 'ر.س',
-      status: 'New',
-      statusClass: 'new',
-      createdDate: '2025-09-26',
-      createdTime: '10:51 am',
-      actionLabel: 'View',
-    },
-    {
-      id: '58128293',
-      orderNumber: '#58128293',
-      customerName: 'Waqas',
-      customerMobile: '+919537612458',
-      paymentMethod: 'Bank Transfer',
-      paymentStatus: 'Pending',
-      paymentClass: 'bank-transfer',
-      shippingLabel: "Doesn't Require Shipping",
-      priceValue: '10.251',
-      priceCurrency: 'OMR',
-      status: 'New',
-      statusClass: 'new',
-      createdDate: '2025-09-23',
-      createdTime: '07:33 pm',
-      actionLabel: 'View',
-    },
-  ],
-};
-
 @Injectable({
   providedIn: 'root',
 })
@@ -269,6 +99,16 @@ export class DashboardService {
       (sum, order) => sum + this.orderAmount(order),
       0,
     );
+    const last30DaysOrders = this.filterOrdersWithinDays(normalizedOrders, 30);
+    const previous30DaysOrders = this.filterOrdersWithinWindow(normalizedOrders, 30, 60);
+    const last30DaysTotal = last30DaysOrders.length;
+    const previous30DaysTotal = previous30DaysOrders.length;
+    const estimatedVisits = Math.max(totalOrders * 12, 0);
+    const conversionRate =
+      estimatedVisits > 0 ? ((totalOrders / estimatedVisits) * 100).toFixed(2) : '0.00';
+    const growthPoints = this.buildChartPoints(last30DaysOrders);
+    const growthLabels = this.buildGrowthLabels();
+    const growthRange = this.buildGrowthRange();
 
     return {
       ...DASHBOARD_DATA,
@@ -278,7 +118,18 @@ export class DashboardService {
         }
 
         if (stat.id === 'sales') {
-          return { ...stat, value: totalSales.toLocaleString(undefined, { maximumFractionDigits: 2 }) };
+          return {
+            ...stat,
+            value: totalSales.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+          };
+        }
+
+        if (stat.id === 'visits') {
+          return { ...stat, value: estimatedVisits.toLocaleString() };
+        }
+
+        if (stat.id === 'conversion') {
+          return { ...stat, value: `${conversionRate}%` };
         }
 
         return stat;
@@ -290,10 +141,92 @@ export class DashboardService {
       },
       growth: {
         ...DASHBOARD_DATA.growth,
-        totalValue: totalOrders.toLocaleString(),
+        totalValue: last30DaysTotal.toLocaleString(),
+        totalSubLabel:
+          previous30DaysTotal > 0
+            ? `${this.percentageChange(last30DaysTotal, previous30DaysTotal)} vs previous 30 days`
+            : 'Compared to previous 30 days',
+        dateRange: growthRange,
+        chartPoints: growthPoints,
+        xAxisLabels: growthLabels,
       },
       newestOrders: normalizedOrders.slice(0, 5).map((order) => this.mapOrder(order)),
     };
+  }
+
+  private filterOrdersWithinDays(orders: AdminOrderRecord[], days: number): AdminOrderRecord[] {
+    const start = new Date();
+    start.setDate(start.getDate() - days);
+    return orders.filter((order) => {
+      const createdAt = this.dateValue(order.createdAt);
+      return createdAt ? createdAt >= start : false;
+    });
+  }
+
+  private filterOrdersWithinWindow(
+    orders: AdminOrderRecord[],
+    fromDaysAgo: number,
+    toDaysAgo: number,
+  ): AdminOrderRecord[] {
+    const start = new Date();
+    start.setDate(start.getDate() - toDaysAgo);
+    const end = new Date();
+    end.setDate(end.getDate() - fromDaysAgo);
+
+    return orders.filter((order) => {
+      const createdAt = this.dateValue(order.createdAt);
+      return createdAt ? createdAt >= start && createdAt < end : false;
+    });
+  }
+
+  private buildChartPoints(orders: AdminOrderRecord[]): string {
+    const totalsByDay = new Map<string, number>();
+
+    for (let dayOffset = 29; dayOffset >= 0; dayOffset -= 1) {
+      const date = new Date();
+      date.setDate(date.getDate() - dayOffset);
+      totalsByDay.set(date.toISOString().slice(0, 10), 0);
+    }
+
+    for (const order of orders) {
+      const key = String(order.createdAt ?? '').slice(0, 10);
+      if (!totalsByDay.has(key)) continue;
+      totalsByDay.set(key, (totalsByDay.get(key) ?? 0) + 1);
+    }
+
+    const values = [...totalsByDay.values()];
+    const maxValue = Math.max(...values, 1);
+
+    return values
+      .map((value, index) => {
+        const x = Math.round((index / Math.max(values.length - 1, 1)) * 1000);
+        const y = Math.round(120 - (value / maxValue) * 90);
+        return `${x},${y}`;
+      })
+      .join(' ');
+  }
+
+  private buildGrowthLabels(): string[] {
+    return [28, 24, 20, 16, 12, 8, 4, 0].map((daysAgo) => {
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    });
+  }
+
+  private buildGrowthRange(): string {
+    const start = new Date();
+    start.setDate(start.getDate() - 29);
+    const end = new Date();
+
+    return `${start.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })} - ${end.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}`;
+  }
+
+  private percentageChange(current: number, previous: number): string {
+    if (previous <= 0) return '+100%';
+    const change = ((current - previous) / previous) * 100;
+    const prefix = change >= 0 ? '+' : '';
+    return `${prefix}${change.toFixed(1)}%`;
   }
 
   private mapOrder(order: AdminOrderRecord): Order {
@@ -312,7 +245,7 @@ export class DashboardService {
       paymentClass: this.paymentClass(paymentMethod),
       shippingLabel: this.shippingLabel(order),
       priceValue: this.orderAmount(order).toLocaleString(undefined, { maximumFractionDigits: 2 }),
-      priceCurrency: order.currency || 'SAR',
+      priceCurrency: 'ريال',
       status: this.orderStatus(order),
       statusClass: this.orderStatusClass(order),
       createdDate: createdAt ? createdAt.toLocaleDateString() : '--',

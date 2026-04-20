@@ -42,7 +42,7 @@ export class ProductsComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
-  private readonly pageSize = 20;
+  private readonly pageSize = 10;
   private readonly pageWindowSize = 4;
 
   readonly products = signal<ProductRecord[]>([]);

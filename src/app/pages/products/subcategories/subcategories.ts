@@ -32,6 +32,8 @@ export class SubcategoriesComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
+  private readonly pageSize = 10;
+  private readonly pageWindowSize = 4;
 
   readonly categories = signal<CategoryRecord[]>([]);
   readonly subcategories = signal<SubcategoryRecord[]>([]);
@@ -41,6 +43,7 @@ export class SubcategoriesComponent {
   readonly errorMessage = signal('');
   readonly searchQuery = signal('');
   readonly categoryFilter = signal('all');
+  readonly currentPage = signal(1);
   readonly isFormModalOpen = signal(false);
   readonly isDeleteModalOpen = signal(false);
   readonly pendingDeleteId = signal<string | null>(null);
@@ -81,6 +84,24 @@ export class SubcategoriesComponent {
     });
   });
 
+  readonly paginatedSubcategories = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    return this.filteredSubcategories().slice(start, start + this.pageSize);
+  });
+
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredSubcategories().length / this.pageSize)),
+  );
+
+  readonly paginationItems = computed(() => {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const start = Math.max(1, Math.min(current - 1, total - this.pageWindowSize + 1));
+    const end = Math.min(total, start + this.pageWindowSize - 1);
+
+    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+  });
+
   constructor() {
     this.loadData();
   }
@@ -109,6 +130,7 @@ export class SubcategoriesComponent {
         [...categories].sort((left, right) => left.name.localeCompare(right.name)),
       );
       this.subcategories.set(this.sortSubcategories(subcategories));
+      this.syncCurrentPage();
 
       if (loadError) {
         this.errorMessage.set(loadError);
@@ -121,6 +143,12 @@ export class SubcategoriesComponent {
 
   updateSearch(query: string): void {
     this.searchQuery.set(query);
+    this.currentPage.set(1);
+  }
+
+  updateCategoryFilter(category: string): void {
+    this.categoryFilter.set(category);
+    this.currentPage.set(1);
   }
 
   openCreateModal(): void {
@@ -197,6 +225,7 @@ export class SubcategoriesComponent {
           };
           return this.sortSubcategories(next);
         });
+        this.syncCurrentPage();
 
         this.toastService.success(
           form.id ? 'Subcategory updated successfully.' : 'Subcategory created successfully.',
@@ -242,6 +271,7 @@ export class SubcategoriesComponent {
         this.subcategories.update((current) =>
           current.filter((subcategory) => this.id(subcategory) !== id),
         );
+        this.syncCurrentPage();
         this.toastService.success('Subcategory deleted successfully.');
         if (this.form().id === id) {
           this.closeFormModal();
@@ -289,6 +319,24 @@ export class SubcategoriesComponent {
 
     const categoryId = this.subcategoryCategoryId(subcategory);
     return this.categoryNameById().get(categoryId) ?? categoryId;
+  }
+
+  previousPage(): void {
+    if (this.currentPage() === 1 || this.isLoading()) return;
+    this.currentPage.update((page) => page - 1);
+  }
+
+  nextPage(): void {
+    if (this.currentPage() >= this.totalPages() || this.isLoading()) return;
+    this.currentPage.update((page) => page + 1);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages() || page === this.currentPage() || this.isLoading()) {
+      return;
+    }
+
+    this.currentPage.set(page);
   }
 
   private normalizeSubcategory(
@@ -350,5 +398,16 @@ export class SubcategoriesComponent {
 
   private sortSubcategories(subcategories: SubcategoryRecord[]): SubcategoryRecord[] {
     return [...subcategories].sort((left, right) => left.name.localeCompare(right.name));
+  }
+
+  private syncCurrentPage(): void {
+    const totalPages = this.totalPages();
+    if (this.currentPage() > totalPages) {
+      this.currentPage.set(totalPages);
+    }
+
+    if (this.currentPage() < 1) {
+      this.currentPage.set(1);
+    }
   }
 }

@@ -48,7 +48,7 @@
           <select
             class="filter-select"
             [ngModel]="categoryFilter()"
-            (ngModelChange)="categoryFilter.set($event)"
+            (ngModelChange)="updateCategoryFilter($event)"
           >
             <option value="all">All categories</option>
             @for (category of categories(); track categoryId(category)) {
@@ -81,7 +81,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (subcategory of filteredSubcategories(); track id(subcategory)) {
+              @for (subcategory of paginatedSubcategories(); track id(subcategory)) {
                 <tr>
                   <td>
                     <div class="cell-stack">
@@ -138,6 +138,41 @@
               }
             </tbody>
           </table>
+        </div>
+
+        <div class="pagination">
+          <button
+            class="pagination__arrow"
+            type="button"
+            aria-label="Previous page"
+            [disabled]="currentPage() === 1 || isLoading()"
+            (click)="previousPage()"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="pagination__pages">
+            @for (page of paginationItems(); track page) {
+              <button
+                class="pagination__page"
+                type="button"
+                [class.pagination__page--active]="page === currentPage()"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            class="pagination__arrow"
+            type="button"
+            aria-label="Next page"
+            [disabled]="currentPage() === totalPages() || isLoading()"
+            (click)="nextPage()"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
       }
     </section>

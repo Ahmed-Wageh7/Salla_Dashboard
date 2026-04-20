@@ -35,7 +35,7 @@
         <p class="catalog-detail__description">{{ currentStaff.department || '--' }}</p>
 
         <div class="catalog-detail__chips">
-          <span class="catalog-detail__chip">Total: {{ totalDeductions() | number: '1.2-2' }}</span>
+          <span class="catalog-detail__chip">Total: {{ totalDeductions() | number: '1.2-2' }} ريال</span>
           <span class="catalog-detail__chip">Month: {{ month() }}</span>
           <span class="catalog-detail__chip deduction-detail__chip" [class.deduction-detail__chip--inactive]="!currentStaff.isActive">
             {{ statusLabel(currentStaff) }}
@@ -60,7 +60,7 @@
           <div><dt>User ID</dt><dd>{{ userId(currentStaff) || '--' }}</dd></div>
           <div><dt>Email</dt><dd>{{ userEmail(currentStaff) || '--' }}</dd></div>
           <div><dt>Join date</dt><dd>{{ joinDateLabel(currentStaff) }}</dd></div>
-          <div><dt>Daily salary</dt><dd>{{ currentStaff.dailySalary }}</dd></div>
+          <div><dt>Daily salary</dt><dd>{{ currentStaff.dailySalary }} ريال</dd></div>
         </dl>
       </article>
     </section>
@@ -89,7 +89,7 @@
               <tr>
                 <td>{{ deduction.month }}</td>
                 <td>{{ deduction.reason }}</td>
-                <td>{{ deduction.amount | number: '1.2-2' }}</td>
+                <td>{{ deduction.amount | number: '1.2-2' }} ريال</td>
                 <td>{{ deduction.date | slice: 0 : 10 }}</td>
                 <td>
                   <div class="row-actions row-actions--product">

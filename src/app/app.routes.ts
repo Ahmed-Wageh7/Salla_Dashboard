@@ -6,6 +6,7 @@ import { AuditLogsComponent } from './pages/audit-logs/audit-logs';
 import { MainContentComponent } from './pages/dashboard/dashboard';
 import { ForbiddenPageComponent } from './pages/forbidden/forbidden';
 import { LoginPageComponent } from './pages/login/login';
+import { NotificationsPageComponent } from './pages/notifications/notifications';
 
 export const routes: Routes = [
   {
@@ -63,6 +64,11 @@ export const routes: Routes = [
         title: 'Audit Log | Salla Dashboard',
         canActivate: [permissionGuard],
         data: { permissions: ['audit.read'] },
+      },
+      {
+        path: 'notifications',
+        component: NotificationsPageComponent,
+        title: 'Notifications | Salla Dashboard',
       },
     ],
   },

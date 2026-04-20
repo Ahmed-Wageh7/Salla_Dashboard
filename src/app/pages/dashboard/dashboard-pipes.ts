@@ -25,7 +25,7 @@ export class NumberFormatPipe implements PipeTransform {
 
 /**
  * Formats currency with symbol
- * Example: 12500 | currencyFormat:'SAR' → '12,500 ر.س'
+ * Example: 12500 | currencyFormat:'SAR' → '12,500 ريال'
  */
 @Pipe({
   name: 'currencyFormat',
@@ -33,14 +33,17 @@ export class NumberFormatPipe implements PipeTransform {
 })
 export class CurrencyFormatPipe implements PipeTransform {
   private currencySymbols: Record<string, string> = {
-    SAR: 'ر.س',
-    KWD: 'KWD',
-    OMR: 'OMR',
-    USD: '$',
+    SAR: 'ريال',
+    KWD: 'ريال',
+    OMR: 'ريال',
+    USD: 'ريال',
     EUR: '€',
+    'ر.س': 'ريال',
+    '﷼': 'ريال',
+    ريال: 'ريال',
   };
 
-  transform(value: number | string, currency: string = 'SAR'): string {
+  transform(value: number | string, currency: string = 'ريال'): string {
     if (value === null || value === undefined) return '0';
 
     const num = typeof value === 'string' ? parseFloat(value) : value;
