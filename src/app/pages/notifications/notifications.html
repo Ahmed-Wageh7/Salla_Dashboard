@@ -14,7 +14,9 @@
           Enable browser alerts
         </button>
       }
-      <a routerLink="/orders" class="notifications-page__primary-link">View all orders</a>
+      <button type="button" class="notifications-page__primary-link" (click)="openOrdersPage()">
+        View all orders
+      </button>
     </div>
   </header>
 
@@ -31,23 +33,63 @@
 
   @if (orderNotifications.notifications().length) {
     <div class="notifications-list">
-      @for (notification of orderNotifications.notifications(); track notification.id) {
-        <button
-          type="button"
-          class="notifications-list__item"
-          [class.notifications-list__item--unread]="!notification.read"
-          (click)="openOrder(notification)"
-        >
-          <div class="notifications-list__content">
-            <div class="notifications-list__meta">
-              <strong>{{ notification.title }}</strong>
-              <span>{{ formatTimestamp(notification.createdAt) }}</span>
-            </div>
-            <p>{{ notification.message }}</p>
-          </div>
-          <small>{{ notification.subject || notification.orderNumber }}</small>
-        </button>
-      }
+      <div class="table-wrap">
+        <table class="notifications-table">
+          <thead>
+            <tr>
+              <th>Order <span>Subject</span></th>
+              <th>Message</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Created at</th>
+              <th class="notifications-table__actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (notification of orderNotifications.notifications(); track notification.id) {
+              <tr [class.notifications-table__row--unread]="!notification.read">
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ notification.orderNumber }}</strong>
+                    <small>{{ notification.subject || notification.title }}</small>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ notification.title }}</strong>
+                    <span>{{ notification.message }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="notification-source">
+                    {{ sourceLabel(notification) }}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    class="notification-state"
+                    [class.notification-state--unread]="!notification.read"
+                  >
+                    {{ notification.read ? 'Read' : 'Unread' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ formatTimestamp(notification.createdAt) }}</strong>
+                  </div>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="btn btn--ghost" (click)="openOrder(notification)">
+                      View
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   } @else {
     <div class="notifications-page__empty">
