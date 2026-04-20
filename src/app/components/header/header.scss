@@ -286,9 +286,13 @@ $transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .header__balance,
-  .header__phone,
-  .header__logout {
+  .header__phone {
     display: none;
+  }
+
+  .header__logout {
+    padding: 0 12px;
+    font-size: 11px;
   }
 }
 
@@ -312,6 +316,12 @@ $transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
 
   .header__group {
     gap: 6px;
+  }
+
+  .header__logout {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 11px;
   }
 
   .header__avatar img {
