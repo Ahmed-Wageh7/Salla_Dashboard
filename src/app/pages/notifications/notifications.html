@@ -46,7 +46,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (notification of orderNotifications.notifications(); track notification.id) {
+            @for (notification of paginatedNotifications(); track notification.id) {
               <tr [class.notifications-table__row--unread]="!notification.read">
                 <td>
                   <div class="cell-stack">
@@ -90,6 +90,43 @@
           </tbody>
         </table>
       </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button
+            class="pagination__arrow"
+            type="button"
+            aria-label="Previous page"
+            [disabled]="currentPage() === 1"
+            (click)="previousPage()"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="pagination__pages">
+            @for (page of paginationItems(); track page) {
+              <button
+                class="pagination__page"
+                type="button"
+                [class.pagination__page--active]="page === currentPage()"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            class="pagination__arrow"
+            type="button"
+            aria-label="Next page"
+            [disabled]="currentPage() === totalPages()"
+            (click)="nextPage()"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      }
     </div>
   } @else {
     <div class="notifications-page__empty">

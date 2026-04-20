@@ -110,6 +110,23 @@
   overflow-x: auto;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 20px 20px;
+  border-top: 1px solid #f1edf5;
+}
+
+.pagination__pages {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
 .notifications-table {
   width: 100%;
   border-collapse: collapse;
@@ -214,6 +231,31 @@
 .notifications-page__ghost-btn:hover,
 .notifications-page__primary-link:hover {
   filter: brightness(0.98);
+}
+
+.pagination__page,
+.pagination__arrow {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e8e1ef;
+  border-radius: 999px;
+  background: #fff;
+  color: #59466f;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination__page--active {
+  background: #4f3478;
+  border-color: #4f3478;
+  color: #fff;
+}
+
+.pagination__page:disabled,
+.pagination__arrow:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .notifications-page__empty {
