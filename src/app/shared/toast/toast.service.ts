@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 
 export interface ToastItem {
   id: number;
@@ -18,8 +18,14 @@ export interface ToastOptions {
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  readonly toasts = signal<ToastItem[]>([]);
+  private readonly currentToast = signal<ToastItem | null>(null);
+  readonly toasts = computed(() => {
+    const activeToast = this.currentToast();
+    return activeToast ? [activeToast] : [];
+  });
   private nextId = 1;
+  private readonly queue: Array<ToastItem & { durationMs: number }> = [];
+  private dismissTimerId?: ReturnType<typeof setTimeout>;
 
   success(message: string, options: ToastOptions = {}): void {
     this.push(message, 'success', options);
@@ -34,29 +40,58 @@ export class ToastService {
   }
 
   dismiss(id: number): void {
-    this.toasts.update((items) => items.filter((item) => item.id !== id));
+    if (this.currentToast()?.id !== id) {
+      const queuedIndex = this.queue.findIndex((item) => item.id === id);
+      if (queuedIndex >= 0) {
+        this.queue.splice(queuedIndex, 1);
+      }
+      return;
+    }
+
+    this.clearDismissTimer();
+    this.currentToast.set(null);
+    this.showNextToast();
   }
 
   triggerAction(id: number): void {
-    const toast = this.toasts().find((item) => item.id === id);
+    const toast = this.currentToast()?.id === id ? this.currentToast() : this.queue.find((item) => item.id === id);
     toast?.onAction?.();
     this.dismiss(id);
   }
 
   private push(message: string, tone: ToastItem['tone'], options: ToastOptions): void {
     const id = this.nextId++;
-    const durationMs = options.durationMs ?? 3200;
-    this.toasts.update((items) => [
-      ...items,
-      {
-        id,
-        message,
-        tone,
-        title: options.title,
-        actionLabel: options.actionLabel,
-        onAction: options.onAction,
-      },
-    ]);
-    setTimeout(() => this.dismiss(id), durationMs);
+    this.queue.push({
+      id,
+      message,
+      tone,
+      title: options.title,
+      actionLabel: options.actionLabel,
+      onAction: options.onAction,
+      durationMs: options.durationMs ?? 3200,
+    });
+    this.showNextToast();
+  }
+
+  private showNextToast(): void {
+    if (this.currentToast() || this.queue.length === 0) {
+      return;
+    }
+
+    const nextToast = this.queue.shift();
+    if (!nextToast) {
+      return;
+    }
+
+    const { durationMs, ...toast } = nextToast;
+    this.currentToast.set(toast);
+    this.dismissTimerId = setTimeout(() => this.dismiss(toast.id), durationMs);
+  }
+
+  private clearDismissTimer(): void {
+    if (this.dismissTimerId) {
+      clearTimeout(this.dismissTimerId);
+      this.dismissTimerId = undefined;
+    }
   }
 }
