@@ -199,5 +199,3 @@ This project goes beyond basic admin CRUD by including:
 - resilient API handling
 - operational staff workflows
 - modular Angular architecture with standalone components and signals
-
-It is suitable as a portfolio or CV project to demonstrate senior-level frontend thinking in a business dashboard context.
