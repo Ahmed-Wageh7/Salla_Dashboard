@@ -35,7 +35,7 @@
         <i class="fas fa-ellipsis-v"></i>
       </button>
       <button class="action-button action-button--secondary" type="button" (click)="exportOrders()">Export orders</button>
-      <button class="action-button action-button--primary" type="button" (click)="openCreateModal()">Create</button>
+      <button class="action-button action-button--primary" type="button" (click)="openCreateModal()" [appCanDisable]="'orders.write'" [appCanDisableReason]="'Requires orders.write permission'">Create</button>
     </div>
   </header>
 
@@ -176,6 +176,8 @@
                       class="status-pill status-pill--button"
                       type="button"
                       [class]="'status-pill status-pill--button status-pill--' + statusTone(order.status)"
+                      [appCanDisable]="'orders.write'"
+                      [appCanDisableReason]="'Requires orders.write permission'"
                       (click)="toggleMenu(order.id)"
                     >
                       {{ order.status }}
@@ -185,7 +187,7 @@
                     @if (isMenuOpen(order.id)) {
                       <div class="options-popover">
                         @for (status of statusOptions; track status) {
-                          <button class="option-row" type="button" (click)="changeStatus(order, status)">
+                          <button class="option-row" type="button" [appCanDisable]="'orders.write'" [appCanDisableReason]="'Requires orders.write permission'" (click)="changeStatus(order, status)">
                             <span class="option-row__radio" [class.option-row__radio--active]="order.status === status"></span>
                             {{ status }}
                           </button>
@@ -434,7 +436,7 @@
 
       <div class="form-grid__actions">
         <button class="action-button action-button--secondary" type="button" (click)="closeCreateModal()">Cancel</button>
-        <button class="action-button action-button--primary modal__submit" type="submit" [disabled]="isSaving()">
+        <button class="action-button action-button--primary modal__submit" type="submit" [disabled]="isSaving()" [appCanDisable]="'orders.write'" [appCanDisableReason]="'Requires orders.write permission'">
           {{ isSaving() ? 'Creating...' : 'Create order' }}
         </button>
       </div>

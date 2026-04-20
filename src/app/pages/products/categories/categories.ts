@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdminApiService } from '../../../core/api/admin-api.service';
+import { AuditLogService } from '../../../services/audit-log.service';
+import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import { CategoryPayload, CategoryRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
 
@@ -15,13 +17,14 @@ interface CategoryFormState {
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CanDisableDirective],
   templateUrl: './categories.html',
   styleUrls: ['../catalog-admin.scss', '../products.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesComponent {
   private readonly adminApi = inject(AdminApiService);
+  private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
 
   readonly categories = signal<CategoryRecord[]>([]);
@@ -122,7 +125,13 @@ export class CategoriesComponent {
       : this.adminApi.createCategory(payload);
 
     request.subscribe({
-      next: () => {
+      next: (category) => {
+        this.auditLogService.log({
+          action: form.id ? 'Category Updated' : 'Category Created',
+          entityType: 'category',
+          entityId: this.id(category),
+          summary: `Category "${payload.name}" was ${form.id ? 'updated' : 'created'}.`,
+        });
         this.toastService.success(
           form.id ? 'Category updated successfully.' : 'Category created successfully.',
         );
@@ -158,6 +167,13 @@ export class CategoriesComponent {
 
     this.adminApi.deleteCategory(id).subscribe({
       next: () => {
+        this.auditLogService.log({
+          action: 'Category Deleted',
+          entityType: 'category',
+          entityId: id,
+          summary: `Category ${id} was deleted.`,
+          status: 'warning',
+        });
         this.toastService.success('Category deleted successfully.');
         if (this.form().id === id) {
           this.closeFormModal();

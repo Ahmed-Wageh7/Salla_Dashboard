@@ -15,6 +15,13 @@
   flex-wrap: wrap;
 }
 
+.catalog-detail__header > *,
+.catalog-detail__panel,
+.catalog-detail__grid,
+.catalog-detail__actions {
+  min-width: 0;
+}
+
 .catalog-detail__eyebrow {
   margin: 0 0 8px;
   color: #8b6c39;
@@ -35,6 +42,7 @@
 .catalog-detail__panel p,
 .catalog-detail__state {
   color: #71697f;
+  overflow-wrap: anywhere;
 }
 
 .catalog-detail__actions {
@@ -161,6 +169,7 @@
   margin: 0;
   color: #433b52;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .catalog-detail__link {
@@ -213,5 +222,9 @@
 @media (max-width: 768px) {
   .catalog-detail {
     padding: 18px;
+  }
+
+  .catalog-detail__actions {
+    width: 100%;
   }
 }

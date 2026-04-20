@@ -5,6 +5,12 @@
     <app-header (menuToggle)="toggleSidebar()"></app-header>
 
     <main class="flex-1 overflow-y-auto">
+      @if (isReadOnlyWorkspace()) {
+        <div class="layout-banner">
+          <strong>Read-only workspace.</strong>
+          Your current role can browse data, but write actions are restricted.
+        </div>
+      }
       <router-outlet></router-outlet>
     </main>
   </div>

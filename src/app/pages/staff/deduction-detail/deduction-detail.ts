@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { AdminApiService } from '../../../core/api/admin-api.service';
+import { AuditLogService } from '../../../services/audit-log.service';
+import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import { DeductionPayload, DeductionRecord, StaffRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
 
@@ -19,7 +21,7 @@ interface DeductionFormState {
 @Component({
   selector: 'app-staff-deduction-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CanDisableDirective],
   templateUrl: './deduction-detail.html',
   styleUrls: ['../../products/catalog-detail.scss', '../staff.scss', './deduction-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +29,7 @@ interface DeductionFormState {
 export class StaffDeductionDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly adminApi = inject(AdminApiService);
+  private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -146,7 +149,13 @@ export class StaffDeductionDetailComponent {
       : this.adminApi.addDeduction(staffId, payload);
 
     request.subscribe({
-      next: () => {
+      next: (deduction) => {
+        this.auditLogService.log({
+          action: form.id ? 'Deduction Updated' : 'Deduction Created',
+          entityType: 'deduction',
+          entityId: this.id(deduction),
+          summary: `Deduction of ${payload.amount} was ${form.id ? 'updated' : 'created'} for ${this.userName(this.staff())}.`,
+        });
         this.toastService.success(
           form.id ? 'Deduction updated successfully.' : 'Deduction created successfully.',
         );
@@ -170,6 +179,13 @@ export class StaffDeductionDetailComponent {
 
     this.adminApi.deleteDeduction(staffId, this.id(deduction)).subscribe({
       next: () => {
+        this.auditLogService.log({
+          action: 'Deduction Deleted',
+          entityType: 'deduction',
+          entityId: this.id(deduction),
+          summary: `Deduction ${this.id(deduction)} was deleted for ${this.userName(this.staff())}.`,
+          status: 'warning',
+        });
         this.toastService.success('Deduction deleted successfully.');
         this.loadDeductions();
       },

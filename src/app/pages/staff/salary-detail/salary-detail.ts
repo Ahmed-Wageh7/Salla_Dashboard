@@ -5,13 +5,15 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { AdminApiService } from '../../../core/api/admin-api.service';
+import { AuditLogService } from '../../../services/audit-log.service';
+import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import { SalaryAdjustmentPayload, SalaryRecord, StaffRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-staff-salary-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CanDisableDirective],
   templateUrl: './salary-detail.html',
   styleUrls: ['../../products/catalog-detail.scss', '../staff.scss', './salary-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +21,7 @@ import { ToastService } from '../../../shared/toast/toast.service';
 export class StaffSalaryDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly adminApi = inject(AdminApiService);
+  private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -27,18 +30,19 @@ export class StaffSalaryDetailComponent {
   readonly month = signal(this.currentMonth());
   readonly adjustmentAmount = signal(0);
   readonly adjustmentReason = signal('');
+  readonly localPaidOverride = signal(false);
   readonly isLoading = signal(true);
   readonly isBusy = signal(false);
   readonly errorMessage = signal('');
 
   readonly baseSalary = computed(() => this.numberValue('baseSalary', 'amount', 'total'));
-  readonly totalDeductions = computed(() => this.numberValue('deductions'));
-  readonly netSalary = computed(() => this.numberValue('netSalary', 'total', 'amount'));
+  readonly totalDeductions = computed(() => this.numberValue('totalDeductions', 'deductions'));
+  readonly netSalary = computed(() => this.numberValue('finalSalary', 'netSalary', 'total', 'amount'));
   readonly salaryStatus = computed(() => {
     const salary = this.salary();
     if (!salary) return 'Not loaded';
-    if (salary.paid === true) return 'Paid';
-    return String(salary['status'] ?? '').toLowerCase() === 'paid' ? 'Paid' : 'Pending';
+    if (this.isSalaryMarkedPaid(salary)) return 'Paid';
+    return 'Pending';
   });
 
   constructor() {
@@ -71,6 +75,7 @@ export class StaffSalaryDetailComponent {
 
   setMonth(value: string): void {
     this.month.set(value);
+    this.localPaidOverride.set(false);
   }
 
   loadSalary(): void {
@@ -83,7 +88,7 @@ export class StaffSalaryDetailComponent {
 
     this.adminApi.getSalary(staffId, month).subscribe({
       next: (salary) => {
-        this.salary.set(salary);
+        this.salary.set(this.normalizeSalary(salary));
         this.isBusy.set(false);
         this.isLoading.set(false);
       },
@@ -101,7 +106,7 @@ export class StaffSalaryDetailComponent {
     if (!staffId || !month) return;
 
     const payload: SalaryAdjustmentPayload = {
-      amount: Number(this.adjustmentAmount()),
+      finalSalary: Number(this.adjustmentAmount()),
       reason: this.adjustmentReason().trim(),
     };
 
@@ -109,10 +114,15 @@ export class StaffSalaryDetailComponent {
     this.errorMessage.set('');
 
     this.adminApi.adjustSalary(staffId, month, payload).subscribe({
-      next: (salary) => {
-        this.salary.set({ ...(this.salary() ?? {}), ...(salary ?? {}) });
+      next: () => {
+        this.auditLogService.log({
+          action: 'Salary Adjusted',
+          entityType: 'salary',
+          entityId: `${staffId}:${month}`,
+          summary: `Salary for ${this.userName(this.staff())} was adjusted to ${payload.finalSalary}.`,
+        });
         this.toastService.success('Salary adjusted successfully.');
-        this.isBusy.set(false);
+        this.loadSalary();
       },
       error: (error) => {
         this.errorMessage.set(error?.error?.message || 'Unable to adjust salary.');
@@ -131,10 +141,16 @@ export class StaffSalaryDetailComponent {
     this.errorMessage.set('');
 
     this.adminApi.paySalary(staffId, month).subscribe({
-      next: (salary) => {
-        this.salary.set({ ...(this.salary() ?? {}), ...(salary ?? {}), paid: true });
+      next: () => {
+        this.auditLogService.log({
+          action: 'Salary Paid',
+          entityType: 'salary',
+          entityId: `${staffId}:${month}`,
+          summary: `Salary payment was submitted for ${this.userName(this.staff())} (${month}).`,
+        });
+        this.localPaidOverride.set(true);
         this.toastService.success('Salary payment sent successfully.');
-        this.isBusy.set(false);
+        this.loadSalary();
       },
       error: (error) => {
         this.errorMessage.set(error?.error?.message || 'Unable to pay salary.');
@@ -183,6 +199,42 @@ export class StaffSalaryDetailComponent {
       if (Number.isFinite(candidate)) return candidate;
     }
     return 0;
+  }
+
+  private normalizeSalary(salary: SalaryRecord | null): SalaryRecord | null {
+    if (!salary) return salary;
+
+    if (this.localPaidOverride() && !this.hasExplicitPaidFlag(salary)) {
+      return {
+        ...salary,
+        paid: true,
+        status: 'paid',
+      };
+    }
+
+    return salary;
+  }
+
+  private hasExplicitPaidFlag(salary: SalaryRecord): boolean {
+    return (
+      salary.paid !== undefined ||
+      salary['isPaid'] !== undefined ||
+      salary['status'] !== undefined ||
+      salary['paymentStatus'] !== undefined ||
+      salary.paidAt !== undefined
+    );
+  }
+
+  private isSalaryMarkedPaid(salary: SalaryRecord): boolean {
+    if (salary.paid === true) return true;
+    if (salary['isPaid'] === true) return true;
+    if (typeof salary.paidAt === 'string' && salary.paidAt.trim()) return true;
+
+    const statusCandidates = [salary['status'], salary['paymentStatus'], salary['salaryStatus']]
+      .map((value) => String(value ?? '').trim().toLowerCase())
+      .filter(Boolean);
+
+    return statusCandidates.some((value) => value === 'paid' || value === 'completed');
   }
 
   private currentMonth(): string {

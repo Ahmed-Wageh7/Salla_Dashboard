@@ -1006,12 +1006,18 @@ $success-green: #10b981;
     border-radius: 16px;
     margin: 0 24px;
     @include card-shadow;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    @media (max-width: 768px) {
+      margin: 0 16px;
+    }
   }
 
   .orders-table-header {
     display: grid;
-    grid-template-columns: 100px 1.2fr 1fr 1.2fr 80px 100px 120px 80px;
+    grid-template-columns: 1.2fr 1fr 1.2fr 80px 100px 120px 80px;
+    min-width: 900px;
     gap: 16px;
     padding: 16px 24px;
     background: #fafafa;
@@ -1040,17 +1046,13 @@ $success-green: #10b981;
   .orders-table-body {
     .order-row {
       display: grid;
-      grid-template-columns: 100px 1.2fr 1fr 1.2fr 80px 100px 120px 80px;
+      grid-template-columns: 1.2fr 1fr 1.2fr 80px 100px 120px 80px;
+      min-width: 900px;
       gap: 16px;
       padding: 16px 24px;
       border-bottom: 1px solid $border-color;
       align-items: center;
       transition: background 0.2s ease;
-
-      @media (max-width: 1200px) {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
 
       &:hover {
         background: #fafafa;
@@ -1059,13 +1061,6 @@ $success-green: #10b981;
       &:last-child {
         border-bottom: none;
       }
-
-      .col-order {
-        font-size: 13px;
-        font-weight: 500;
-        color: $text-primary;
-      }
-
       .col-customer {
         display: flex;
         flex-direction: column;
@@ -1202,6 +1197,7 @@ $success-green: #10b981;
     padding: 16px 24px;
     border-top: 1px solid $border-color;
     text-align: right;
+    min-width: 900px;
 
     .view-all-link {
       font-size: 13px;

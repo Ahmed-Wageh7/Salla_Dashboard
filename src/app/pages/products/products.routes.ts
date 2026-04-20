@@ -7,10 +7,10 @@ import { SubcategoryDetailComponent } from './subcategory-detail/subcategory-det
 import { SubcategoriesComponent } from './subcategories/subcategories';
 
 export const PRODUCTS_ROUTES: Routes = [
-  { path: 'categories', component: CategoriesComponent },
-  { path: 'categories/:id', component: CategoryDetailComponent },
-  { path: 'subcategories', component: SubcategoriesComponent },
-  { path: 'subcategories/:id', component: SubcategoryDetailComponent },
-  { path: ':id', component: ProductDetailComponent },
-  { path: '', component: ProductsComponent },
+  { path: 'categories', component: CategoriesComponent, title: 'Categories | Salla Dashboard' },
+  { path: 'categories/:id', component: CategoryDetailComponent, title: 'Category Details | Salla Dashboard' },
+  { path: 'subcategories', component: SubcategoriesComponent, title: 'Subcategories | Salla Dashboard' },
+  { path: 'subcategories/:id', component: SubcategoryDetailComponent, title: 'Subcategory Details | Salla Dashboard' },
+  { path: ':id', component: ProductDetailComponent, title: 'Product Details | Salla Dashboard' },
+  { path: '', component: ProductsComponent, title: 'Products | Salla Dashboard' },
 ];

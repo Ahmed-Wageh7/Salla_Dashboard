@@ -1,26 +1,28 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminApiService } from '../../../core/api/admin-api.service';
+import { AuditLogService } from '../../../services/audit-log.service';
+import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { StaffWorkspaceNavComponent } from '../workspace-nav/staff-workspace-nav';
 
 @Component({
   selector: 'app-staff-attendance',
   standalone: true,
-  imports: [CommonModule, JsonPipe, RouterModule, StaffWorkspaceNavComponent],
+  imports: [CommonModule, RouterModule, StaffWorkspaceNavComponent, CanDisableDirective],
   templateUrl: './attendance.html',
   styleUrls: ['../staff.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StaffAttendanceComponent {
   private readonly adminApi = inject(AdminApiService);
+  private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
 
   readonly isBusy = signal(false);
   readonly feedback = signal('');
   readonly errorMessage = signal('');
-  readonly lastPayload = signal<unknown>(null);
 
   checkIn(): void {
     this.runAction(() => this.adminApi.checkIn(), 'Staff check-in recorded.');
@@ -39,8 +41,12 @@ export class StaffAttendanceComponent {
     this.feedback.set('');
 
     requestFactory().subscribe({
-      next: (payload) => {
-        this.lastPayload.set(payload ?? null);
+      next: () => {
+        this.auditLogService.log({
+          action: successMessage.includes('check-in') ? 'Attendance Check-In' : 'Attendance Check-Out',
+          entityType: 'attendance',
+          summary: successMessage,
+        });
         this.feedback.set(successMessage);
         this.toastService.success(successMessage);
         this.isBusy.set(false);

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AdminApiService } from '../../../core/api/admin-api.service';
+import { AuditLogService } from '../../../services/audit-log.service';
+import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import {
   CategoryRecord,
   SubcategoryPayload,
@@ -21,13 +23,14 @@ interface SubcategoryFormState {
 @Component({
   selector: 'app-subcategories',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CanDisableDirective],
   templateUrl: './subcategories.html',
   styleUrls: ['../catalog-admin.scss', '../products.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubcategoriesComponent {
   private readonly adminApi = inject(AdminApiService);
+  private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
 
   readonly categories = signal<CategoryRecord[]>([]);
@@ -171,6 +174,12 @@ export class SubcategoriesComponent {
     request.subscribe({
       next: (subcategory) => {
         const normalizedSubcategory = this.normalizeSubcategory(subcategory, payload.category);
+        this.auditLogService.log({
+          action: form.id ? 'Subcategory Updated' : 'Subcategory Created',
+          entityType: 'subcategory',
+          entityId: this.id(normalizedSubcategory),
+          summary: `Subcategory "${payload.name}" was ${form.id ? 'updated' : 'created'}.`,
+        });
 
         this.subcategories.update((current) => {
           const existingIndex = current.findIndex(
@@ -223,6 +232,13 @@ export class SubcategoriesComponent {
 
     this.adminApi.deleteSubcategory(id).subscribe({
       next: () => {
+        this.auditLogService.log({
+          action: 'Subcategory Deleted',
+          entityType: 'subcategory',
+          entityId: id,
+          summary: `Subcategory ${id} was deleted.`,
+          status: 'warning',
+        });
         this.subcategories.update((current) =>
           current.filter((subcategory) => this.id(subcategory) !== id),
         );

@@ -117,10 +117,12 @@ export const DASHBOARD_DATA: DashboardApiResponse = {
   viewAllOrdersLabel: 'View all orders',
   newestOrders: [
     {
+      id: '58332475',
       orderNumber: '#58332475',
       customerName: 'علي الشمري',
       customerMobile: '96599521252',
       paymentMethod: 'Apple Pay',
+      paymentStatus: 'Paid',
       paymentClass: 'apple-pay',
       shippingLabel: "Doesn't Require Shipping",
       priceValue: '8.149',
@@ -132,10 +134,12 @@ export const DASHBOARD_DATA: DashboardApiResponse = {
       actionLabel: 'View',
     },
     {
+      id: '58278453',
       orderNumber: '#58278453',
       customerName: 'راشد المري',
       customerMobile: '966546788700',
       paymentMethod: 'Bank Transfer',
+      paymentStatus: 'Pending',
       paymentClass: 'bank-transfer',
       shippingLabel: "Doesn't Require Shipping",
       priceValue: '100',
@@ -147,10 +151,12 @@ export const DASHBOARD_DATA: DashboardApiResponse = {
       actionLabel: 'View',
     },
     {
+      id: '58128293',
       orderNumber: '#58128293',
       customerName: 'Waqas',
       customerMobile: '+919537612458',
       paymentMethod: 'Bank Transfer',
+      paymentStatus: 'Pending',
       paymentClass: 'bank-transfer',
       shippingLabel: "Doesn't Require Shipping",
       priceValue: '10.251',

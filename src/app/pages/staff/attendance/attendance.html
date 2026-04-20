@@ -26,7 +26,7 @@
       <h2>Start shift</h2>
       <small>Creates a check-in record for the current staff context.</small>
       <div class="action-row">
-        <button class="btn btn--primary" type="button" [disabled]="isBusy()" (click)="checkIn()">
+        <button class="btn btn--primary" type="button" [disabled]="isBusy()" [appCanDisable]="'attendance.write'" [appCanDisableReason]="'Requires attendance.write permission'" (click)="checkIn()">
           Check in
         </button>
       </div>
@@ -37,35 +37,18 @@
       <h2>End shift</h2>
       <small>Closes the active attendance session and returns worked hours.</small>
       <div class="action-row">
-        <button class="btn btn--secondary" type="button" [disabled]="isBusy()" (click)="checkOut()">
+        <button class="btn btn--secondary" type="button" [disabled]="isBusy()" [appCanDisable]="'attendance.write'" [appCanDisableReason]="'Requires attendance.write permission'" (click)="checkOut()">
           Check out
         </button>
       </div>
     </section>
 
     <section class="panel stat">
-      <p>Latest response</p>
-      <h2>{{ lastPayload() ? 'Captured' : 'Waiting' }}</h2>
-      <small>{{
-        lastPayload()
-          ? 'The latest backend payload is shown below.'
-          : 'Run an attendance action to inspect the payload.'
-      }}</small>
+      <p>Status</p>
+      <h2>{{ feedback() ? 'Updated' : 'Ready' }}</h2>
+      <small>
+        {{ feedback() ? 'Attendance action completed successfully.' : 'Run check-in or check-out when needed.' }}
+      </small>
     </section>
   </div>
-
-  <section class="panel">
-    <div class="panel__header">
-      <h2>Latest API payload</h2>
-      <p>This helps verify exactly what the attendance endpoint returned.</p>
-    </div>
-
-    <div class="salary-card">
-      @if (lastPayload()) {
-        <pre>{{ lastPayload() | json }}</pre>
-      } @else {
-        <div class="state-card">No attendance request has been sent yet.</div>
-      }
-    </div>
-  </section>
 </section>

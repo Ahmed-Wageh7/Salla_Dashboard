@@ -47,7 +47,7 @@
             <span>Month</span>
             <input type="month" [ngModel]="month()" (ngModelChange)="setMonth($event)" />
           </label>
-          <button class="btn btn--primary" type="button" (click)="openCreateDeductionModal()">
+          <button class="btn btn--primary" type="button" (click)="openCreateDeductionModal()" [appCanDisable]="'deductions.write'" [appCanDisableReason]="'Requires deductions.write permission'">
             Add deduction
           </button>
         </div>
@@ -93,10 +93,10 @@
                 <td>{{ deduction.date | slice: 0 : 10 }}</td>
                 <td>
                   <div class="row-actions row-actions--product">
-                    <button class="btn btn--danger" type="button" (click)="deleteDeduction(deduction)">
+                    <button class="btn btn--danger" type="button" [appCanDisable]="'deductions.write'" [appCanDisableReason]="'Requires deductions.write permission'" (click)="deleteDeduction(deduction)">
                       Delete
                     </button>
-                    <button class="btn btn--primary" type="button" (click)="editDeduction(deduction)">
+                    <button class="btn btn--primary" type="button" [appCanDisable]="'deductions.write'" [appCanDisableReason]="'Requires deductions.write permission'" (click)="editDeduction(deduction)">
                       Edit
                     </button>
                   </div>
@@ -146,7 +146,7 @@
       </label>
       <div class="form-grid__actions">
         <button class="btn btn--ghost" type="button" (click)="closeDeductionModal()">Cancel</button>
-        <button class="btn btn--primary" type="submit" [disabled]="isBusy()">
+        <button class="btn btn--primary" type="submit" [disabled]="isBusy()" [appCanDisable]="'deductions.write'" [appCanDisableReason]="'Requires deductions.write permission'">
           {{ deductionForm().id ? 'Update deduction' : 'Save deduction' }}
         </button>
       </div>

@@ -1,0 +1,155 @@
+<section class="audit-page">
+  <header class="audit-page__header">
+    <div>
+      <p class="audit-page__eyebrow">Operations Intelligence</p>
+      <h1>Audit Log</h1>
+      <p class="audit-page__subtext">
+        Track sensitive admin actions across catalog, orders, staff, payroll, and authentication.
+      </p>
+    </div>
+
+    <div class="audit-page__header-actions">
+      <button class="audit-page__ghost-btn" type="button" (click)="clearFilters()">Reset filters</button>
+      <button class="audit-page__ghost-btn" type="button" (click)="exportLogs()">Export JSON</button>
+      <button class="audit-page__clear-btn" type="button" (click)="clearLogs()">Clear local log</button>
+    </div>
+  </header>
+
+  <div class="audit-stats">
+    <article class="audit-stat">
+      <span>Total events</span>
+      <strong>{{ statusSummary().total }}</strong>
+    </article>
+    <article class="audit-stat">
+      <span>Successful</span>
+      <strong>{{ statusSummary().success }}</strong>
+    </article>
+    <article class="audit-stat">
+      <span>Warnings</span>
+      <strong>{{ statusSummary().warning }}</strong>
+    </article>
+    <article class="audit-stat">
+      <span>Errors</span>
+      <strong>{{ statusSummary().error }}</strong>
+    </article>
+  </div>
+
+  <div class="audit-toolbar">
+    <input
+      type="search"
+      [ngModel]="searchQuery()"
+      (ngModelChange)="updateSearch($event)"
+      placeholder="Search by action, entity, actor, or record id"
+    />
+
+    <select [ngModel]="entityFilter()" (ngModelChange)="updateEntityFilter($event)">
+      @for (option of entityOptions(); track option) {
+        <option [value]="option">{{ option === 'all' ? 'All entities' : option }}</option>
+      }
+    </select>
+
+    <select [ngModel]="statusFilter()" (ngModelChange)="updateStatusFilter($event)">
+      <option value="all">All statuses</option>
+      <option value="success">Success</option>
+      <option value="warning">Warning</option>
+      <option value="error">Error</option>
+    </select>
+
+    <select [ngModel]="roleFilter()" (ngModelChange)="updateRoleFilter($event)">
+      @for (option of roleOptions(); track option) {
+        <option [value]="option">{{ option === 'all' ? 'All roles' : option }}</option>
+      }
+    </select>
+
+    <input type="date" [ngModel]="dateFrom()" (ngModelChange)="updateDateFrom($event)" />
+    <input type="date" [ngModel]="dateTo()" (ngModelChange)="updateDateTo($event)" />
+  </div>
+
+  @if (!filteredLogs().length) {
+    <div class="audit-empty">
+      <h2>No audit entries match the current filters</h2>
+      <p>As admins create, edit, pay, delete, and sign out, the activity timeline will appear here.</p>
+    </div>
+  } @else {
+    <div class="audit-results">
+      Showing {{ visibleRange().start }}-{{ visibleRange().end }} of {{ filteredLogs().length }} matching events
+    </div>
+
+    <div class="audit-table">
+      <div class="audit-table__header">
+        <span>Event</span>
+        <span>Entity</span>
+        <span>Actor</span>
+        <span>Status</span>
+        <span>Time</span>
+      </div>
+
+      @for (entry of paginatedLogs(); track entry.id) {
+        <article class="audit-row">
+          <div>
+            <strong>{{ entry.action }}</strong>
+            <p>{{ entry.summary }}</p>
+            @if (metadataEntries(entry).length) {
+              <button class="audit-link" type="button" (click)="toggleExpanded(entry.id)">
+                {{ isExpanded(entry.id) ? 'Hide metadata' : 'View metadata' }}
+              </button>
+            }
+          </div>
+          <div>
+            <strong>{{ entry.entityType }}</strong>
+            <p>{{ entry.entityId }}</p>
+          </div>
+          <div>
+            <strong>{{ entry.actorName }}</strong>
+            <p>{{ entry.actorRole }}</p>
+          </div>
+          <div>
+            <span class="audit-status" [class]="'audit-status audit-status--' + entry.status">
+              {{ entry.status }}
+            </span>
+          </div>
+          <div>
+            <strong>{{ formatTimestamp(entry) }}</strong>
+          </div>
+        </article>
+
+        @if (isExpanded(entry.id)) {
+          <div class="audit-row audit-row--metadata">
+            <div class="audit-metadata" style="grid-column: 1 / -1;">
+              @for (item of metadataEntries(entry); track item[0]) {
+                <div class="audit-metadata__item">
+                  <span>{{ item[0] }}</span>
+                  <strong>{{ item[1] ?? '--' }}</strong>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="audit-pagination">
+        <button type="button" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+          Previous
+        </button>
+        @for (page of paginationItems(); track page) {
+          <button
+            type="button"
+            [class.audit-pagination__page--active]="page === currentPage()"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        }
+        <button
+          type="button"
+          [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)"
+        >
+          Next
+        </button>
+      </div>
+    }
+  }
+</section>

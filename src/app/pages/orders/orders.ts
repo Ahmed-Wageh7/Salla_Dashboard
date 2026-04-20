@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Order, OrderSource, OrderStatus, PaymentMethod, PaymentStatus } from './orders.model';
 import { CreateOrderPayload, OrdersService } from './orders.service';
+import { AuditLogService } from '../../services/audit-log.service';
+import { CanDisableDirective } from '../../shared/access/can-disable.directive';
 import { ToastService } from '../../shared/toast/toast.service';
 
 interface OrderMenuState {
@@ -31,7 +33,7 @@ interface CreateOrderFormState {
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CanDisableDirective],
   templateUrl: './orders.html',
   styleUrls: ['./orders.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +57,7 @@ export class OrdersComponent {
   ] as const;
   private readonly storageKey = 'orders.currentPage';
   private readonly ordersService = inject(OrdersService);
+  private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
   private readonly pageSize = 10;
   private readonly pageWindowSize = 4;
@@ -238,6 +241,12 @@ export class OrdersComponent {
 
     this.ordersService.updateStatus(order.id, status).subscribe({
       next: (updated) => {
+        this.auditLogService.log({
+          action: 'Order Status Updated',
+          entityType: 'order',
+          entityId: updated.id,
+          summary: `Order ${updated.orderNumber} status changed to ${updated.status}.`,
+        });
         this.replaceOrder(updated);
         this.toastService.success('Order status updated successfully.');
         this.closeMenu();
@@ -304,6 +313,12 @@ export class OrdersComponent {
 
     this.ordersService.createOrder(payload).subscribe({
       next: (order) => {
+        this.auditLogService.log({
+          action: 'Order Created',
+          entityType: 'order',
+          entityId: order.id,
+          summary: `Order ${order.orderNumber} was created for ${order.customer}.`,
+        });
         this.orders.update((orders) => [order, ...orders]);
         this.tabs.set(this.ordersService.buildTabs(this.orders()));
         this.closeCreateModal();

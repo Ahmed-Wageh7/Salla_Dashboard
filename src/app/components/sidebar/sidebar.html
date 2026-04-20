@@ -29,7 +29,7 @@
   <nav class="sidebar__nav">
     <!-- Dashboard -->
     <ul class="sidebar__list">
-      @for (item of mainNav; track item.id) {
+      @for (item of visibleMainNav(); track item.id) {
         <li>
           <button
             type="button"
@@ -48,7 +48,7 @@
 
     <!-- MAIN EXPANDABLE -->
     <ul class="sidebar__list">
-      @for (item of expandableNav; track item.id) {
+      @for (item of visibleExpandableNav(); track item.id) {
         <li>
           @if (item.isExpandable) {
             @if (item.route) {
@@ -137,7 +137,7 @@
 
     <!-- EXTRA NAV -->
     <ul class="sidebar__list sidebar__list--extra">
-      @for (item of extraNav; track item.id) {
+      @for (item of visibleExtraNav(); track item.id) {
         <li>
           @if (item.isExpandable) {
             <button
@@ -237,9 +237,9 @@
 
     <div class="sidebar__divider"></div>
 
-    <!-- SETTINGS -->
+    <!-- FOOTER NAV -->
     <ul class="sidebar__list">
-      @for (item of bottomNav; track item.id) {
+      @for (item of visibleBottomNav(); track item.id) {
         <li>
           <button
             type="button"

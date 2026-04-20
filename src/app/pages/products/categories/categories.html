@@ -16,7 +16,7 @@
         Subcategories
       </button>
       <button class="btn btn--ghost" type="button" (click)="loadCategories()">Refresh</button>
-      <button class="btn btn--secondary" type="button" (click)="openCreateModal()">
+      <button class="btn btn--secondary" type="button" (click)="openCreateModal()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
         New category
       </button>
     </div>
@@ -99,6 +99,8 @@
                       <button
                         class="btn btn--primary"
                         type="button"
+                        [appCanDisable]="'products.write'"
+                        [appCanDisableReason]="'Requires products.write permission'"
                         (click)="selectCategory(category)"
                       >
                         Edit
@@ -106,6 +108,8 @@
                       <button
                         class="btn btn--danger"
                         type="button"
+                        [appCanDisable]="'products.write'"
+                        [appCanDisableReason]="'Requires products.write permission'"
                         (click)="requestDelete(category)"
                       >
                         Delete
@@ -167,7 +171,7 @@
 
       <div class="form-grid__actions">
         <button class="btn btn--ghost" type="button" (click)="closeFormModal()">Cancel</button>
-        <button class="btn btn--primary" type="submit" [disabled]="isSaving()">
+        <button class="btn btn--primary" type="submit" [disabled]="isSaving()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
           {{ isSaving() ? 'Saving...' : form().id ? 'Update category' : 'Create category' }}
         </button>
       </div>
@@ -207,6 +211,8 @@
         class="btn btn--danger"
         type="button"
         [disabled]="isDeleting()"
+        [appCanDisable]="'products.write'"
+        [appCanDisableReason]="'Requires products.write permission'"
         (click)="confirmDelete()"
       >
         {{ isDeleting() ? 'Deleting...' : 'Delete category' }}

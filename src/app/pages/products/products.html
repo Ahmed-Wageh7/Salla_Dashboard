@@ -16,7 +16,7 @@
         Subcategories
       </button>
       <button class="btn btn--ghost" type="button" (click)="loadProducts()">Refresh</button>
-      <button class="btn btn--secondary" type="button" (click)="openCreateModal()">
+      <button class="btn btn--secondary" type="button" (click)="openCreateModal()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
         New product
       </button>
     </div>
@@ -143,6 +143,8 @@
                       <button
                         class="btn btn--danger"
                         type="button"
+                        [appCanDisable]="'products.write'"
+                        [appCanDisableReason]="'Requires products.write permission'"
                         (click)="requestDelete(product)"
                       >
                         Delete
@@ -150,6 +152,8 @@
                       <button
                         class="btn btn--primary"
                         type="button"
+                        [appCanDisable]="'products.write'"
+                        [appCanDisableReason]="'Requires products.write permission'"
                         (click)="selectProduct(product)"
                       >
                         Edit
@@ -301,7 +305,7 @@
 
       <div class="form-grid__actions">
         <button class="btn btn--ghost" type="button" (click)="resetForm()">Cancel</button>
-        <button class="btn btn--primary" type="submit" [disabled]="isSaving()">
+        <button class="btn btn--primary" type="submit" [disabled]="isSaving()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
           {{ isSaving() ? 'Saving...' : form().id ? 'Update product' : 'Create product' }}
         </button>
       </div>
@@ -336,6 +340,8 @@
         class="btn btn--danger"
         type="button"
         [disabled]="isDeleting()"
+        [appCanDisable]="'products.write'"
+        [appCanDisableReason]="'Requires products.write permission'"
         (click)="confirmDelete()"
       >
         {{ isDeleting() ? 'Deleting...' : 'Delete product' }}

@@ -163,7 +163,7 @@ export interface DeductionPayload {
 }
 
 export interface SalaryAdjustmentPayload {
-  amount: number;
+  finalSalary: number;
   reason?: string;
 }
 

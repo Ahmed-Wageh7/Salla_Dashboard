@@ -9,11 +9,11 @@ import { StaffSalaryComponent } from './salary/salary';
 
 export const STAFF_ROUTES: Routes = [
   { path: '', redirectTo: 'members', pathMatch: 'full' },
-  { path: 'members/:id', component: StaffMemberDetailComponent },
-  { path: 'members', component: StaffMembersComponent },
-  { path: 'attendance', component: StaffAttendanceComponent },
-  { path: 'deductions/:id', component: StaffDeductionDetailComponent },
-  { path: 'deductions', component: StaffDeductionsComponent },
-  { path: 'salary/:id', component: StaffSalaryDetailComponent },
-  { path: 'salary', component: StaffSalaryComponent },
+  { path: 'members/:id', component: StaffMemberDetailComponent, title: 'Staff Details | Salla Dashboard' },
+  { path: 'members', component: StaffMembersComponent, title: 'Staff Members | Salla Dashboard' },
+  { path: 'attendance', component: StaffAttendanceComponent, title: 'Attendance | Salla Dashboard' },
+  { path: 'deductions/:id', component: StaffDeductionDetailComponent, title: 'Deduction Details | Salla Dashboard' },
+  { path: 'deductions', component: StaffDeductionsComponent, title: 'Deductions | Salla Dashboard' },
+  { path: 'salary/:id', component: StaffSalaryDetailComponent, title: 'Salary Details | Salla Dashboard' },
+  { path: 'salary', component: StaffSalaryComponent, title: 'Salary | Salla Dashboard' },
 ];

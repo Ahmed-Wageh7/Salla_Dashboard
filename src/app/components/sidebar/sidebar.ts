@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   EventEmitter,
   inject,
   Input,
@@ -12,6 +13,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { AccessControlService, Permission } from '../../core/auth/access-control.service';
 
 export interface NavItem {
   id: string;
@@ -21,6 +23,7 @@ export interface NavItem {
   badge?: number;
   exact?: boolean;
   isExpandable?: boolean;
+  permissions?: Permission[];
   children?: NavItem[];
 }
 
@@ -45,6 +48,7 @@ export interface NavItem {
 })
 export class SidebarComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly accessControl = inject(AccessControlService);
 
   @Input() isOpen = false;
   @Output() closeMenu = new EventEmitter<void>();
@@ -53,7 +57,14 @@ export class SidebarComponent implements OnInit {
   expanded = signal<string | null>(null);
 
   readonly mainNav: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', route: '/dashboard', icon: 'dashboard', exact: true },
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      route: '/dashboard',
+      icon: 'dashboard',
+      exact: true,
+      permissions: ['dashboard.view'],
+    },
   ];
 
   readonly expandableNav: NavItem[] = [
@@ -63,10 +74,27 @@ export class SidebarComponent implements OnInit {
       icon: 'products',
       route: '/products',
       isExpandable: true,
+      permissions: ['products.read'],
       children: [
-        { id: 'all-products', label: 'All Products', route: '/products', exact: true },
-        { id: 'categories', label: 'Categories', route: '/products/categories' },
-        { id: 'subcategories', label: 'Subcategories', route: '/products/subcategories' },
+        {
+          id: 'all-products',
+          label: 'All Products',
+          route: '/products',
+          exact: true,
+          permissions: ['products.read'],
+        },
+        {
+          id: 'categories',
+          label: 'Categories',
+          route: '/products/categories',
+          permissions: ['products.read'],
+        },
+        {
+          id: 'subcategories',
+          label: 'Subcategories',
+          route: '/products/subcategories',
+          permissions: ['products.read'],
+        },
       ],
     },
     {
@@ -75,7 +103,16 @@ export class SidebarComponent implements OnInit {
       icon: 'orders',
       route: '/orders',
       isExpandable: true,
-      children: [{ id: 'orders-overview', label: 'All Orders', route: '/orders', exact: true }],
+      permissions: ['orders.read'],
+      children: [
+        {
+          id: 'orders-overview',
+          label: 'All Orders',
+          route: '/orders',
+          exact: true,
+          permissions: ['orders.read'],
+        },
+      ],
     },
     {
       id: 'staff',
@@ -83,10 +120,26 @@ export class SidebarComponent implements OnInit {
       icon: 'customers',
       route: '/staff',
       isExpandable: true,
+      permissions: ['staff.read'],
       children: [
-        { id: 'attendance', label: 'Attendance', route: '/staff/attendance' },
-        { id: 'deductions', label: 'Deductions', route: '/staff/deductions' },
-        { id: 'salary', label: 'Salary', route: '/staff/salary' },
+        {
+          id: 'attendance',
+          label: 'Attendance',
+          route: '/staff/attendance',
+          permissions: ['staff.read'],
+        },
+        {
+          id: 'deductions',
+          label: 'Deductions',
+          route: '/staff/deductions',
+          permissions: ['staff.read'],
+        },
+        {
+          id: 'salary',
+          label: 'Salary',
+          route: '/staff/salary',
+          permissions: ['staff.read'],
+        },
       ],
     },
   ];
@@ -94,8 +147,19 @@ export class SidebarComponent implements OnInit {
   readonly extraNav: NavItem[] = [];
 
   readonly bottomNav: NavItem[] = [
-    { id: 'settings', label: 'Settings', route: '/settings', icon: 'settings' },
+    {
+      id: 'audit-logs',
+      label: 'Audit Log',
+      route: '/audit-logs',
+      icon: 'analytics',
+      permissions: ['audit.read'],
+    },
   ];
+
+  readonly visibleMainNav = computed(() => this.filterNav(this.mainNav));
+  readonly visibleExpandableNav = computed(() => this.filterNav(this.expandableNav));
+  readonly visibleExtraNav = computed(() => this.filterNav(this.extraNav));
+  readonly visibleBottomNav = computed(() => this.filterNav(this.bottomNav));
 
   ngOnInit() {
     this._checkViewport();
@@ -168,5 +232,18 @@ export class SidebarComponent implements OnInit {
       settings: '<i class="fas fa-cog"></i>',
     };
     return name ? (icons[name] ?? '') : '';
+  }
+
+  private filterNav(items: readonly NavItem[]): NavItem[] {
+    return items
+      .map((item) => ({
+        ...item,
+        children: item.children ? this.filterNav(item.children) : undefined,
+      }))
+      .filter((item) => {
+        const hasPermission = this.accessControl.canAny(item.permissions);
+        const hasVisibleChildren = item.children ? item.children.length > 0 : true;
+        return hasPermission && hasVisibleChildren;
+      });
   }
 }

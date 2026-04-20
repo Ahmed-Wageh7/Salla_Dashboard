@@ -313,7 +313,6 @@
 
       <div class="orders-card">
         <div class="orders-table-header">
-          <div class="col-order">Order number</div>
           <div class="col-customer">Customer<span>Mobile</span></div>
           <div class="col-payment">Payment<span>Payment status</span></div>
           <div class="col-shipping">Shipping</div>
@@ -326,7 +325,6 @@
         <div class="orders-table-body">
           @for (order of newestOrders; track order.orderNumber) {
             <div class="order-row">
-              <div class="col-order">{{ order.orderNumber }}</div>
               <div class="col-customer">
                 <span class="customer-name">{{ order.customerName }}</span>
                 <span class="customer-mobile">{{ order.customerMobile }}</span>

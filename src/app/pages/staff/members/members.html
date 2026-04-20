@@ -17,7 +17,7 @@
         Attendance
       </button>
       <button class="btn btn--secondary" type="button" (click)="loadStaff()">Refresh</button>
-      <button class="btn btn--primary" type="button" (click)="openCreateModal()">
+      <button class="btn btn--primary" type="button" (click)="openCreateModal()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'">
         New staff member
       </button>
     </div>
@@ -31,14 +31,14 @@
 
   <div class="grid">
     <section class="panel panel--list">
-      <div class="panel__header members-panel__header">
+      <div class="panel__header panel__header--split">
         <div>
           <h2>Staff list</h2>
           <small>Browse, edit, or delete staff records from the admin API.</small>
         </div>
 
-        <div class="members-toolbar">
-          <label class="search-field">
+        <div class="toolbar">
+          <div class="search-field">
             <i class="fas fa-search"></i>
             <input
               type="search"
@@ -46,7 +46,7 @@
               [ngModel]="searchQuery()"
               (ngModelChange)="updateSearch($event)"
             />
-          </label>
+          </div>
         </div>
       </div>
 
@@ -86,10 +86,10 @@
                   <td>
                     <div class="row-actions row-actions--product">
                       <a class="btn btn--ghost" [routerLink]="['/staff/members', id(record)]">View</a>
-                      <button class="btn btn--danger" type="button" (click)="requestDelete(record)">
+                      <button class="btn btn--danger" type="button" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="requestDelete(record)">
                         Delete
                       </button>
-                      <button class="btn btn--primary" type="button" (click)="openEditModal(record)">
+                      <button class="btn btn--primary" type="button" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="openEditModal(record)">
                         Edit
                       </button>
                     </div>
@@ -191,7 +191,7 @@
 
       <div class="form-grid__actions">
         <button class="btn btn--ghost" type="button" (click)="closeFormModal()">Cancel</button>
-        <button class="btn btn--primary" type="submit" [disabled]="isSaving()">
+        <button class="btn btn--primary" type="submit" [disabled]="isSaving()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'">
           {{ isSaving() ? 'Saving...' : form().id ? 'Update staff' : 'Create staff' }}
         </button>
       </div>
@@ -224,7 +224,7 @@
 
     <div class="form-grid__actions">
       <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">Cancel</button>
-      <button class="btn btn--danger" type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+      <button class="btn btn--danger" type="button" [disabled]="isDeleting()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="confirmDelete()">
         {{ isDeleting() ? 'Deleting...' : 'Delete staff' }}
       </button>
     </div>

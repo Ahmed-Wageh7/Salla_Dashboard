@@ -38,6 +38,11 @@
 
       <!-- Icon group -->
       <div class="header__icons">
+        <div class="header__balance" title="Current access role">
+          <span class="header__balance-amount">{{ accessControl.roleLabel() }}</span>
+          <span class="header__balance-currency">Role</span>
+        </div>
+
         <!-- Balance chip -->
         <div class="header__balance" title="Wallet balance">
           <svg

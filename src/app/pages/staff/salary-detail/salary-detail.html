@@ -96,10 +96,10 @@
             <small>Read from the current salary payload.</small>
           </section>
           <div class="salary-actions__buttons">
-            <button class="btn btn--secondary" type="button" [disabled]="isBusy()" (click)="adjustSalary()">
+            <button class="btn btn--secondary" type="button" [disabled]="isBusy()" [appCanDisable]="'salary.write'" [appCanDisableReason]="'Requires salary.write permission'" (click)="adjustSalary()">
               Adjust salary
             </button>
-            <button class="btn btn--primary" type="button" [disabled]="isBusy()" (click)="paySalary()">
+            <button class="btn btn--primary" type="button" [disabled]="isBusy()" [appCanDisable]="'salary.write'" [appCanDisableReason]="'Requires salary.write permission'" (click)="paySalary()">
               Mark as paid
             </button>
           </div>

@@ -5,6 +5,8 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { RouterModule } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AdminApiService } from '../../core/api/admin-api.service';
+import { AuditLogService } from '../../services/audit-log.service';
+import { CanDisableDirective } from '../../shared/access/can-disable.directive';
 import { CategoryRecord, ProductPayload, ProductRecord, SubcategoryRecord } from '../../core/api/admin.models';
 import { ToastService } from '../../shared/toast/toast.service';
 
@@ -22,7 +24,7 @@ interface ProductFormState {
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CanDisableDirective],
   templateUrl: './products.html',
   styleUrls: ['./products.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +40,7 @@ interface ProductFormState {
 export class ProductsComponent {
   private readonly storageKey = 'products.currentPage';
   private readonly adminApi = inject(AdminApiService);
+  private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
   private readonly pageSize = 20;
   private readonly pageWindowSize = 4;
@@ -293,7 +296,13 @@ export class ProductsComponent {
       : this.adminApi.createProduct(payload);
 
     request.subscribe({
-      next: () => {
+      next: (product) => {
+        this.auditLogService.log({
+          action: form.id ? 'Product Updated' : 'Product Created',
+          entityType: 'product',
+          entityId: this.id(product),
+          summary: `Product "${payload.name}" was ${form.id ? 'updated' : 'created'}.`,
+        });
         this.toastService.success(form.id ? 'Product updated successfully.' : 'Product created successfully.');
         this.form.set(this.emptyForm());
         this.isFormModalOpen.set(false);
@@ -330,6 +339,13 @@ export class ProductsComponent {
 
     this.adminApi.deleteProduct(id).subscribe({
       next: () => {
+        this.auditLogService.log({
+          action: 'Product Deleted',
+          entityType: 'product',
+          entityId: id,
+          summary: `Product ${id} was deleted.`,
+          status: 'warning',
+        });
         this.toastService.success('Product deleted successfully.');
         if (this.form().id === id) this.form.set(this.emptyForm());
         this.closeDeleteModal();
@@ -361,6 +377,12 @@ export class ProductsComponent {
 
     this.adminApi.updateProductStock(id, stock).subscribe({
       next: () => {
+        this.auditLogService.log({
+          action: 'Product Stock Updated',
+          entityType: 'product',
+          entityId: id,
+          summary: `Stock for "${product.name}" was updated to ${stock}.`,
+        });
         this.toastService.success('Stock updated successfully.');
         this.loadProducts();
         this.stockSavingId.set('');

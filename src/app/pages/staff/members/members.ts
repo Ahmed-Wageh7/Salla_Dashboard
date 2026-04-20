@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdminApiService } from '../../../core/api/admin-api.service';
+import { AuditLogService } from '../../../services/audit-log.service';
+import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import {
   StaffPayload,
   StaffRecord,
@@ -24,13 +26,14 @@ interface StaffFormState {
 @Component({
   selector: 'app-staff-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, StaffWorkspaceNavComponent],
+  imports: [CommonModule, FormsModule, RouterModule, StaffWorkspaceNavComponent, CanDisableDirective],
   templateUrl: './members.html',
   styleUrls: ['../staff.scss', './members.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StaffMembersComponent {
   private readonly adminApi = inject(AdminApiService);
+  private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
 
   readonly staffMembers = signal<StaffRecord[]>([]);
@@ -172,6 +175,12 @@ export class StaffMembersComponent {
 
     request.subscribe({
       next: (record) => {
+        this.auditLogService.log({
+          action: form.id ? 'Staff Updated' : 'Staff Created',
+          entityType: 'staff',
+          entityId: this.id(record),
+          summary: `Staff record for ${this.userName(record)} was ${form.id ? 'updated' : 'created'}.`,
+        });
         this.syncStaffRecord(record);
         this.toastService.success(
           form.id ? 'Staff updated successfully.' : 'Staff created successfully.',
@@ -207,6 +216,13 @@ export class StaffMembersComponent {
 
     this.adminApi.deleteStaff(id).subscribe({
       next: () => {
+        this.auditLogService.log({
+          action: 'Staff Deleted',
+          entityType: 'staff',
+          entityId: id,
+          summary: `Staff record ${id} was deleted.`,
+          status: 'warning',
+        });
         this.staffMembers.update((records) => records.filter((record) => this.id(record) !== id));
         this.toastService.success('Staff deleted successfully.');
         this.closeDeleteModal();

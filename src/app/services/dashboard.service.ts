@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
-import { of, Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
+import { AdminApiService } from '../core/api/admin-api.service';
+import { AdminOrderRecord } from '../core/api/admin.models';
 import { DASHBOARD_DATA } from '../data/dashboard-data';
 
 export interface DashboardApiResponse {
@@ -58,10 +60,12 @@ export interface GrowthData {
 }
 
 export interface Order {
+  id: string;
   orderNumber: string;
   customerName: string;
   customerMobile: string;
   paymentMethod: string;
+  paymentStatus: string;
   paymentClass: string;
   shippingLabel: string;
   priceValue: string;
@@ -190,10 +194,12 @@ const DASHBOARD_MOCK: DashboardApiResponse = {
   viewAllOrdersLabel: 'View all orders',
   newestOrders: [
     {
+      id: '58332475',
       orderNumber: '#58332475',
       customerName: 'علي الشمري',
       customerMobile: '96599521252',
       paymentMethod: 'Apple Pay',
+      paymentStatus: 'Paid',
       paymentClass: 'apple-pay',
       shippingLabel: "Doesn't Require Shipping",
       priceValue: '8.149',
@@ -205,10 +211,12 @@ const DASHBOARD_MOCK: DashboardApiResponse = {
       actionLabel: 'View',
     },
     {
+      id: '58278453',
       orderNumber: '#58278453',
       customerName: 'راشد المري',
       customerMobile: '966546788700',
       paymentMethod: 'Bank Transfer',
+      paymentStatus: 'Pending',
       paymentClass: 'bank-transfer',
       shippingLabel: "Doesn't Require Shipping",
       priceValue: '100',
@@ -220,10 +228,12 @@ const DASHBOARD_MOCK: DashboardApiResponse = {
       actionLabel: 'View',
     },
     {
+      id: '58128293',
       orderNumber: '#58128293',
       customerName: 'Waqas',
       customerMobile: '+919537612458',
       paymentMethod: 'Bank Transfer',
+      paymentStatus: 'Pending',
       paymentClass: 'bank-transfer',
       shippingLabel: "Doesn't Require Shipping",
       priceValue: '10.251',
@@ -241,7 +251,147 @@ const DASHBOARD_MOCK: DashboardApiResponse = {
   providedIn: 'root',
 })
 export class DashboardService {
+  private readonly adminApi = inject(AdminApiService);
+
   getDashboardData(): Observable<DashboardApiResponse> {
-    return of(DASHBOARD_DATA);
+    return this.adminApi.getAdminOrders().pipe(
+      map((orders) => this.buildDashboardData(orders)),
+      catchError(() => of(this.buildDashboardData([]))),
+    );
+  }
+
+  private buildDashboardData(orders: AdminOrderRecord[]): DashboardApiResponse {
+    const normalizedOrders = [...orders].sort((left, right) =>
+      String(right.createdAt ?? '').localeCompare(String(left.createdAt ?? '')),
+    );
+    const totalOrders = normalizedOrders.length;
+    const totalSales = normalizedOrders.reduce(
+      (sum, order) => sum + this.orderAmount(order),
+      0,
+    );
+
+    return {
+      ...DASHBOARD_DATA,
+      stats: DASHBOARD_DATA.stats.map((stat) => {
+        if (stat.id === 'orders') {
+          return { ...stat, value: totalOrders.toLocaleString() };
+        }
+
+        if (stat.id === 'sales') {
+          return { ...stat, value: totalSales.toLocaleString(undefined, { maximumFractionDigits: 2 }) };
+        }
+
+        return stat;
+      }),
+      goals: {
+        ...DASHBOARD_DATA.goals,
+        currentOrders: totalOrders,
+        ordersToGoal: Math.max(0, DASHBOARD_DATA.goals.goal - totalOrders),
+      },
+      growth: {
+        ...DASHBOARD_DATA.growth,
+        totalValue: totalOrders.toLocaleString(),
+      },
+      newestOrders: normalizedOrders.slice(0, 5).map((order) => this.mapOrder(order)),
+    };
+  }
+
+  private mapOrder(order: AdminOrderRecord): Order {
+    const createdAt = this.dateValue(order.createdAt);
+    const customerName = this.customerName(order);
+    const customerMobile = this.customerPhone(order);
+    const paymentMethod = this.paymentMethod(order);
+
+    return {
+      id: this.recordId(order),
+      orderNumber: this.orderNumber(order),
+      customerName,
+      customerMobile,
+      paymentMethod,
+      paymentStatus: this.paymentStatus(order),
+      paymentClass: this.paymentClass(paymentMethod),
+      shippingLabel: this.shippingLabel(order),
+      priceValue: this.orderAmount(order).toLocaleString(undefined, { maximumFractionDigits: 2 }),
+      priceCurrency: order.currency || 'SAR',
+      status: this.orderStatus(order),
+      statusClass: this.orderStatusClass(order),
+      createdDate: createdAt ? createdAt.toLocaleDateString() : '--',
+      createdTime: createdAt
+        ? createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : '--',
+      actionLabel: 'View',
+    };
+  }
+
+  private orderAmount(order: AdminOrderRecord): number {
+    return Number(order.totalPrice ?? order.totalAmount ?? order.total ?? 0);
+  }
+
+  private orderNumber(order: AdminOrderRecord): string {
+    const raw = (order.orderNumber ?? this.recordId(order)) || 'Order';
+    const text = String(raw).trim();
+    return text.startsWith('#') ? text : `#${text}`;
+  }
+
+  private paymentMethod(order: AdminOrderRecord): string {
+    return String(order.paymentMethod ?? 'Unknown').trim() || 'Unknown';
+  }
+
+  private paymentStatus(order: AdminOrderRecord): string {
+    return String(order.paymentStatus ?? 'Pending').trim() || 'Pending';
+  }
+
+  private paymentClass(value: string): string {
+    const normalized = value.trim().toLowerCase();
+    if (normalized.includes('apple')) return 'apple-pay';
+    if (normalized.includes('bank')) return 'bank-transfer';
+    if (normalized.includes('cash')) return 'cash';
+    if (normalized.includes('card')) return 'card';
+    return 'default';
+  }
+
+  private shippingLabel(order: AdminOrderRecord): string {
+    if (order.shipping) return String(order.shipping);
+    if (order.shippingAddress) return 'Shipping address provided';
+    return "Doesn't Require Shipping";
+  }
+
+  private orderStatus(order: AdminOrderRecord): string {
+    return String(order.orderStatus ?? order.status ?? 'Pending').trim() || 'Pending';
+  }
+
+  private orderStatusClass(order: AdminOrderRecord): string {
+    const normalized = this.orderStatus(order).toLowerCase();
+    if (['new', 'pending'].includes(normalized)) return 'pending';
+    if (['processing', 'confirmed', 'preparing'].includes(normalized)) return 'processing';
+    if (['delivered', 'completed', 'paid'].includes(normalized)) return 'completed';
+    if (['cancelled', 'canceled', 'failed', 'rejected'].includes(normalized)) return 'cancelled';
+    return 'pending';
+  }
+
+  private customerName(order: AdminOrderRecord): string {
+    const user = order.user;
+    if (order.customer?.name) return order.customer.name;
+    if (user && typeof user !== 'string' && user.name) return user.name;
+    return 'Unknown customer';
+  }
+
+  private customerPhone(order: AdminOrderRecord): string {
+    const user = order.user;
+    if (order.customer?.phone) return order.customer.phone;
+    if (user && typeof user !== 'string' && user.phone) return user.phone;
+    if (order.customer?.email) return order.customer.email;
+    if (user && typeof user !== 'string' && user.email) return user.email;
+    return '--';
+  }
+
+  private dateValue(value: string | undefined): Date | null {
+    if (!value) return null;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  private recordId(order: AdminOrderRecord): string {
+    return order._id ?? order.id ?? '';
   }
 }

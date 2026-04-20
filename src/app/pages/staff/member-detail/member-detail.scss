@@ -9,3 +9,10 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+
+@media (max-width: 768px) {
+  .member-detail__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
