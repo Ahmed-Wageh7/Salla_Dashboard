@@ -4,11 +4,22 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   OnInit,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DashboardApiResponse, DashboardService } from '../../services/dashboard.service';
+import { TranslationService } from '../../core/i18n/translation.service';
+import {
+  DashboardDataService,
+  LiveVisitor,
+  Product,
+  Review,
+  ReviewStats,
+  SalesChannel,
+} from './dashboard-data.service';
 
 interface StatCard {
   id: 'sales' | 'orders' | 'visits' | 'conversion';
@@ -76,51 +87,6 @@ interface Order {
   actionLabel: string;
 }
 
-interface SalesChannel {
-  id: string;
-  name: string;
-  value: number;
-  percentage: number;
-  color: string;
-}
-
-interface LiveVisitor {
-  id: string;
-  city: string;
-  cityAr: string;
-  lat: number;
-  lng: number;
-  visitors: number;
-}
-
-interface ReviewStats {
-  totalReviews: number;
-  publishedReviews: number;
-  pendingReviews: number;
-  averageRating: number;
-}
-
-interface Review {
-  id: string;
-  customerName: string;
-  rating: number;
-  comment: string;
-  productName: string;
-  date: string;
-  status: 'published' | 'pending';
-}
-
-interface Product {
-  id: string;
-  name: string;
-  image?: string;
-  status: 'published' | 'hidden' | 'out-of-stock';
-  stock: number;
-  stockStatus: 'in-stock' | 'low-stock' | 'out-of-stock' | 'unlimited';
-  sales: number;
-  price: number;
-}
-
 @Component({
   selector: 'app-main-content',
   standalone: true,
@@ -130,75 +96,78 @@ interface Product {
   styleUrls: ['./dashboard.scss'],
 })
 export class MainContentComponent implements OnInit {
+  readonly i18n = inject(TranslationService);
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
 
   readonly dashboardData = signal<DashboardData | null>(null);
   private readonly dashboardService = inject(DashboardService);
+  private readonly dashboardDataService = inject(DashboardDataService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly pendingTimers = new Set<ReturnType<typeof setTimeout>>();
+  private hasLoadedOnce = false;
+  private lastLanguage = this.i18n.language();
 
   stats: StatCard[] = [
     {
       id: 'sales',
-      label: 'Sales',
+      label: this.i18n.t('dashboard.stats.sales'),
       value: '0',
-      currency: 'ريال',
+      currency: this.i18n.t('common.currency'),
       chartType: 'line',
       chartPoints: '0,35 40,30 80,32 120,25 160,28 200,20',
-      reportLabel: 'View report',
+      reportLabel: this.i18n.t('dashboard.stats.report'),
     },
     {
       id: 'orders',
-      label: 'Orders',
+      label: this.i18n.t('dashboard.stats.orders'),
       value: '0',
       chartType: 'line',
       chartPoints: '0,35 40,30 80,32 120,25 160,28 200,20',
-      reportLabel: 'View report',
+      reportLabel: this.i18n.t('dashboard.stats.report'),
     },
     {
       id: 'visits',
-      label: 'Visits',
+      label: this.i18n.t('dashboard.stats.visits'),
       value: '250',
       chartType: 'area',
       chartPoints: '0,40 50,38 100,25 150,30 200,20',
-      reportLabel: 'View report',
+      reportLabel: this.i18n.t('dashboard.stats.report'),
     },
     {
       id: 'conversion',
-      label: 'Conversion',
+      label: this.i18n.t('dashboard.stats.conversion'),
       value: '0.00%',
       chartType: 'line',
       chartPoints: '0,35 40,30 80,32 120,25 160,28 200,20',
-      reportLabel: 'View report',
+      reportLabel: this.i18n.t('dashboard.stats.report'),
     },
   ];
 
   readonly slides = signal<Slide[]>([
     {
       image: 'carousel-1.png',
-      title: 'Sell directly on WhatsApp',
-      description: 'Turn chats into checkouts with one smooth purchase flow.',
+      title: this.i18n.t('dashboard.slides.whatsappTitle'),
+      description: this.i18n.t('dashboard.slides.whatsappDescription'),
     },
     {
       image: 'carousel-2.png',
-      title: 'Recover abandoned carts faster',
-      description: 'Send smart reminders and recover lost revenue in minutes.',
+      title: this.i18n.t('dashboard.slides.cartsTitle'),
+      description: this.i18n.t('dashboard.slides.cartsDescription'),
     },
     {
       image: 'carousel-3.webp',
-      title: 'Engage repeat customers',
-      description: 'Run targeted campaigns and increase returning buyers.',
+      title: this.i18n.t('dashboard.slides.campaignsTitle'),
+      description: this.i18n.t('dashboard.slides.campaignsDescription'),
     },
     {
       image: 'carousel-4.png',
-      title: 'Automate support responses',
-      description: 'Keep response time low and customer satisfaction high.',
+      title: this.i18n.t('dashboard.slides.behaviorTitle'),
+      description: this.i18n.t('dashboard.slides.behaviorDescription'),
     },
     {
       image: 'carousel-5.png',
-      title: 'Launch campaigns quickly',
-      description: 'Create and publish offers in a few clicks.',
+      title: this.i18n.t('dashboard.slides.automationTitle'),
+      description: this.i18n.t('dashboard.slides.automationDescription'),
     },
   ]);
 
@@ -206,26 +175,26 @@ export class MainContentComponent implements OnInit {
   readonly currentSlide = computed(() => this.slides()[this.currentIndex()] ?? null);
 
   readonly goals = signal<GoalsData>({
-    title: 'Track Goals',
-    description: 'Track your progress and keep your sales goals on target.',
-    progressLabel: 'Progress',
+    title: this.i18n.t('dashboard.goals.title'),
+    description: this.i18n.t('dashboard.goals.description'),
+    progressLabel: this.i18n.t('dashboard.goals.progressLabel'),
     progressPercent: 0,
     progressLabels: ['0%', '25%', '50%', '75%', '100%'],
     currentOrders: 0,
     goal: 5000,
     ordersToGoal: 5000,
-    editLabel: 'Edit goals',
-    helpLabel: 'Get help',
+    editLabel: this.i18n.t('dashboard.goals.edit'),
+    helpLabel: this.i18n.t('dashboard.goals.help'),
   });
 
   growth: GrowthData = {
-    title: 'Compare growth',
+    title: this.i18n.t('dashboard.growth.title'),
     totalValue: '0',
-    totalLabel: 'Total orders',
-    totalSubLabel: 'Compared to previous period',
-    indicatorValue: 'Total orders',
-    dateLabel: 'Date',
-    datePreset: 'Last 30 days',
+    totalLabel: this.i18n.t('dashboard.growth.totalLabel'),
+    totalSubLabel: this.i18n.t('dashboard.growth.comparedToPrevious'),
+    indicatorValue: this.i18n.t('dashboard.growth.indicatorValue'),
+    dateLabel: this.i18n.t('dashboard.growth.dateLabel'),
+    datePreset: this.i18n.t('dashboard.growth.datePreset'),
     dateRange: '04 Feb - 06 Mar, 2026',
     chartPoints: '0,120 120,112 240,116 360,108 480,110 600,104 720,102 840,98 1000,96',
     xAxisLabels: ['4 Feb', '8 Feb', '12 Feb', '16 Feb', '20 Feb', '24 Feb', '28 Feb', '6 Mar'],
@@ -282,7 +251,7 @@ export class MainContentComponent implements OnInit {
   readonly salesChannels = signal<SalesChannel[]>([]);
   readonly isLoadingChannels = signal(false);
   readonly selectedChannelPeriod = signal<'day' | 'week' | 'month' | 'year'>('month');
-  noDataMessage = 'No sales data available for this period';
+  noDataMessage = this.i18n.t('dashboard.noSalesData');
 
   readonly liveVisitors = signal<LiveVisitor[]>([]);
   readonly totalLiveVisitors = signal(0);
@@ -314,8 +283,21 @@ export class MainContentComponent implements OnInit {
     'Hafar Al Batin': { x: 280, y: 80 },
   };
 
+  constructor() {
+    effect(() => {
+      const language = this.i18n.language();
+      if (this.hasLoadedOnce && language !== this.lastLanguage) {
+        this.lastLanguage = language;
+        this.loadDashboardData();
+        return;
+      }
+
+      this.lastLanguage = language;
+    });
+  }
+
   ngOnInit(): void {
-    this.destroyRef.onDestroy(() => this.clearPendingTimers());
+    this.hasLoadedOnce = true;
     this.loadDashboardData();
   }
 
@@ -323,7 +305,10 @@ export class MainContentComponent implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.dashboardService.getDashboardData().subscribe({
+    this.dashboardService
+      .getDashboardData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (data) => {
         this.dashboardData.set({
           welcomeTitle: data.welcomeTitle,
@@ -348,15 +333,16 @@ export class MainContentComponent implements OnInit {
         });
         this.growth = data.growth;
         this.newestOrders = data.newestOrders;
+        this.loadMockData();
 
         this.isLoading.set(false);
       },
       error: () => {
-        this.errorMessage.set('Failed to load dashboard data. Please try again.');
+        this.errorMessage.set(this.i18n.t('dashboard.loadError'));
         this.isLoading.set(false);
         this.loadMockData();
       },
-    });
+      });
   }
 
   goToSlide(index: number): void {
@@ -387,132 +373,94 @@ export class MainContentComponent implements OnInit {
 
   loadSalesChannels(): void {
     this.isLoadingChannels.set(true);
-
-    this.queueDelayedUpdate(800, () => {
-      this.salesChannels.set([]);
-      this.isLoadingChannels.set(false);
-    });
+    this.dashboardDataService
+      .getSalesChannelsByPeriod(this.selectedChannelPeriod())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (channels) => {
+          this.salesChannels.set(channels);
+          this.isLoadingChannels.set(false);
+        },
+        error: () => {
+          this.salesChannels.set([]);
+          this.isLoadingChannels.set(false);
+        },
+      });
   }
 
   loadLiveVisitors(): void {
     this.isLoadingVisitors.set(true);
-
-    this.queueDelayedUpdate(500, () => {
-      const visitors: LiveVisitor[] = [
-        { id: '1', city: 'Riyadh', cityAr: 'الرياض', lat: 24.7136, lng: 46.6753, visitors: 45 },
-        { id: '2', city: 'Jeddah', cityAr: 'جدة', lat: 21.4858, lng: 39.1925, visitors: 32 },
-        { id: '3', city: 'Dammam', cityAr: 'الدمام', lat: 26.3927, lng: 50.0916, visitors: 18 },
-        {
-          id: '4',
-          city: 'Madinah',
-          cityAr: 'المدينة المنورة',
-          lat: 24.5247,
-          lng: 39.5692,
-          visitors: 12,
+    this.dashboardDataService
+      .getLiveVisitors()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (visitors) => {
+          this.liveVisitors.set(visitors);
+          this.totalLiveVisitors.set(visitors.reduce((sum, visitor) => sum + visitor.visitors, 0));
+          this.isLoadingVisitors.set(false);
         },
-        { id: '5', city: 'Doha', cityAr: 'الدوحة', lat: 25.2854, lng: 51.531, visitors: 8 },
-        { id: '6', city: 'Manama', cityAr: 'المنامة', lat: 26.2285, lng: 50.586, visitors: 5 },
-        { id: '7', city: 'Buraydah', cityAr: 'بريدة', lat: 26.3333, lng: 43.9667, visitors: 3 },
-        { id: '8', city: 'Hail', cityAr: 'حائل', lat: 27.5114, lng: 41.7208, visitors: 2 },
-        { id: '9', city: 'Khaybar', cityAr: 'خيبر', lat: 25.6934, lng: 39.2926, visitors: 1 },
-        {
-          id: '10',
-          city: 'Hafar Al Batin',
-          cityAr: 'حفر الباطن',
-          lat: 28.4328,
-          lng: 45.9708,
-          visitors: 1,
+        error: () => {
+          this.liveVisitors.set([]);
+          this.totalLiveVisitors.set(0);
+          this.isLoadingVisitors.set(false);
         },
-      ];
-
-      this.liveVisitors.set(visitors);
-      this.totalLiveVisitors.set(visitors.reduce((sum, v) => sum + v.visitors, 0));
-      this.isLoadingVisitors.set(false);
-    });
+      });
   }
 
   loadReviewStats(): void {
     this.isLoadingReviews.set(true);
-
-    this.queueDelayedUpdate(400, () => {
-      this.reviewStats.set({
-        totalReviews: 128,
-        publishedReviews: 115,
-        pendingReviews: 13,
-        averageRating: 4.6,
+    this.dashboardDataService
+      .getReviewStats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (stats) => {
+          this.reviewStats.set(stats);
+          this.loadRecentReviews();
+        },
+        error: () => {
+          this.reviewStats.set({
+            totalReviews: 0,
+            publishedReviews: 0,
+            pendingReviews: 0,
+            averageRating: 0,
+          });
+          this.recentReviews.set([]);
+          this.isLoadingReviews.set(false);
+        },
       });
-
-      this.recentReviews.set([
-        {
-          id: '1',
-          customerName: 'Ahmed Al-Saud',
-          rating: 5,
-          comment:
-            'Excellent product! Fast delivery and great quality. Will definitely order again.',
-          productName: 'Demo Voucher Product',
-          date: '2025-03-05',
-          status: 'published',
-        },
-        {
-          id: '2',
-          customerName: 'Fatima Al-Rashid',
-          rating: 4,
-          comment:
-            'Good quality, but packaging could be better. Overall satisfied with the purchase.',
-          productName: 'Demo Single Product',
-          date: '2025-03-04',
-          status: 'published',
-        },
-        {
-          id: '3',
-          customerName: 'Mohammed Khan',
-          rating: 5,
-          comment: 'Amazing experience! Will buy again for sure. Highly recommended!',
-          productName: 'Demo Grouped Product',
-          date: '2025-03-03',
-          status: 'pending',
-        },
-      ]);
-
-      this.isLoadingReviews.set(false);
-    });
   }
 
   loadBestSellingProducts(): void {
     this.isLoadingProducts.set(true);
+    this.dashboardDataService
+      .getBestSellingProducts(5)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (products) => {
+          this.bestSellingProducts.set(products);
+          this.isLoadingProducts.set(false);
+        },
+        error: () => {
+          this.bestSellingProducts.set([]);
+          this.isLoadingProducts.set(false);
+        },
+      });
+  }
 
-    this.queueDelayedUpdate(700, () => {
-      this.bestSellingProducts.set([
-        {
-          id: '1',
-          name: 'Demo Grouped Product',
-          status: 'hidden',
-          stock: 0,
-          stockStatus: 'unlimited',
-          sales: 245,
-          price: 150,
+  private loadRecentReviews(): void {
+    this.dashboardDataService
+      .getReviews(undefined, 3)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (reviews) => {
+          this.recentReviews.set(reviews);
+          this.isLoadingReviews.set(false);
         },
-        {
-          id: '2',
-          name: 'Demo Single Product',
-          status: 'hidden',
-          stock: 20000,
-          stockStatus: 'in-stock',
-          sales: 189,
-          price: 99,
+        error: () => {
+          this.recentReviews.set([]);
+          this.isLoadingReviews.set(false);
         },
-        {
-          id: '3',
-          name: 'Demo Voucher Product',
-          status: 'published',
-          stock: 1,
-          stockStatus: 'low-stock',
-          sales: 156,
-          price: 50,
-        },
-      ]);
-      this.isLoadingProducts.set(false);
-    });
+      });
   }
 
   toggleChannelPeriod(): void {
@@ -556,12 +504,16 @@ export class MainContentComponent implements OnInit {
 
   getStockLabel(product: Product): string {
     const labels: { [key: string]: string } = {
-      'in-stock': `${product.stock.toLocaleString()} In stock`,
-      'low-stock': `${product.stock} In stock`,
-      'out-of-stock': 'Out of stock',
-      unlimited: 'Unlimited In stock',
+      'in-stock': this.i18n.t('dashboard.stock.inStock', {
+        count: this.i18n.formatNumber(product.stock),
+      }),
+      'low-stock': this.i18n.t('dashboard.stock.lowStock', {
+        count: this.i18n.formatNumber(product.stock),
+      }),
+      'out-of-stock': this.i18n.t('dashboard.stock.outOfStock'),
+      unlimited: this.i18n.t('dashboard.stock.unlimited'),
     };
-    return labels[product.stockStatus] || 'Unknown';
+    return labels[product.stockStatus] || this.i18n.t('dashboard.order.unknown');
   }
 
   getStockColor(status: Product['stockStatus']): string {
@@ -576,22 +528,5 @@ export class MainContentComponent implements OnInit {
 
   onViewAllProducts(): void {
     console.log('Viewing all products...');
-  }
-
-  private queueDelayedUpdate(delayMs: number, callback: () => void): void {
-    const timeoutId = setTimeout(() => {
-      this.pendingTimers.delete(timeoutId);
-      callback();
-    }, delayMs);
-
-    this.pendingTimers.add(timeoutId);
-  }
-
-  private clearPendingTimers(): void {
-    for (const timeoutId of this.pendingTimers) {
-      clearTimeout(timeoutId);
-    }
-
-    this.pendingTimers.clear();
   }
 }

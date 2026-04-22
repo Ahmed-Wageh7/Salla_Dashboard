@@ -7,6 +7,7 @@ import { AuthService } from '../core/auth/auth.service';
 import { environment } from '../../environments/environment';
 import { ToastService } from '../shared/toast/toast.service';
 import { Router } from '@angular/router';
+import { TranslationService } from '../core/i18n/translation.service';
 
 export interface OrderNotificationItem {
   id: string;
@@ -26,6 +27,7 @@ export class OrderNotificationService {
   private readonly knownOrdersKey = 'notifications.known-order-ids';
   private readonly maxItems = 20;
   private readonly router = inject(Router);
+  private readonly i18n = inject(TranslationService);
   private readonly notificationsState = signal<OrderNotificationItem[]>(this.readStoredNotifications());
   private readonly browserPermissionState = signal<NotificationPermission>(this.readPermission());
   private readonly knownOrderIds = new Set<string>(this.readKnownOrderIds());
@@ -186,13 +188,13 @@ export class OrderNotificationService {
 
     const subject = this.notificationSubject(order);
     const orderNumber = this.orderNumber(order);
-    const amount = this.orderAmount(order).toLocaleString(undefined, { maximumFractionDigits: 2 });
-    const currency = 'ريال';
+    const amount = this.i18n.formatNumber(this.orderAmount(order), { maximumFractionDigits: 2 });
+    const currency = this.i18n.t('common.currency');
     const item: OrderNotificationItem = {
       id: `${orderId}:${source}`,
       orderId,
       orderNumber,
-      title: `Order • ${subject}`,
+      title: this.i18n.t('notifications.orderTitle', { subject }),
       message: `${orderNumber} • ${amount} ${currency}`,
       subject,
       createdAt: order.createdAt ?? new Date().toISOString(),
@@ -206,7 +208,8 @@ export class OrderNotificationService {
     this.toastService.success(item.message, {
       title: item.title,
       durationMs: 7000,
-      actionLabel: 'Open order',
+      variant: 'notification',
+      actionLabel: this.i18n.t('toast.openOrder'),
       onAction: () => this.openOrder(item),
     });
     this.notifyAttention();

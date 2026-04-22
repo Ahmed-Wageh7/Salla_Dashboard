@@ -1,35 +1,33 @@
 <section class="audit-page">
   <header class="audit-page__header">
     <div>
-      <p class="audit-page__eyebrow">Operations Intelligence</p>
-      <h1>Audit Log</h1>
-      <p class="audit-page__subtext">
-        Track sensitive admin actions across catalog, orders, staff, payroll, and authentication.
-      </p>
+      <p class="audit-page__eyebrow">{{ i18n.t('auditLogs.eyebrow') }}</p>
+      <h1>{{ i18n.t('auditLogs.title') }}</h1>
+      <p class="audit-page__subtext">{{ i18n.t('auditLogs.subtext') }}</p>
     </div>
 
     <div class="audit-page__header-actions">
-      <button class="audit-page__ghost-btn" type="button" (click)="clearFilters()">Reset filters</button>
-      <button class="audit-page__ghost-btn" type="button" (click)="exportLogs()">Export JSON</button>
-      <button class="audit-page__clear-btn" type="button" (click)="clearLogs()">Clear local log</button>
+      <button class="audit-page__ghost-btn" type="button" (click)="clearFilters()">{{ i18n.t('auditLogs.resetFilters') }}</button>
+      <button class="audit-page__ghost-btn" type="button" (click)="exportLogs()">{{ i18n.t('auditLogs.exportJson') }}</button>
+      <button class="audit-page__clear-btn" type="button" (click)="clearLogs()">{{ i18n.t('auditLogs.clearLog') }}</button>
     </div>
   </header>
 
   <div class="audit-stats">
     <article class="audit-stat">
-      <span>Total events</span>
+      <span>{{ i18n.t('auditLogs.stats.total') }}</span>
       <strong>{{ statusSummary().total }}</strong>
     </article>
     <article class="audit-stat">
-      <span>Successful</span>
+      <span>{{ i18n.t('auditLogs.stats.success') }}</span>
       <strong>{{ statusSummary().success }}</strong>
     </article>
     <article class="audit-stat">
-      <span>Warnings</span>
+      <span>{{ i18n.t('auditLogs.stats.warning') }}</span>
       <strong>{{ statusSummary().warning }}</strong>
     </article>
     <article class="audit-stat">
-      <span>Errors</span>
+      <span>{{ i18n.t('auditLogs.stats.error') }}</span>
       <strong>{{ statusSummary().error }}</strong>
     </article>
   </div>
@@ -39,25 +37,25 @@
       type="search"
       [ngModel]="searchQuery()"
       (ngModelChange)="updateSearch($event)"
-      placeholder="Search by action, entity, actor, or record id"
+      [placeholder]="i18n.t('auditLogs.searchPlaceholder')"
     />
 
     <select [ngModel]="entityFilter()" (ngModelChange)="updateEntityFilter($event)">
       @for (option of entityOptions(); track option) {
-        <option [value]="option">{{ option === 'all' ? 'All entities' : option }}</option>
+        <option [value]="option">{{ entityLabel(option) }}</option>
       }
     </select>
 
     <select [ngModel]="statusFilter()" (ngModelChange)="updateStatusFilter($event)">
-      <option value="all">All statuses</option>
-      <option value="success">Success</option>
-      <option value="warning">Warning</option>
-      <option value="error">Error</option>
+      <option value="all">{{ i18n.t('auditLogs.filters.allStatuses') }}</option>
+      <option value="success">{{ i18n.t('auditLogs.statuses.success') }}</option>
+      <option value="warning">{{ i18n.t('auditLogs.statuses.warning') }}</option>
+      <option value="error">{{ i18n.t('auditLogs.statuses.error') }}</option>
     </select>
 
     <select [ngModel]="roleFilter()" (ngModelChange)="updateRoleFilter($event)">
       @for (option of roleOptions(); track option) {
-        <option [value]="option">{{ option === 'all' ? 'All roles' : option }}</option>
+        <option [value]="option">{{ roleLabel(option) }}</option>
       }
     </select>
 
@@ -67,21 +65,21 @@
 
   @if (!filteredLogs().length) {
     <div class="audit-empty">
-      <h2>No audit entries match the current filters</h2>
-      <p>As admins create, edit, pay, delete, and sign out, the activity timeline will appear here.</p>
+      <h2>{{ i18n.t('auditLogs.emptyTitle') }}</h2>
+      <p>{{ i18n.t('auditLogs.emptyDescription') }}</p>
     </div>
   } @else {
     <div class="audit-results">
-      Showing {{ visibleRange().start }}-{{ visibleRange().end }} of {{ filteredLogs().length }} matching events
+      {{ i18n.t('auditLogs.results', { start: visibleRange().start, end: visibleRange().end, total: filteredLogs().length }) }}
     </div>
 
     <div class="audit-table">
       <div class="audit-table__header">
-        <span>Event</span>
-        <span>Entity</span>
-        <span>Actor</span>
-        <span>Status</span>
-        <span>Time</span>
+        <span>{{ i18n.t('auditLogs.columns.event') }}</span>
+        <span>{{ i18n.t('auditLogs.columns.entity') }}</span>
+        <span>{{ i18n.t('auditLogs.columns.actor') }}</span>
+        <span>{{ i18n.t('auditLogs.columns.status') }}</span>
+        <span>{{ i18n.t('auditLogs.columns.time') }}</span>
       </div>
 
       @for (entry of paginatedLogs(); track entry.id) {
@@ -91,7 +89,7 @@
             <p>{{ entry.summary }}</p>
             @if (metadataEntries(entry).length) {
               <button class="audit-link" type="button" (click)="toggleExpanded(entry.id)">
-                {{ isExpanded(entry.id) ? 'Hide metadata' : 'View metadata' }}
+                {{ isExpanded(entry.id) ? i18n.t('auditLogs.hideMetadata') : i18n.t('auditLogs.viewMetadata') }}
               </button>
             }
           </div>
@@ -105,7 +103,7 @@
           </div>
           <div>
             <span class="audit-status" [class]="'audit-status audit-status--' + entry.status">
-              {{ entry.status }}
+              {{ statusLabel(entry.status) }}
             </span>
           </div>
           <div>
@@ -119,7 +117,7 @@
               @for (item of metadataEntries(entry); track item[0]) {
                 <div class="audit-metadata__item">
                   <span>{{ item[0] }}</span>
-                  <strong>{{ item[1] ?? '--' }}</strong>
+                  <strong>{{ item[1] ?? i18n.t('auditLogs.emptyValue') }}</strong>
                 </div>
               }
             </div>
@@ -131,7 +129,7 @@
     @if (totalPages() > 1) {
       <div class="audit-pagination">
         <button type="button" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
-          Previous
+          {{ i18n.t('auditLogs.previousPage') }}
         </button>
         @for (page of paginationItems(); track page) {
           <button
@@ -147,7 +145,7 @@
           [disabled]="currentPage() === totalPages()"
           (click)="goToPage(currentPage() + 1)"
         >
-          Next
+          {{ i18n.t('auditLogs.nextPage') }}
         </button>
       </div>
     }

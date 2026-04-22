@@ -9,7 +9,7 @@
       <div class="sidebar__brand-icon">
         <img src="images1.png" alt="" />
       </div>
-      <span class="sidebar__brand-name">Salla</span>
+      <span class="sidebar__brand-name">{{ i18n.t('app.brand') }}</span>
     </div>
 
     <button class="sidebar__close-btn" (click)="closeMenu.emit()">
@@ -38,7 +38,7 @@
             (click)="navigate(item.route)"
           >
             <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
-            <span class="sidebar__label">{{ item.label }}</span>
+            <span class="sidebar__label">{{ i18n.t(item.labelKey) }}</span>
           </button>
         </li>
       }
@@ -61,7 +61,7 @@
                 (click)="toggleExpand(item.id); navigate(item.route)"
               >
                 <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
-                <span class="sidebar__label">{{ item.label }}</span>
+                <span class="sidebar__label">{{ i18n.t(item.labelKey) }}</span>
                 <span class="sidebar__chevron" [class.sidebar__chevron--rotated]="isExpanded(item)">
                   <svg
                     viewBox="0 0 16 16"
@@ -84,7 +84,7 @@
                 (click)="toggleExpand(item.id)"
               >
                 <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
-                <span class="sidebar__label">{{ item.label }}</span>
+                <span class="sidebar__label">{{ i18n.t(item.labelKey) }}</span>
                 <span class="sidebar__chevron" [class.sidebar__chevron--rotated]="isExpanded(item)">
                   <svg
                     viewBox="0 0 16 16"
@@ -111,7 +111,7 @@
                         (click)="navigate(child.route)"
                       >
                         <span class="sidebar__subdot"></span>
-                        {{ child.label }}
+                        {{ i18n.t(child.labelKey) }}
                       </button>
                     </li>
                   }
@@ -126,7 +126,7 @@
               (click)="navigate(item.route)"
             >
               <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
-              <span class="sidebar__label">{{ item.label }}</span>
+              <span class="sidebar__label">{{ i18n.t(item.labelKey) }}</span>
             </button>
           }
         </li>
@@ -145,7 +145,7 @@
               class="sidebar__item sidebar__item--extra"
               (click)="toggleExpand(item.id)"
             >
-              <span class="sidebar__label">{{ item.label }}</span>
+              <span class="sidebar__label">{{ i18n.t(item.labelKey) }}</span>
               <span class="sidebar__chevron" [class.sidebar__chevron--rotated]="isExpanded(item)">
                 <svg
                   viewBox="0 0 16 16"
@@ -170,7 +170,7 @@
                         class="sidebar__subitem sidebar__item--btn"
                         (click)="toggleExpand(child.id)"
                       >
-                        {{ child.label }}
+                        {{ i18n.t(child.labelKey) }}
                         <span
                           class="sidebar__chevron"
                           [class.sidebar__chevron--rotated]="isExpanded(child)"
@@ -201,7 +201,7 @@
                                 [class.sidebar__subitem--active]="isItemRouteActive(subChild)"
                                 (click)="navigate(subChild.route)"
                               >
-                                {{ subChild.label }}
+                                {{ i18n.t(subChild.labelKey) }}
                               </button>
                             </li>
                           }
@@ -214,7 +214,7 @@
                         [class.sidebar__subitem--active]="isItemRouteActive(child)"
                         (click)="navigate(child.route)"
                       >
-                        {{ child.label }}
+                        {{ i18n.t(child.labelKey) }}
                       </button>
                     }
                   </li>
@@ -228,7 +228,7 @@
               [class.sidebar__item--active]="isRouteActive(item.route)"
               (click)="navigate(item.route)"
             >
-              {{ item.label }}
+              {{ i18n.t(item.labelKey) }}
             </button>
           }
         </li>
@@ -248,7 +248,7 @@
             (click)="navigate(item.route)"
           >
             <span class="sidebar__icon" [innerHTML]="getIcon(item.icon)"></span>
-            <span class="sidebar__label">{{ item.label }}</span>
+            <span class="sidebar__label">{{ i18n.t(item.labelKey) }}</span>
           </button>
         </li>
       }

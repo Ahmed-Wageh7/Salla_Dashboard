@@ -5,7 +5,7 @@
   z-index: 1000;
   display: grid;
   gap: 10px;
-  width: min(460px, calc(100vw - 32px));
+  width: min(560px, calc(100vw - 32px));
 }
 
 .toast {
@@ -18,6 +18,9 @@
   box-shadow: 0 18px 40px rgba(38, 21, 8, 0.12);
   border: 1px solid transparent;
   backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  animation: toast-enter-right 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
   button {
     border: 0;
@@ -45,6 +48,17 @@
   }
 }
 
+.toast--app {
+  min-height: 74px;
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 1px;
+}
+
+.toast--notification {
+  border-radius: 18px;
+}
+
 .toast__body {
   display: grid;
   gap: 4px;
@@ -64,6 +78,19 @@
   }
 }
 
+.toast--app .toast__body {
+  gap: 6px;
+
+  strong {
+    font-size: 14px;
+  }
+
+  span {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+}
+
 .toast__actions {
   display: flex;
   align-items: center;
@@ -77,4 +104,76 @@
   background: rgba(255, 255, 255, 0.7) !important;
   font-size: 12px;
   font-weight: 700;
+}
+
+.toast__progress {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 4px;
+  background: currentColor;
+  opacity: 0.42;
+  transform-origin: left center;
+  animation-name: toast-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes toast-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+:host-context([dir='rtl']) {
+  .toast-stack {
+    left: 18px;
+    right: auto;
+  }
+
+  .toast {
+    direction: rtl;
+    text-align: right;
+    animation-name: toast-enter-left;
+  }
+
+  .toast__body {
+    text-align: right;
+  }
+
+  .toast__actions {
+    flex-direction: row-reverse;
+  }
+
+  .toast__progress {
+    transform-origin: right center;
+  }
 }

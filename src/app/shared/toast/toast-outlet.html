@@ -1,6 +1,11 @@
 <div class="toast-stack" aria-live="polite" aria-atomic="true">
   @for (toast of toastService.toasts(); track toast.id) {
-    <div class="toast" [class]="'toast toast--' + toast.tone">
+    <div
+      class="toast"
+      [class]="'toast toast--' + toast.tone + ' toast--' + toast.variant"
+      (mouseenter)="pauseToast(toast.id, toast.variant)"
+      (mouseleave)="resumeToast(toast.id, toast.variant)"
+    >
       <div class="toast__body">
         @if (toast.title) {
           <strong>{{ toast.title }}</strong>
@@ -13,10 +18,21 @@
             {{ toast.actionLabel }}
           </button>
         }
-        <button type="button" (click)="toastService.dismiss(toast.id)" aria-label="Dismiss notification">
+        <button
+          type="button"
+          (click)="toastService.dismiss(toast.id)"
+          [attr.aria-label]="i18n.t('common.dismissNotification')"
+        >
           <i class="fas fa-times"></i>
         </button>
       </div>
+      @if (toast.variant === 'app') {
+        <div
+          class="toast__progress"
+          [style.animation-duration.ms]="toast.durationMs"
+          [style.animation-play-state]="toastService.activePaused() ? 'paused' : 'running'"
+        ></div>
+      }
     </div>
   }
 </div>

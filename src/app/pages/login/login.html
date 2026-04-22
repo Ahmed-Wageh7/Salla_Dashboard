@@ -1,30 +1,34 @@
 <section class="login-page">
   <div class="login-page__panel">
     <div class="login-page__brand">
-      <img src="images1.png" alt="Salla logo" class="login-page__logo" />
+      <img src="images1.png" [alt]="i18n.t('app.brand') + ' logo'" class="login-page__logo" />
       <div>
-        <p class="login-page__eyebrow">Salla</p>
-        <h1>Sign in to Salla</h1>
+        <p class="login-page__eyebrow">{{ i18n.t('app.brand') }}</p>
+        <h1>{{ i18n.t('auth.login.title') }}</h1>
       </div>
     </div>
 
     <form class="login-form" [formGroup]="form" (ngSubmit)="submit()">
       <label class="login-form__field">
-        <span>Email</span>
-        <input type="email" formControlName="email" placeholder="Enter your email" />
+        <span>{{ i18n.t('auth.login.email') }}</span>
+        <input
+          type="email"
+          formControlName="email"
+          [placeholder]="i18n.t('auth.login.emailPlaceholder')"
+        />
       </label>
 
       <label class="login-form__field">
-        <span>Password</span>
-        <input type="password" formControlName="password" placeholder="Enter your password" />
+        <span>{{ i18n.t('auth.login.password') }}</span>
+        <input
+          type="password"
+          formControlName="password"
+          [placeholder]="i18n.t('auth.login.passwordPlaceholder')"
+        />
       </label>
 
-      @if (errorMessage()) {
-        <p class="login-form__error">{{ errorMessage() }}</p>
-      }
-
       <button class="login-form__submit" type="submit" [disabled]="isSubmitting()">
-        {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
+        {{ isSubmitting() ? i18n.t('auth.login.submitting') : i18n.t('auth.login.submit') }}
       </button>
     </form>
   </div>

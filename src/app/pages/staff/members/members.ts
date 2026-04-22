@@ -13,6 +13,7 @@ import {
 } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { StaffWorkspaceNavComponent } from '../workspace-nav/staff-workspace-nav';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 interface StaffFormState {
   id: string | null;
@@ -35,6 +36,7 @@ export class StaffMembersComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
+  readonly i18n = inject(TranslationService);
 
   readonly staffMembers = signal<StaffRecord[]>([]);
   readonly searchQuery = signal('');
@@ -86,7 +88,7 @@ export class StaffMembersComponent {
         this.isLoading.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to load staff members.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('staffPage.members.messages.loadError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isLoading.set(false);
@@ -131,21 +133,21 @@ export class StaffMembersComponent {
     const dailySalary = Number(form.dailySalary);
 
     if (!form.id && !form.user.trim()) {
-      const message = 'User ID is required when creating a staff record.';
+      const message = this.i18n.t('staffPage.members.messages.userRequired');
       this.errorMessage.set(message);
       this.toastService.error(message);
       return;
     }
 
     if (!Number.isFinite(dailySalary) || dailySalary < 0) {
-      const message = 'Daily salary must be a valid number.';
+      const message = this.i18n.t('staffPage.members.messages.salaryInvalid');
       this.errorMessage.set(message);
       this.toastService.error(message);
       return;
     }
 
     if (!form.joinDate.trim() || !form.department.trim()) {
-      const message = 'Join date and department are required.';
+      const message = this.i18n.t('staffPage.members.messages.joinDateDepartmentRequired');
       this.errorMessage.set(message);
       this.toastService.error(message);
       return;
@@ -179,17 +181,20 @@ export class StaffMembersComponent {
           action: form.id ? 'Staff Updated' : 'Staff Created',
           entityType: 'staff',
           entityId: this.id(record),
-          summary: `Staff record for ${this.userName(record)} was ${form.id ? 'updated' : 'created'}.`,
+          summary: this.i18n.t(
+            form.id ? 'staffPage.members.messages.auditUpdated' : 'staffPage.members.messages.auditCreated',
+            { name: this.userName(record) },
+          ),
         });
         this.syncStaffRecord(record);
         this.toastService.success(
-          form.id ? 'Staff updated successfully.' : 'Staff created successfully.',
+          this.i18n.t(form.id ? 'staffPage.members.messages.updated' : 'staffPage.members.messages.created'),
         );
         this.closeFormModal();
         this.isSaving.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to save staff record.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('staffPage.members.messages.saveError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isSaving.set(false);
@@ -220,16 +225,16 @@ export class StaffMembersComponent {
           action: 'Staff Deleted',
           entityType: 'staff',
           entityId: id,
-          summary: `Staff record ${id} was deleted.`,
+          summary: this.i18n.t('staffPage.members.messages.auditDeleted', { id }),
           status: 'warning',
         });
         this.staffMembers.update((records) => records.filter((record) => this.id(record) !== id));
-        this.toastService.success('Staff deleted successfully.');
+        this.toastService.success(this.i18n.t('staffPage.members.messages.deleted'));
         this.closeDeleteModal();
         this.isDeleting.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to delete staff record.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('staffPage.members.messages.deleteError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isDeleting.set(false);
@@ -254,7 +259,7 @@ export class StaffMembersComponent {
 
   userName(record: StaffRecord | null | undefined): string {
     const user = record?.user;
-    if (!user) return 'Unknown user';
+    if (!user) return this.i18n.t('staffPage.shared.unknownUser');
     return typeof user === 'string' ? user : user.name?.trim() || user.email?.trim() || this.userId(record);
   }
 
@@ -270,7 +275,7 @@ export class StaffMembersComponent {
   }
 
   statusLabel(record: StaffRecord | null | undefined): string {
-    return record?.isActive ? 'Active' : 'Inactive';
+    return record?.isActive ? this.i18n.t('staffPage.shared.active') : this.i18n.t('staffPage.shared.inactive');
   }
 
   joinDateLabel(record: StaffRecord | null | undefined): string {

@@ -1,32 +1,28 @@
 <section class="admin-page">
   <section class="panel staff-hero">
     <div class="staff-hero__content">
-      <p class="admin-page__eyebrow">Staff operations</p>
-      <h1>Staff workspace</h1>
+      <p class="admin-page__eyebrow">{{ i18n.t('staffPage.eyebrow') }}</p>
+      <h1>{{ i18n.t('staffPage.title') }}</h1>
       <p class="admin-page__subtitle">
-        Move between staff records, attendance, deductions, and salary without losing context. Each
-        workflow has a dedicated screen and a shared workspace switcher.
+        {{ i18n.t('staffPage.subtitle') }}
       </p>
 
       <div class="staff-hero__chips">
-        <span class="staff-chip">4 focused workflows</span>
-        <span class="staff-chip">Sidebar stays in sync</span>
-        <span class="staff-chip">Backend-ready staff CRUD</span>
+        <span class="staff-chip">{{ i18n.t('staffPage.chips.workflows') }}</span>
+        <span class="staff-chip">{{ i18n.t('staffPage.chips.sidebar') }}</span>
+        <span class="staff-chip">{{ i18n.t('staffPage.chips.backend') }}</span>
       </div>
     </div>
 
     <div class="staff-hero__aside">
-      <p class="staff-hero__aside-label">Recommended flow</p>
-      <h2>Create staff records first, then handle attendance, deductions, and salary actions.</h2>
-      <p>
-        Use the switcher below or the sidebar to jump between tasks without hunting for the right
-        page.
-      </p>
+      <p class="staff-hero__aside-label">{{ i18n.t('staffPage.recommendedLabel') }}</p>
+      <h2>{{ i18n.t('staffPage.recommendedTitle') }}</h2>
+      <p>{{ i18n.t('staffPage.recommendedDescription') }}</p>
     </div>
   </section>
 
   <div class="module-grid">
-    @for (module of modules; track module.route) {
+    @for (module of modules(); track module.route) {
       <a class="panel module-card" [routerLink]="module.route">
         <div class="module-card__icon">
           <i [class]="'fas ' + module.icon"></i>
@@ -39,7 +35,7 @@
         <div class="module-card__footer">
           <span class="module-card__cta">{{ module.ctaLabel }}</span>
           <span class="module-card__cta-icon">
-            <i class="fas fa-arrow-right"></i>
+            <i class="fas" [class.fa-arrow-right]="!i18n.isRtl()" [class.fa-arrow-left]="i18n.isRtl()"></i>
           </span>
         </div>
       </a>

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ToastService } from '../../shared/toast/toast.service';
+import { TranslationService } from '../../core/i18n/translation.service';
 
 @Component({
   selector: 'app-login-page',
@@ -18,6 +19,7 @@ export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
+  readonly i18n = inject(TranslationService);
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
@@ -39,11 +41,12 @@ export class LoginPageComponent {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.toastService.success('Signed in successfully.');
+        this.toastService.success(this.i18n.t('auth.login.success'));
         void this.router.navigateByUrl('/dashboard');
       },
       error: (error: { error?: { message?: string }; message?: string }) => {
-        const message = error?.error?.message || error?.message || 'Unable to sign in right now.';
+        const message =
+          error?.error?.message || error?.message || this.i18n.t('auth.login.unknownError');
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isSubmitting.set(false);

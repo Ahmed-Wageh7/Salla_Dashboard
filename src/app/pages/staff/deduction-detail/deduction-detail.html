@@ -1,42 +1,38 @@
 <section class="catalog-detail">
   <header class="catalog-detail__header">
     <div>
-      <p class="catalog-detail__eyebrow">Staff deductions</p>
-      <h1>Deduction details</h1>
+      <p class="catalog-detail__eyebrow">{{ i18n.t('staffPage.deductionDetail.eyebrow') }}</p>
+      <h1>{{ i18n.t('staffPage.deductionDetail.title') }}</h1>
       <p class="catalog-detail__subtitle">
-        Manage all deductions for one staff member in a full-width page.
+        {{ i18n.t('staffPage.deductionDetail.subtitle') }}
       </p>
     </div>
 
     <div class="catalog-detail__actions">
-      <a class="btn btn--ghost" routerLink="/staff/members">Staff members</a>
-      <a class="btn btn--ghost" routerLink="/staff/salary">Salary</a>
-      <a class="btn btn--secondary" routerLink="/staff/deductions">Back to deductions</a>
+      <a class="btn btn--ghost" routerLink="/staff/members">{{ i18n.t('staffPage.members.title') }}</a>
+      <a class="btn btn--ghost" routerLink="/staff/salary">{{ i18n.t('staffPage.salary.title') }}</a>
+      <a class="btn btn--secondary" routerLink="/staff/deductions">{{ i18n.t('staffPage.deductionDetail.back') }}</a>
     </div>
   </header>
 
-  @if (errorMessage()) {
-    <div class="catalog-detail__feedback catalog-detail__feedback--error">{{ errorMessage() }}</div>
-  }
-
   @if (isLoading()) {
     <section class="catalog-detail__panel">
-      <div class="catalog-detail__state">Loading deduction details...</div>
+      <div class="catalog-detail__state">{{ i18n.t('staffPage.deductionDetail.loading') }}</div>
     </section>
   } @else if (!staff()) {
     <section class="catalog-detail__panel">
-      <div class="catalog-detail__state">Staff member not found.</div>
+      <div class="catalog-detail__state">{{ i18n.t('staffPage.deductionDetail.notFound') }}</div>
     </section>
   } @else if (staff(); as currentStaff) {
     <section class="catalog-detail__grid">
       <article class="catalog-detail__panel">
-        <p class="catalog-detail__eyebrow">Staff summary</p>
+        <p class="catalog-detail__eyebrow">{{ i18n.t('staffPage.deductionDetail.summary') }}</p>
         <h2>{{ userName(currentStaff) }}</h2>
         <p class="catalog-detail__description">{{ currentStaff.department || '--' }}</p>
 
         <div class="catalog-detail__chips">
-          <span class="catalog-detail__chip">Total: {{ totalDeductions() | number: '1.2-2' }} ريال</span>
-          <span class="catalog-detail__chip">Month: {{ month() }}</span>
+          <span class="catalog-detail__chip">{{ i18n.t('staffPage.deductionDetail.total') }}: {{ totalDeductions() | number: '1.2-2' }} {{ i18n.t('common.currency') }}</span>
+          <span class="catalog-detail__chip">{{ i18n.t('staffPage.shared.month') }}: {{ month() }}</span>
           <span class="catalog-detail__chip deduction-detail__chip" [class.deduction-detail__chip--inactive]="!currentStaff.isActive">
             {{ statusLabel(currentStaff) }}
           </span>
@@ -44,23 +40,23 @@
 
         <div class="deduction-detail__toolbar">
           <label>
-            <span>Month</span>
+            <span>{{ i18n.t('staffPage.shared.month') }}</span>
             <input type="month" [ngModel]="month()" (ngModelChange)="setMonth($event)" />
           </label>
           <button class="btn btn--primary" type="button" (click)="openCreateDeductionModal()" [appCanDisable]="'deductions.write'" [appCanDisableReason]="'Requires deductions.write permission'">
-            Add deduction
+            {{ i18n.t('staffPage.deductionDetail.addDeduction') }}
           </button>
         </div>
       </article>
 
       <article class="catalog-detail__panel">
-        <h3>Staff details</h3>
+        <h3>{{ i18n.t('staffPage.deductionDetail.staffDetails') }}</h3>
         <dl class="catalog-detail__list">
-          <div><dt>Staff ID</dt><dd>{{ id(currentStaff) || '--' }}</dd></div>
-          <div><dt>User ID</dt><dd>{{ userId(currentStaff) || '--' }}</dd></div>
-          <div><dt>Email</dt><dd>{{ userEmail(currentStaff) || '--' }}</dd></div>
-          <div><dt>Join date</dt><dd>{{ joinDateLabel(currentStaff) }}</dd></div>
-          <div><dt>Daily salary</dt><dd>{{ currentStaff.dailySalary }} ريال</dd></div>
+          <div><dt>{{ i18n.t('staffPage.memberDetail.staffId') }}</dt><dd>{{ id(currentStaff) || '--' }}</dd></div>
+          <div><dt>{{ i18n.t('staffPage.memberDetail.userId') }}</dt><dd>{{ userId(currentStaff) || '--' }}</dd></div>
+          <div><dt>{{ i18n.t('staffPage.memberDetail.email') }}</dt><dd>{{ userEmail(currentStaff) || '--' }}</dd></div>
+          <div><dt>{{ i18n.t('staffPage.members.joinDate') }}</dt><dd>{{ joinDateLabel(currentStaff) }}</dd></div>
+          <div><dt>{{ i18n.t('staffPage.members.dailySalary') }}</dt><dd>{{ currentStaff.dailySalary }} {{ i18n.t('common.currency') }}</dd></div>
         </dl>
       </article>
     </section>
@@ -68,8 +64,8 @@
     <section class="catalog-detail__panel deduction-detail__table-panel">
       <div class="catalog-detail__header">
         <div>
-          <h3>Deduction records</h3>
-          <p>{{ visibleDeductions().length }} loaded for {{ month() }}.</p>
+          <h3>{{ i18n.t('staffPage.deductionDetail.records') }}</h3>
+          <p>{{ i18n.t('staffPage.deductionDetail.loadedForMonth', { count: visibleDeductions().length, month: month() }) }}</p>
         </div>
       </div>
 
@@ -77,10 +73,10 @@
         <table>
           <thead>
             <tr>
-              <th>Month</th>
-              <th>Reason</th>
-              <th>Amount</th>
-              <th>Date</th>
+              <th>{{ i18n.t('staffPage.shared.month') }}</th>
+              <th>{{ i18n.t('staffPage.deductionDetail.reason') }}</th>
+              <th>{{ i18n.t('staffPage.deductionDetail.amount') }}</th>
+              <th>{{ i18n.t('staffPage.deductionDetail.date') }}</th>
               <th class="table-actions"></th>
             </tr>
           </thead>
@@ -89,22 +85,22 @@
               <tr>
                 <td>{{ deduction.month }}</td>
                 <td>{{ deduction.reason }}</td>
-                <td>{{ deduction.amount | number: '1.2-2' }} ريال</td>
+                <td>{{ deduction.amount | number: '1.2-2' }} {{ i18n.t('common.currency') }}</td>
                 <td>{{ deduction.date | slice: 0 : 10 }}</td>
                 <td>
                   <div class="row-actions row-actions--product">
                     <button class="btn btn--danger" type="button" [appCanDisable]="'deductions.write'" [appCanDisableReason]="'Requires deductions.write permission'" (click)="deleteDeduction(deduction)">
-                      Delete
+                      {{ i18n.t('productsPage.delete') }}
                     </button>
                     <button class="btn btn--primary" type="button" [appCanDisable]="'deductions.write'" [appCanDisableReason]="'Requires deductions.write permission'" (click)="editDeduction(deduction)">
-                      Edit
+                      {{ i18n.t('productsPage.edit') }}
                     </button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="5" class="empty-row">No deductions found for the selected month.</td>
+                <td colspan="5" class="empty-row">{{ i18n.t('staffPage.deductionDetail.noRows') }}</td>
               </tr>
             }
           </tbody>
@@ -116,38 +112,38 @@
 
 @if (isDeductionModalOpen()) {
   <div class="modal-backdrop" (click)="closeDeductionModal()"></div>
-  <section class="modal-card" role="dialog" aria-modal="true" aria-label="Deduction form">
+  <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t('staffPage.deductionDetail.formTitle')">
     <div class="modal-card__header">
       <div>
-        <p class="modal-card__eyebrow">Deduction form</p>
-        <h2>{{ deductionForm().id ? 'Edit deduction' : 'Add deduction' }}</h2>
+        <p class="modal-card__eyebrow">{{ i18n.t('staffPage.deductionDetail.formEyebrow') }}</p>
+        <h2>{{ deductionForm().id ? i18n.t('staffPage.deductionDetail.editDeduction') : i18n.t('staffPage.deductionDetail.addDeduction') }}</h2>
       </div>
-      <button class="modal-card__close" type="button" (click)="closeDeductionModal()" aria-label="Close deduction form">
+      <button class="modal-card__close" type="button" (click)="closeDeductionModal()" [attr.aria-label]="i18n.t('common.close')">
         <i class="fas fa-times"></i>
       </button>
     </div>
 
     <form class="form-grid" (ngSubmit)="saveDeduction()">
       <label>
-        <span>Month</span>
+        <span>{{ i18n.t('staffPage.shared.month') }}</span>
         <input type="month" [ngModel]="deductionForm().month" name="month" (ngModelChange)="updateDeductionField('month', $event)" />
       </label>
       <label>
-        <span>Amount</span>
+        <span>{{ i18n.t('staffPage.deductionDetail.amount') }}</span>
         <input type="number" [ngModel]="deductionForm().amount" name="amount" (ngModelChange)="updateDeductionField('amount', $event)" />
       </label>
       <label class="form-grid__wide">
-        <span>Reason</span>
+        <span>{{ i18n.t('staffPage.deductionDetail.reason') }}</span>
         <input type="text" [ngModel]="deductionForm().reason" name="reason" (ngModelChange)="updateDeductionField('reason', $event)" />
       </label>
       <label class="form-grid__wide">
-        <span>Date</span>
+        <span>{{ i18n.t('staffPage.deductionDetail.date') }}</span>
         <input type="date" [ngModel]="deductionForm().date" name="date" (ngModelChange)="updateDeductionField('date', $event)" />
       </label>
       <div class="form-grid__actions">
-        <button class="btn btn--ghost" type="button" (click)="closeDeductionModal()">Cancel</button>
+        <button class="btn btn--ghost" type="button" (click)="closeDeductionModal()">{{ i18n.t('common.cancel') }}</button>
         <button class="btn btn--primary" type="submit" [disabled]="isBusy()" [appCanDisable]="'deductions.write'" [appCanDisableReason]="'Requires deductions.write permission'">
-          {{ deductionForm().id ? 'Update deduction' : 'Save deduction' }}
+          {{ deductionForm().id ? i18n.t('staffPage.deductionDetail.updateDeduction') : i18n.t('staffPage.deductionDetail.saveDeduction') }}
         </button>
       </div>
     </form>

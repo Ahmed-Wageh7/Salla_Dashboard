@@ -3,6 +3,7 @@ import { SidebarComponent } from '../components/sidebar/sidebar';
 import { HeaderComponent } from '../components/header/header';
 import { RouterOutlet } from '@angular/router';
 import { AccessControlService } from '../core/auth/access-control.service';
+import { TranslationService } from '../core/i18n/translation.service';
 
 @Component({
   selector: 'app-layout',
@@ -14,6 +15,7 @@ import { AccessControlService } from '../core/auth/access-control.service';
 })
 export class Layout {
   private readonly accessControl = inject(AccessControlService);
+  readonly i18n = inject(TranslationService);
   readonly sidebarOpen = signal(false);
   readonly hasAttendanceWriteOnlyAccess = computed(
     () =>

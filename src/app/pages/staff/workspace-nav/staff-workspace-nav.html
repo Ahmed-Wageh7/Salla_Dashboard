@@ -1,5 +1,5 @@
-<nav class="workspace-nav" aria-label="Staff workspaces">
-  @for (section of sections; track section.id) {
+<nav class="workspace-nav" [attr.aria-label]="i18n.t('staffPage.workspaceAria')">
+  @for (section of sections(); track section.id) {
     <a
       class="workspace-nav__card"
       [routerLink]="section.route"
@@ -18,7 +18,7 @@
 
       <span class="workspace-nav__action">
         {{ section.ctaLabel }}
-        <i class="fas fa-arrow-right"></i>
+        <i class="fas" [class.fa-arrow-right]="!i18n.isRtl()" [class.fa-arrow-left]="i18n.isRtl()"></i>
       </span>
     </a>
   }

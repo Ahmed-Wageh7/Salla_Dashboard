@@ -1,8 +1,4 @@
 <section class="orders-page" (click)="closeMenu()">
-  @if (errorMessage()) {
-    <div class="feedback feedback--error">{{ errorMessage() }}</div>
-  }
-
   <section class="orders-shell">
     <div class="orders-tabs">
       @for (tab of orderedTabs(); track tab.key) {
@@ -12,7 +8,7 @@
           [class.orders-tab--active]="activeTab() === tab.key"
           (click)="setActiveTab(tab.key)"
         >
-          <span>{{ tab.label }}</span>
+          <span>{{ tabLabel(tab.label) }}</span>
           <strong>{{ tab.count }}</strong>
         </button>
       }
@@ -23,7 +19,7 @@
         <i class="fas fa-search"></i>
         <input
           type="search"
-          placeholder="Search"
+          [placeholder]="i18n.t('ordersPage.searchPlaceholder')"
           [ngModel]="searchQuery()"
           (ngModelChange)="updateSearch($event)"
           (click)="$event.stopPropagation()"
@@ -33,26 +29,26 @@
       <div class="orders-toolbar__filters" (click)="$event.stopPropagation()">
         <select [ngModel]="sourceFilter()" (ngModelChange)="updateSourceFilter($event)">
           @for (source of sourceOptions; track source) {
-            <option [ngValue]="source">{{ source }}</option>
+            <option [ngValue]="source">{{ sourceLabel(source) }}</option>
           }
         </select>
 
         <select [ngModel]="paymentFilter()" (ngModelChange)="updatePaymentFilter($event)">
-          <option value="All">All payments</option>
+          <option value="All">{{ i18n.t('ordersPage.filters.allPayments') }}</option>
           @for (payment of paymentOptions; track payment) {
-            <option [ngValue]="payment">{{ payment }}</option>
+            <option [ngValue]="payment">{{ paymentLabel(payment) }}</option>
           }
         </select>
 
         <select [ngModel]="paymentStatusFilter()" (ngModelChange)="updatePaymentStatusFilter($event)">
-          <option value="All">All payment states</option>
+          <option value="All">{{ i18n.t('ordersPage.filters.allPaymentStates') }}</option>
           @for (paymentStatus of paymentStatusOptions; track paymentStatus) {
-            <option [ngValue]="paymentStatus">{{ paymentStatus }}</option>
+            <option [ngValue]="paymentStatus">{{ paymentStatusLabel(paymentStatus) }}</option>
           }
         </select>
 
         <button class="action-button action-button--secondary action-button--compact" type="button" (click)="clearFilters()">
-          Reset
+          {{ i18n.t('ordersPage.filters.reset') }}
         </button>
       </div>
     </div>
@@ -61,45 +57,45 @@
       <div class="state-card loading-state">
         <div class="loading-spinner" aria-hidden="true"></div>
         <div class="loading-copy">
-          <strong>Loading orders</strong>
-          <p>Fetching the latest data from the backend.</p>
+          <strong>{{ i18n.t('ordersPage.loadingTitle') }}</strong>
+          <p>{{ i18n.t('ordersPage.loadingDescription') }}</p>
         </div>
       </div>
     } @else if (filteredOrders().length === 0) {
-      <div class="state-card">No orders matched the current filters.</div>
+      <div class="state-card">{{ i18n.t('ordersPage.emptyState') }}</div>
     } @else {
       <div class="orders-table-wrap" [@pageSwap]="currentPage()">
         <table class="orders-table">
           <thead>
             <tr>
               <th class="orders-table__expander"></th>
-              <th class="orders-table__checkbox"><input type="checkbox" aria-label="Select all orders" /></th>
-              <th>Order number <span>Source</span></th>
-              <th>Customer <span>Mobile</span></th>
-              <th>Payment</th>
-              <th>Payment status</th>
-              <th>Shipping</th>
-              <th>Total <span>Currency</span></th>
-              <th>Status</th>
-              <th>Tags</th>
-              <th>Created date <span>Updated date</span></th>
+              <th class="orders-table__checkbox"><input type="checkbox" [attr.aria-label]="i18n.t('ordersPage.selectAll')" /></th>
+              <th>{{ i18n.t('ordersPage.columns.orderNumber') }} <span>{{ i18n.t('ordersPage.columns.source') }}</span></th>
+              <th>{{ i18n.t('ordersPage.columns.customer') }} <span>{{ i18n.t('ordersPage.columns.mobile') }}</span></th>
+              <th>{{ i18n.t('ordersPage.columns.payment') }}</th>
+              <th>{{ i18n.t('ordersPage.columns.paymentStatus') }}</th>
+              <th>{{ i18n.t('ordersPage.columns.shipping') }}</th>
+              <th>{{ i18n.t('ordersPage.columns.total') }} <span>{{ i18n.t('ordersPage.columns.currency') }}</span></th>
+              <th>{{ i18n.t('ordersPage.columns.status') }}</th>
+              <th>{{ i18n.t('ordersPage.columns.tags') }}</th>
+              <th>{{ i18n.t('ordersPage.columns.createdDate') }} <span>{{ i18n.t('ordersPage.columns.updatedDate') }}</span></th>
             </tr>
           </thead>
           <tbody>
             @for (order of paginatedOrders(); track trackById($index, order)) {
               <tr>
                 <td class="orders-table__expander">
-                  <button class="chevron-button" type="button" aria-label="Expand order">
+                  <button class="chevron-button" type="button" [attr.aria-label]="i18n.t('ordersPage.expandOrder')">
                     <i class="fas fa-chevron-down"></i>
                   </button>
                 </td>
                 <td class="orders-table__checkbox">
-                  <input type="checkbox" [attr.aria-label]="'Select order ' + order.orderNumber" />
+                  <input type="checkbox" [attr.aria-label]="i18n.t('ordersPage.selectOrder', { orderNumber: order.orderNumber })" />
                 </td>
                 <td>
                   <div class="cell-stack">
                     <strong>{{ order.orderNumber }}</strong>
-                    <span>{{ order.source }}</span>
+                    <span>{{ sourceLabel(order.source) }}</span>
                   </div>
                 </td>
                 <td>
@@ -110,12 +106,12 @@
                 </td>
                 <td>
                   <span class="payment-pill" [class]="'payment-pill payment-pill--' + paymentMethodClass(order.payment)">
-                    {{ order.payment }}
+                    {{ paymentLabel(order.payment) }}
                   </span>
                 </td>
                 <td>
                   <span class="status-pill" [class]="'status-pill status-pill--' + paymentTone(order.paymentStatus)">
-                    {{ order.paymentStatus }}
+                    {{ paymentStatusLabel(order.paymentStatus) }}
                   </span>
                 </td>
                 <td>
@@ -140,7 +136,7 @@
                       [appCanDisableReason]="'Requires orders.write permission'"
                       (click)="toggleMenu(order.id)"
                     >
-                      {{ order.status }}
+                      {{ orderStatusLabel(order.status) }}
                       <i class="fas fa-chevron-down"></i>
                     </button>
 
@@ -149,7 +145,7 @@
                         @for (status of statusOptions; track status) {
                           <button class="option-row" type="button" [appCanDisable]="'orders.write'" [appCanDisableReason]="'Requires orders.write permission'" (click)="changeStatus(order, status)">
                             <span class="option-row__radio" [class.option-row__radio--active]="order.status === status"></span>
-                            {{ status }}
+                            {{ orderStatusLabel(status) }}
                           </button>
                         }
                       </div>
@@ -174,14 +170,20 @@
       @if (totalPages() > 1) {
         <div class="pagination">
           <span class="pagination__summary">
-            {{ visibleRange().start }}-{{ visibleRange().end }} of {{ filteredOrders().length }}
+            {{
+              i18n.t('ordersPage.paginationSummary', {
+                start: visibleRange().start,
+                end: visibleRange().end,
+                total: filteredOrders().length,
+              })
+            }}
           </span>
 
           <div class="pagination__controls">
             <button
               class="pagination__arrow"
               type="button"
-              aria-label="Previous page"
+              [attr.aria-label]="i18n.t('ordersPage.previousPage')"
               [disabled]="currentPage() === 1"
               (click)="previousPage()"
             >
@@ -202,7 +204,7 @@
             <button
               class="pagination__arrow"
               type="button"
-              aria-label="Next page"
+              [attr.aria-label]="i18n.t('ordersPage.nextPage')"
               [disabled]="currentPage() === totalPages()"
               (click)="nextPage()"
             >

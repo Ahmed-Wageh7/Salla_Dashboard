@@ -9,11 +9,15 @@ import { StaffSalaryComponent } from './salary/salary';
 
 export const STAFF_ROUTES: Routes = [
   { path: '', redirectTo: 'members', pathMatch: 'full' },
-  { path: 'members/:id', component: StaffMemberDetailComponent, title: 'Staff Details | Salla Dashboard' },
-  { path: 'members', component: StaffMembersComponent, title: 'Staff Members | Salla Dashboard' },
-  { path: 'attendance', component: StaffAttendanceComponent, title: 'Attendance | Salla Dashboard' },
-  { path: 'deductions/:id', component: StaffDeductionDetailComponent, title: 'Deduction Details | Salla Dashboard' },
-  { path: 'deductions', component: StaffDeductionsComponent, title: 'Deductions | Salla Dashboard' },
-  { path: 'salary/:id', component: StaffSalaryDetailComponent, title: 'Salary Details | Salla Dashboard' },
-  { path: 'salary', component: StaffSalaryComponent, title: 'Salary | Salla Dashboard' },
+  { path: 'members/:id', component: StaffMemberDetailComponent, data: { titleKey: 'routes.staffDetails' } },
+  { path: 'members', component: StaffMembersComponent, data: { titleKey: 'routes.staffMembers' } },
+  { path: 'attendance', component: StaffAttendanceComponent, data: { titleKey: 'routes.attendance' } },
+  {
+    path: 'deductions/:id',
+    component: StaffDeductionDetailComponent,
+    data: { titleKey: 'routes.deductionDetails' },
+  },
+  { path: 'deductions', component: StaffDeductionsComponent, data: { titleKey: 'routes.deductions' } },
+  { path: 'salary/:id', component: StaffSalaryDetailComponent, data: { titleKey: 'routes.salaryDetails' } },
+  { path: 'salary', component: StaffSalaryComponent, data: { titleKey: 'routes.salary' } },
 ];

@@ -478,6 +478,31 @@ input[type='checkbox'] {
   cursor: not-allowed;
 }
 
+:host-context([dir='rtl']) {
+  th,
+  td,
+  .entity-link,
+  .cell-stack,
+  .search-field input {
+    text-align: right;
+  }
+
+  .row-actions,
+  .toolbar,
+  .admin-page__actions,
+  .admin-page__intro {
+    direction: rtl;
+  }
+
+  .row-actions--product {
+    justify-content: flex-start;
+  }
+
+  .pagination__arrow i {
+    transform: scaleX(-1);
+  }
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;

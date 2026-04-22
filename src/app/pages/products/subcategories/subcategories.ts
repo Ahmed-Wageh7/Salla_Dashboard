@@ -12,6 +12,7 @@ import {
   SubcategoryRecord,
 } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 interface SubcategoryFormState {
   id: string | null;
@@ -32,6 +33,7 @@ export class SubcategoriesComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
+  readonly i18n = inject(TranslationService);
   private readonly pageSize = 10;
   private readonly pageWindowSize = 4;
 
@@ -115,13 +117,13 @@ export class SubcategoriesComponent {
     forkJoin({
       categories: this.adminApi.getCategories().pipe(
         catchError((error) => {
-          loadError ||= this.getApiErrorMessage(error, 'Unable to load categories.');
+          loadError ||= this.getApiErrorMessage(error, this.i18n.t('subcategoryPage.messages.categoriesError'));
           return of([] as CategoryRecord[]);
         }),
       ),
       subcategories: this.adminApi.getSubcategories().pipe(
         catchError((error) => {
-          loadError ||= this.getApiErrorMessage(error, 'Unable to load subcategories.');
+          loadError ||= this.getApiErrorMessage(error, this.i18n.t('subcategoryPage.messages.loadError'));
           return of([] as SubcategoryRecord[]);
         }),
       ),
@@ -186,7 +188,7 @@ export class SubcategoriesComponent {
     };
 
     if (!payload.name || !payload.category) {
-      const message = 'Subcategory name and category are required.';
+      const message = this.i18n.t('subcategoryPage.messages.required');
       this.errorMessage.set(message);
       this.toastService.error(message);
       return;
@@ -206,7 +208,12 @@ export class SubcategoriesComponent {
           action: form.id ? 'Subcategory Updated' : 'Subcategory Created',
           entityType: 'subcategory',
           entityId: this.id(normalizedSubcategory),
-          summary: `Subcategory "${payload.name}" was ${form.id ? 'updated' : 'created'}.`,
+          summary: this.i18n.t(
+            form.id
+              ? 'subcategoryPage.messages.auditUpdated'
+              : 'subcategoryPage.messages.auditCreated',
+            { name: payload.name },
+          ),
         });
 
         this.subcategories.update((current) => {
@@ -228,13 +235,15 @@ export class SubcategoriesComponent {
         this.syncCurrentPage();
 
         this.toastService.success(
-          form.id ? 'Subcategory updated successfully.' : 'Subcategory created successfully.',
+          this.i18n.t(
+            form.id ? 'subcategoryPage.messages.updated' : 'subcategoryPage.messages.created',
+          ),
         );
         this.closeFormModal();
         this.isSaving.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to save subcategory.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('subcategoryPage.messages.saveError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isSaving.set(false);
@@ -265,14 +274,14 @@ export class SubcategoriesComponent {
           action: 'Subcategory Deleted',
           entityType: 'subcategory',
           entityId: id,
-          summary: `Subcategory ${id} was deleted.`,
+          summary: this.i18n.t('subcategoryPage.messages.auditDeleted', { id }),
           status: 'warning',
         });
         this.subcategories.update((current) =>
           current.filter((subcategory) => this.id(subcategory) !== id),
         );
         this.syncCurrentPage();
-        this.toastService.success('Subcategory deleted successfully.');
+        this.toastService.success(this.i18n.t('subcategoryPage.messages.deleted'));
         if (this.form().id === id) {
           this.closeFormModal();
         }
@@ -280,7 +289,7 @@ export class SubcategoriesComponent {
         this.isDeleting.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to delete subcategory.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('subcategoryPage.messages.deleteError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isDeleting.set(false);

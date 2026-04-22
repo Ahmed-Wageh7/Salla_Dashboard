@@ -1,10 +1,18 @@
 <div class="header-wrap">
   <!-- ── Main header bar ── -->
-  <header class="header">
+  <header
+    class="header"
+    [class.header--rtl]="currentLanguage() === 'ar'"
+    [attr.dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'"
+  >
     <!-- Right group -->
     <div class="header__group header__group--right">
       <!-- Hamburger (mobile only) -->
-      <button class="header__hamburger" (click)="menuToggle.emit()" aria-label="Toggle sidebar">
+      <button
+        class="header__hamburger"
+        (click)="menuToggle.emit()"
+        [attr.aria-label]="i18n.t('header.toggleSidebar')"
+      >
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -38,13 +46,13 @@
 
       <!-- Icon group -->
       <div class="header__icons">
-        <div class="header__balance" title="Current access role">
-          <span class="header__balance-amount">{{ accessControl.roleLabel() }}</span>
-          <span class="header__balance-currency">Role</span>
+        <div class="header__balance" [attr.title]="i18n.t('header.currentAccessRole')">
+          <span class="header__balance-amount">{{ roleLabel() }}</span>
+          <span class="header__balance-currency">{{ i18n.t('common.role') }}</span>
         </div>
 
         <!-- Balance chip -->
-        <div class="header__balance" title="Wallet balance">
+        <div class="header__balance" [attr.title]="i18n.t('common.walletBalance')">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -57,7 +65,7 @@
             <line x1="1" y1="10" x2="23" y2="10" stroke-linecap="round" />
           </svg>
           <span class="header__balance-amount">{{ balance() }}</span>
-          <span class="header__balance-currency">{{ balanceCurrency() }}</span>
+          <span class="header__balance-currency">{{ displayBalanceCurrency() }}</span>
         </div>
 
         <!-- Support / headset
@@ -80,7 +88,16 @@
           </svg>
         </button> -->
 
-        <!-- Language toggle -->
+        <div class="header__language" role="group" [attr.aria-label]="i18n.t('language.toggleLabel')">
+          <button
+            type="button"
+            class="header__language-btn"
+            [attr.aria-label]="nextLanguageAria()"
+            (click)="toggleLanguage()"
+          >
+            {{ nextLanguageShort() }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -103,9 +120,9 @@
           type="search"
           [ngModel]="searchQuery()"
           (ngModelChange)="searchQuery.set($event)"
-          placeholder="Search..."
+          [placeholder]="i18n.t('header.searchPlaceholder')"
           class="header__search-input"
-          aria-label="Search Salla"
+          [attr.aria-label]="i18n.t('header.searchAria')"
         />
         <!-- <kbd class="header__search-kbd"></kbd> -->
       </div>
@@ -113,7 +130,11 @@
 
     <!-- Left group -->
     <div class="header__group header__group--left">
-      <a class="header__phone" href="tel:01099567735" aria-label="Call 01099567735">
+      <a
+        class="header__phone"
+        href="tel:01099567735"
+        [attr.aria-label]="i18n.t('common.callSupport')"
+      >
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -139,7 +160,7 @@
         <button
           class="header__icon-btn"
           type="button"
-          aria-label="Notifications"
+          [attr.aria-label]="i18n.t('common.notifications')"
           (click)="openNotificationsPage()"
         >
           <svg
@@ -165,11 +186,17 @@
       </div>
 
       <!-- User avatar -->
-      <button class="header__avatar" aria-label="User menu" aria-haspopup="true">
+      <button
+        class="header__avatar"
+        [attr.aria-label]="i18n.t('common.userMenu')"
+        aria-haspopup="true"
+      >
         <img src="images1.png" alt="" />
       </button>
 
-      <button class="header__logout" type="button" (click)="logout()">Logout</button>
+      <button class="header__logout" type="button" (click)="logout()">
+        {{ i18n.t('common.logout') }}
+      </button>
     </div>
   </header>
 </div>

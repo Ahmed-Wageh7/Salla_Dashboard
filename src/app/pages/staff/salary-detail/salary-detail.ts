@@ -9,6 +9,7 @@ import { AuditLogService } from '../../../services/audit-log.service';
 import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import { SalaryAdjustmentPayload, SalaryRecord, StaffRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 @Component({
   selector: 'app-staff-salary-detail',
@@ -24,6 +25,7 @@ export class StaffSalaryDetailComponent {
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  readonly i18n = inject(TranslationService);
 
   readonly staff = signal<StaffRecord | null>(null);
   readonly salary = signal<SalaryRecord | null>(null);
@@ -40,9 +42,9 @@ export class StaffSalaryDetailComponent {
   readonly netSalary = computed(() => this.numberValue('finalSalary', 'netSalary', 'total', 'amount'));
   readonly salaryStatus = computed(() => {
     const salary = this.salary();
-    if (!salary) return 'Not loaded';
-    if (this.isSalaryMarkedPaid(salary)) return 'Paid';
-    return 'Pending';
+    if (!salary) return this.i18n.t('staffPage.salaryDetail.statusNotLoaded');
+    if (this.isSalaryMarkedPaid(salary)) return this.i18n.t('staffPage.salaryDetail.paid');
+    return this.i18n.t('staffPage.salaryDetail.pending');
   });
 
   constructor() {
@@ -67,7 +69,7 @@ export class StaffSalaryDetailComponent {
           }
         },
         error: (error) => {
-          this.errorMessage.set(error?.error?.message || 'Unable to load staff details.');
+          this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.salaryDetail.messages.loadError'));
           this.isLoading.set(false);
         },
       });
@@ -93,7 +95,7 @@ export class StaffSalaryDetailComponent {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to load salary details.');
+        this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.salaryDetail.messages.loadSalary'));
         this.isBusy.set(false);
         this.isLoading.set(false);
       },
@@ -121,11 +123,11 @@ export class StaffSalaryDetailComponent {
           entityId: `${staffId}:${month}`,
           summary: `Salary for ${this.userName(this.staff())} was adjusted to ${payload.finalSalary}.`,
         });
-        this.toastService.success('Salary adjusted successfully.');
+        this.toastService.success(this.i18n.t('staffPage.salaryDetail.messages.adjusted'));
         this.loadSalary();
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to adjust salary.');
+        this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.salaryDetail.messages.adjustError'));
         this.toastService.error(this.errorMessage());
         this.isBusy.set(false);
       },
@@ -149,11 +151,11 @@ export class StaffSalaryDetailComponent {
           summary: `Salary payment was submitted for ${this.userName(this.staff())} (${month}).`,
         });
         this.localPaidOverride.set(true);
-        this.toastService.success('Salary payment sent successfully.');
+        this.toastService.success(this.i18n.t('staffPage.salaryDetail.messages.paid'));
         this.loadSalary();
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to pay salary.');
+        this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.salaryDetail.messages.payError'));
         this.toastService.error(this.errorMessage());
         this.isBusy.set(false);
       },
@@ -173,7 +175,7 @@ export class StaffSalaryDetailComponent {
 
   userName(record: StaffRecord | null | undefined): string {
     const user = record?.user;
-    if (!user) return 'Unknown user';
+    if (!user) return this.i18n.t('staffPage.shared.unknownUser');
     return typeof user === 'string' ? user : user.name?.trim() || user.email?.trim() || this.userId(record);
   }
 
@@ -188,7 +190,7 @@ export class StaffSalaryDetailComponent {
   }
 
   statusLabel(record: StaffRecord | null | undefined): string {
-    return record?.isActive ? 'Active' : 'Inactive';
+    return record?.isActive ? this.i18n.t('staffPage.shared.active') : this.i18n.t('staffPage.shared.inactive');
   }
 
   private numberValue(...keys: string[]): number {

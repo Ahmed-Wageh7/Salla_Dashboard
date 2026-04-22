@@ -7,6 +7,7 @@ import { AuditLogService } from '../../../services/audit-log.service';
 import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import { CategoryPayload, CategoryRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 interface CategoryFormState {
   id: string | null;
@@ -26,6 +27,7 @@ export class CategoriesComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
+  readonly i18n = inject(TranslationService);
 
   readonly categories = signal<CategoryRecord[]>([]);
   readonly isLoading = signal(true);
@@ -66,7 +68,7 @@ export class CategoriesComponent {
         this.isLoading.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to load categories.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('categoryPage.messages.loadError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isLoading.set(false);
@@ -111,7 +113,7 @@ export class CategoriesComponent {
     };
 
     if (!payload.name) {
-      const message = 'Category name is required.';
+      const message = this.i18n.t('categoryPage.messages.requiredName');
       this.errorMessage.set(message);
       this.toastService.error(message);
       return;
@@ -130,17 +132,22 @@ export class CategoriesComponent {
           action: form.id ? 'Category Updated' : 'Category Created',
           entityType: 'category',
           entityId: this.id(category),
-          summary: `Category "${payload.name}" was ${form.id ? 'updated' : 'created'}.`,
+          summary: this.i18n.t(
+            form.id ? 'categoryPage.messages.auditUpdated' : 'categoryPage.messages.auditCreated',
+            { name: payload.name },
+          ),
         });
         this.toastService.success(
-          form.id ? 'Category updated successfully.' : 'Category created successfully.',
+          this.i18n.t(
+            form.id ? 'categoryPage.messages.updated' : 'categoryPage.messages.created',
+          ),
         );
         this.closeFormModal();
         this.loadCategories();
         this.isSaving.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to save category.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('categoryPage.messages.saveError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isSaving.set(false);
@@ -171,10 +178,10 @@ export class CategoriesComponent {
           action: 'Category Deleted',
           entityType: 'category',
           entityId: id,
-          summary: `Category ${id} was deleted.`,
+          summary: this.i18n.t('categoryPage.messages.auditDeleted', { id }),
           status: 'warning',
         });
-        this.toastService.success('Category deleted successfully.');
+        this.toastService.success(this.i18n.t('categoryPage.messages.deleted'));
         if (this.form().id === id) {
           this.closeFormModal();
         }
@@ -183,7 +190,7 @@ export class CategoriesComponent {
         this.isDeleting.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to delete category.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('categoryPage.messages.deleteError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isDeleting.set(false);

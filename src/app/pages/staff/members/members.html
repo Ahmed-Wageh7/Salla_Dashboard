@@ -3,29 +3,24 @@
     <div class="admin-page__intro">
       <div class="admin-page__count">{{ filteredStaff().length }}</div>
       <div>
-        <p class="admin-page__eyebrow">Admin staff</p>
-        <h1>Staff members</h1>
+        <p class="admin-page__eyebrow">{{ i18n.t('staffPage.members.eyebrow') }}</p>
+        <h1>{{ i18n.t('staffPage.members.title') }}</h1>
         <p class="admin-page__subtitle">
-          Create staff records, review account links, and manage payroll-ready profiles in one
-          workspace.
+          {{ i18n.t('staffPage.members.subtitle') }}
         </p>
       </div>
     </div>
 
     <div class="action-row">
       <button class="btn btn--ghost" type="button" routerLink="/staff/attendance">
-        Attendance
+        {{ i18n.t('staffPage.members.attendance') }}
       </button>
-      <button class="btn btn--secondary" type="button" (click)="loadStaff()">Refresh</button>
+      <button class="btn btn--secondary" type="button" (click)="loadStaff()">{{ i18n.t('common.refresh') }}</button>
       <button class="btn btn--primary" type="button" (click)="openCreateModal()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'">
-        New staff member
+        {{ i18n.t('staffPage.members.newStaff') }}
       </button>
     </div>
   </header>
-
-  @if (errorMessage()) {
-    <div class="feedback feedback--error">{{ errorMessage() }}</div>
-  }
 
   <app-staff-workspace-nav />
 
@@ -33,8 +28,8 @@
     <section class="panel panel--list">
       <div class="panel__header panel__header--split">
         <div>
-          <h2>Staff list</h2>
-          <small>Browse, edit, or delete staff records from the admin API.</small>
+          <h2>{{ i18n.t('staffPage.members.listTitle') }}</h2>
+          <small>{{ i18n.t('staffPage.members.listSubtitle') }}</small>
         </div>
 
         <div class="toolbar">
@@ -42,7 +37,7 @@
             <i class="fas fa-search"></i>
             <input
               type="search"
-              placeholder="Search by name, email, ID, or department"
+              [placeholder]="i18n.t('staffPage.members.searchPlaceholder')"
               [ngModel]="searchQuery()"
               (ngModelChange)="updateSearch($event)"
             />
@@ -51,18 +46,18 @@
       </div>
 
       @if (isLoading()) {
-        <div class="state-card">Loading staff members...</div>
+        <div class="state-card">{{ i18n.t('staffPage.members.loading') }}</div>
       } @else if (filteredStaff().length === 0) {
-        <div class="state-card">No staff records matched the current search.</div>
+        <div class="state-card">{{ i18n.t('staffPage.members.empty') }}</div>
       } @else {
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Staff</th>
-                <th>Department</th>
-                <th>Salary</th>
-                <th>Status</th>
+                <th>{{ i18n.t('staffPage.members.columns.staff') }}</th>
+                <th>{{ i18n.t('staffPage.members.columns.department') }}</th>
+                <th>{{ i18n.t('staffPage.members.columns.salary') }}</th>
+                <th>{{ i18n.t('staffPage.members.columns.status') }}</th>
                 <th class="table-actions"></th>
               </tr>
             </thead>
@@ -72,12 +67,12 @@
                   <td>
                     <div class="cell-stack">
                       <strong>{{ userName(record) }}</strong>
-                      <small>{{ userEmail(record) || userId(record) || 'No user details' }}</small>
-                      <small>ID: {{ id(record) || 'Missing ID' }}</small>
+                      <small>{{ userEmail(record) || userId(record) || i18n.t('staffPage.members.noUserDetails') }}</small>
+                      <small>{{ i18n.t('staffPage.members.idLabel') }}: {{ id(record) || i18n.t('staffPage.members.missingId') }}</small>
                     </div>
                   </td>
                   <td>{{ record.department || '--' }}</td>
-                  <td>{{ record.dailySalary }} ريال</td>
+                  <td>{{ record.dailySalary }} {{ i18n.t('common.currency') }}</td>
                   <td>
                     <span class="status-pill" [class.status-pill--inactive]="!record.isActive">
                       {{ statusLabel(record) }}
@@ -85,12 +80,12 @@
                   </td>
                   <td>
                     <div class="row-actions row-actions--product">
-                      <a class="btn btn--ghost" [routerLink]="['/staff/members', id(record)]">View</a>
+                      <a class="btn btn--ghost" [routerLink]="['/staff/members', id(record)]">{{ i18n.t('common.view') }}</a>
                       <button class="btn btn--danger" type="button" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="requestDelete(record)">
-                        Delete
+                        {{ i18n.t('productsPage.delete') }}
                       </button>
                       <button class="btn btn--primary" type="button" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="openEditModal(record)">
-                        Edit
+                        {{ i18n.t('productsPage.edit') }}
                       </button>
                     </div>
                   </td>
@@ -106,18 +101,18 @@
 
 @if (isFormModalOpen()) {
   <div class="modal-backdrop" (click)="closeFormModal()"></div>
-  <section class="modal-card" role="dialog" aria-modal="true" aria-label="Staff form">
+  <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t('staffPage.members.formTitle')">
     <div class="modal-card__header">
       <div>
-        <p class="modal-card__eyebrow">Staff management</p>
-        <h2>{{ form().id ? 'Edit staff member' : 'Create staff member' }}</h2>
+        <p class="modal-card__eyebrow">{{ i18n.t('staffPage.members.formEyebrow') }}</p>
+        <h2>{{ form().id ? i18n.t('staffPage.members.editStaff') : i18n.t('staffPage.members.createStaff') }}</h2>
       </div>
 
       <button
         class="modal-card__close"
         type="button"
         (click)="closeFormModal()"
-        aria-label="Close modal"
+        [attr.aria-label]="i18n.t('common.close')"
       >
         <i class="fas fa-times"></i>
       </button>
@@ -126,38 +121,38 @@
     <form class="form-grid" (ngSubmit)="saveStaff()">
       @if (!form().id) {
         <label class="form-grid__wide">
-          <span>User ID</span>
+          <span>{{ i18n.t('staffPage.members.userId') }}</span>
           <input
             type="text"
             [ngModel]="form().user"
             name="user"
             (ngModelChange)="updateForm('user', $event)"
-            placeholder="Paste the backend user ID"
+            [placeholder]="i18n.t('staffPage.members.userIdPlaceholder')"
             required
           />
         </label>
       } @else {
         <label class="form-grid__wide">
-          <span>Linked user</span>
-          <input type="text" [value]="form().user || 'Existing linked user'" readonly />
+          <span>{{ i18n.t('staffPage.members.linkedUser') }}</span>
+          <input type="text" [value]="form().user || i18n.t('staffPage.members.existingLinkedUser')" readonly />
         </label>
       }
 
       <label>
-        <span>Daily salary</span>
+        <span>{{ i18n.t('staffPage.members.dailySalary') }}</span>
         <input
           type="number"
           [ngModel]="form().dailySalary"
           name="dailySalary"
           (ngModelChange)="updateForm('dailySalary', $event)"
-          placeholder="300"
+          [placeholder]="i18n.t('staffPage.members.dailySalaryPlaceholder')"
           min="0"
           required
         />
       </label>
 
       <label>
-        <span>Join date</span>
+        <span>{{ i18n.t('staffPage.members.joinDate') }}</span>
         <input
           type="date"
           [ngModel]="form().joinDate"
@@ -168,13 +163,13 @@
       </label>
 
       <label class="form-grid__wide">
-        <span>Department</span>
+        <span>{{ i18n.t('staffPage.members.columns.department') }}</span>
         <input
           type="text"
           [ngModel]="form().department"
           name="department"
           (ngModelChange)="updateForm('department', $event)"
-          placeholder="Sales"
+          [placeholder]="i18n.t('staffPage.members.departmentPlaceholder')"
           required
         />
       </label>
@@ -186,13 +181,13 @@
           name="isActive"
           (ngModelChange)="updateForm('isActive', $event)"
         />
-        <span>Staff member is active</span>
+        <span>{{ i18n.t('staffPage.members.activeLabel') }}</span>
       </label>
 
       <div class="form-grid__actions">
-        <button class="btn btn--ghost" type="button" (click)="closeFormModal()">Cancel</button>
+        <button class="btn btn--ghost" type="button" (click)="closeFormModal()">{{ i18n.t('common.cancel') }}</button>
         <button class="btn btn--primary" type="submit" [disabled]="isSaving()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'">
-          {{ isSaving() ? 'Saving...' : form().id ? 'Update staff' : 'Create staff' }}
+          {{ isSaving() ? i18n.t('common.loading') : form().id ? i18n.t('staffPage.members.updateStaff') : i18n.t('staffPage.members.createStaff') }}
         </button>
       </div>
     </form>
@@ -201,31 +196,31 @@
 
 @if (isDeleteModalOpen()) {
   <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
-  <section class="modal-card" role="dialog" aria-modal="true" aria-label="Delete staff member">
+  <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t('staffPage.members.deleteStaff')">
     <div class="modal-card__header">
       <div>
-        <p class="modal-card__eyebrow">Delete staff</p>
-        <h2>Remove {{ userName(pendingDeleteStaff()) }}?</h2>
+        <p class="modal-card__eyebrow">{{ i18n.t('staffPage.members.deleteStaff') }}</p>
+        <h2>{{ i18n.t('staffPage.members.deletePrompt', { name: userName(pendingDeleteStaff()) }) }}</h2>
       </div>
 
       <button
         class="modal-card__close"
         type="button"
         (click)="closeDeleteModal()"
-        aria-label="Close modal"
+        [attr.aria-label]="i18n.t('common.close')"
       >
         <i class="fas fa-times"></i>
       </button>
     </div>
 
     <p class="members-delete-copy">
-      This deletes the staff record from the admin API. The linked user account remains separate.
+      {{ i18n.t('staffPage.members.deleteDescription') }}
     </p>
 
     <div class="form-grid__actions">
-      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">Cancel</button>
+      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">{{ i18n.t('common.cancel') }}</button>
       <button class="btn btn--danger" type="button" [disabled]="isDeleting()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="confirmDelete()">
-        {{ isDeleting() ? 'Deleting...' : 'Delete staff' }}
+        {{ isDeleting() ? i18n.t('common.loading') : i18n.t('staffPage.members.deleteStaff') }}
       </button>
     </div>
   </section>

@@ -18,6 +18,47 @@ body {
   direction: ltr;
 }
 
+html,
+body {
+  min-height: 100%;
+}
+
+html[dir='rtl'] body {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir='rtl'] input,
+html[dir='rtl'] textarea,
+html[dir='rtl'] select,
+html[dir='rtl'] button {
+  text-align: right;
+}
+
+html[dir='rtl'] .fa-chevron-right,
+html[dir='rtl'] .fa-angle-right,
+html[dir='rtl'] .fa-arrow-right,
+html[dir='rtl'] .fa-chevron-left,
+html[dir='rtl'] .fa-angle-left,
+html[dir='rtl'] .fa-arrow-left {
+  transform: scaleX(-1);
+}
+
+html[dir='rtl'] .date-range,
+html[dir='rtl'] .goals-actions,
+html[dir='rtl'] .workspace-nav__action {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .header__search-icon {
+  right: auto;
+  left: 12px;
+}
+
+html[dir='rtl'] .header__search-input {
+  text-align: right;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

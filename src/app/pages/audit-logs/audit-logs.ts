@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditLogEntry, AuditLogService } from '../../services/audit-log.service';
+import { TranslationService } from '../../core/i18n/translation.service';
 
 @Component({
   selector: 'app-audit-logs',
@@ -13,6 +14,7 @@ import { AuditLogEntry, AuditLogService } from '../../services/audit-log.service
 })
 export class AuditLogsComponent {
   private readonly auditLogService = inject(AuditLogService);
+  readonly i18n = inject(TranslationService);
   private readonly pageSize = 12;
 
   readonly searchQuery = signal('');
@@ -169,6 +171,18 @@ export class AuditLogsComponent {
     return Object.entries(entry.metadata ?? {});
   }
 
+  statusLabel(status: string): string {
+    return this.i18n.t(`auditLogs.statuses.${status}`);
+  }
+
+  entityLabel(entity: string): string {
+    return entity === 'all' ? this.i18n.t('auditLogs.filters.allEntities') : entity;
+  }
+
+  roleLabel(role: string): string {
+    return role === 'all' ? this.i18n.t('auditLogs.filters.allRoles') : this.i18n.t(`roles.${role}`);
+  }
+
   exportLogs(): void {
     if (typeof window === 'undefined') return;
 
@@ -189,6 +203,9 @@ export class AuditLogsComponent {
   }
 
   formatTimestamp(entry: AuditLogEntry): string {
-    return new Date(entry.timestamp).toLocaleString();
+    return this.i18n.formatDate(entry.timestamp, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
   }
 }

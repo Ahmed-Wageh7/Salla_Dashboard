@@ -9,6 +9,7 @@ import { AuditLogService } from '../../../services/audit-log.service';
 import { CanDisableDirective } from '../../../shared/access/can-disable.directive';
 import { DeductionPayload, DeductionRecord, StaffRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 interface DeductionFormState {
   id: string | null;
@@ -32,6 +33,7 @@ export class StaffDeductionDetailComponent {
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  readonly i18n = inject(TranslationService);
 
   readonly staff = signal<StaffRecord | null>(null);
   readonly deductions = signal<DeductionRecord[]>([]);
@@ -64,7 +66,7 @@ export class StaffDeductionDetailComponent {
           }
         },
         error: (error) => {
-          this.errorMessage.set(error?.error?.message || 'Unable to load staff details.');
+          this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.deductionDetail.messages.loadError'));
           this.isLoading.set(false);
         },
       });
@@ -101,7 +103,7 @@ export class StaffDeductionDetailComponent {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to load deductions.');
+        this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.deductionDetail.messages.loadDeductions'));
         this.isBusy.set(false);
         this.isLoading.set(false);
       },
@@ -157,13 +159,15 @@ export class StaffDeductionDetailComponent {
           summary: `Deduction of ${payload.amount} was ${form.id ? 'updated' : 'created'} for ${this.userName(this.staff())}.`,
         });
         this.toastService.success(
-          form.id ? 'Deduction updated successfully.' : 'Deduction created successfully.',
+          this.i18n.t(
+            form.id ? 'staffPage.deductionDetail.messages.updated' : 'staffPage.deductionDetail.messages.created',
+          ),
         );
         this.closeDeductionModal();
         this.loadDeductions();
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to save deduction.');
+        this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.deductionDetail.messages.saveError'));
         this.toastService.error(this.errorMessage());
         this.isBusy.set(false);
       },
@@ -186,11 +190,11 @@ export class StaffDeductionDetailComponent {
           summary: `Deduction ${this.id(deduction)} was deleted for ${this.userName(this.staff())}.`,
           status: 'warning',
         });
-        this.toastService.success('Deduction deleted successfully.');
+        this.toastService.success(this.i18n.t('staffPage.deductionDetail.messages.deleted'));
         this.loadDeductions();
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to delete deduction.');
+        this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.deductionDetail.messages.deleteError'));
         this.toastService.error(this.errorMessage());
         this.isBusy.set(false);
       },
@@ -214,7 +218,7 @@ export class StaffDeductionDetailComponent {
 
   userName(record: StaffRecord | null | undefined): string {
     const user = record?.user;
-    if (!user) return 'Unknown user';
+    if (!user) return this.i18n.t('staffPage.shared.unknownUser');
     return typeof user === 'string' ? user : user.name?.trim() || user.email?.trim() || this.userId(record);
   }
 
@@ -229,7 +233,7 @@ export class StaffDeductionDetailComponent {
   }
 
   statusLabel(record: StaffRecord | null | undefined): string {
-    return record?.isActive ? 'Active' : 'Inactive';
+    return record?.isActive ? this.i18n.t('staffPage.shared.active') : this.i18n.t('staffPage.shared.inactive');
   }
 
   private emptyDeduction(): DeductionFormState {

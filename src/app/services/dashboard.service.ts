@@ -3,6 +3,8 @@ import { Observable, catchError, map, of } from 'rxjs';
 import { AdminApiService } from '../core/api/admin-api.service';
 import { AdminOrderRecord } from '../core/api/admin.models';
 import { DASHBOARD_DATA } from '../data/dashboard-data';
+import { ORDERS_DATA } from '../data/orders-data';
+import { TranslationService } from '../core/i18n/translation.service';
 
 export interface DashboardApiResponse {
   welcomeTitle: string;
@@ -82,11 +84,12 @@ export interface Order {
 })
 export class DashboardService {
   private readonly adminApi = inject(AdminApiService);
+  private readonly i18n = inject(TranslationService);
 
   getDashboardData(): Observable<DashboardApiResponse> {
     return this.adminApi.getAdminOrders().pipe(
       map((orders) => this.buildDashboardData(orders)),
-      catchError(() => of(this.buildDashboardData([]))),
+      catchError(() => of(this.buildDashboardData(this.fallbackOrders()))),
     );
   }
 
@@ -112,44 +115,81 @@ export class DashboardService {
 
     return {
       ...DASHBOARD_DATA,
+      welcomeTitle: this.i18n.t('dashboard.welcomeTitle'),
+      datePreset: this.i18n.t('dashboard.datePreset'),
+      dateDisplay: this.buildDashboardDateDisplay(),
       stats: DASHBOARD_DATA.stats.map((stat) => {
         if (stat.id === 'orders') {
-          return { ...stat, value: totalOrders.toLocaleString() };
+          return {
+            ...stat,
+            label: this.i18n.t('dashboard.stats.orders'),
+            reportLabel: this.i18n.t('dashboard.stats.report'),
+            value: this.i18n.formatNumber(totalOrders),
+          };
         }
 
         if (stat.id === 'sales') {
           return {
             ...stat,
-            value: totalSales.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+            label: this.i18n.t('dashboard.stats.sales'),
+            currency: this.i18n.t('common.currency'),
+            reportLabel: this.i18n.t('dashboard.stats.report'),
+            value: this.i18n.formatNumber(totalSales, { maximumFractionDigits: 2 }),
           };
         }
 
         if (stat.id === 'visits') {
-          return { ...stat, value: estimatedVisits.toLocaleString() };
+          return {
+            ...stat,
+            label: this.i18n.t('dashboard.stats.visits'),
+            reportLabel: this.i18n.t('dashboard.stats.report'),
+            value: this.i18n.formatNumber(estimatedVisits),
+          };
         }
 
         if (stat.id === 'conversion') {
-          return { ...stat, value: `${conversionRate}%` };
+          return {
+            ...stat,
+            label: this.i18n.t('dashboard.stats.conversion'),
+            reportLabel: this.i18n.t('dashboard.stats.report'),
+            value: `${conversionRate}%`,
+          };
         }
 
-        return stat;
+        return { ...stat, reportLabel: this.i18n.t('dashboard.stats.report') };
       }),
+      slides: this.buildSlides(),
       goals: {
         ...DASHBOARD_DATA.goals,
+        title: this.i18n.t('dashboard.goals.title'),
+        description: this.i18n.t('dashboard.goals.description'),
+        progressLabel: this.i18n.t('dashboard.goals.progressLabel'),
+        progressLabels: this.buildGoalLabels(DASHBOARD_DATA.goals.goal),
         currentOrders: totalOrders,
         ordersToGoal: Math.max(0, DASHBOARD_DATA.goals.goal - totalOrders),
+        editLabel: this.i18n.t('dashboard.goals.edit'),
+        helpLabel: this.i18n.t('dashboard.goals.help'),
       },
       growth: {
         ...DASHBOARD_DATA.growth,
-        totalValue: last30DaysTotal.toLocaleString(),
+        title: this.i18n.t('dashboard.growth.title'),
+        totalValue: this.i18n.formatNumber(last30DaysTotal),
+        totalLabel: this.i18n.t('dashboard.growth.totalLabel'),
+        indicatorValue: this.i18n.t('dashboard.growth.indicatorValue'),
+        dateLabel: this.i18n.t('dashboard.growth.dateLabel'),
+        datePreset: this.i18n.t('dashboard.growth.datePreset'),
         totalSubLabel:
           previous30DaysTotal > 0
-            ? `${this.percentageChange(last30DaysTotal, previous30DaysTotal)} vs previous 30 days`
-            : 'Compared to previous 30 days',
+            ? this.i18n.t('dashboard.growth.versusPrevious', {
+                value: this.percentageChange(last30DaysTotal, previous30DaysTotal),
+              })
+            : this.i18n.t('dashboard.growth.comparedToPrevious'),
         dateRange: growthRange,
         chartPoints: growthPoints,
         xAxisLabels: growthLabels,
       },
+      ordersTitle: this.i18n.t('dashboard.newestOrders'),
+      viewAllOrdersLabel: this.i18n.t('notificationsPage.viewAllOrders'),
       newestOrders: normalizedOrders.slice(0, 5).map((order) => this.mapOrder(order)),
     };
   }
@@ -210,7 +250,7 @@ export class DashboardService {
     return [28, 24, 20, 16, 12, 8, 4, 0].map((daysAgo) => {
       const date = new Date();
       date.setDate(date.getDate() - daysAgo);
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      return this.i18n.formatDate(date, { month: 'short', day: 'numeric' });
     });
   }
 
@@ -219,7 +259,49 @@ export class DashboardService {
     start.setDate(start.getDate() - 29);
     const end = new Date();
 
-    return `${start.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })} - ${end.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}`;
+    return `${this.i18n.formatDate(start, { day: '2-digit', month: 'short', year: 'numeric' })} - ${this.i18n.formatDate(end, { day: '2-digit', month: 'short', year: 'numeric' })}`;
+  }
+
+  private buildDashboardDateDisplay(): string {
+    const start = new Date('2025-12-06');
+    const end = new Date('2026-03-06');
+    return `${this.i18n.formatDate(start, { day: '2-digit', month: 'short', year: 'numeric' })} - ${this.i18n.formatDate(end, { day: '2-digit', month: 'short', year: 'numeric' })}`;
+  }
+
+  private buildGoalLabels(goal: number): string[] {
+    return [0, 0.25, 0.5, 0.75, 1].map((ratio) =>
+      this.i18n.formatNumber(goal * ratio, { notation: 'compact', maximumFractionDigits: 1 }),
+    );
+  }
+
+  private buildSlides(): Slide[] {
+    return [
+      {
+        image: '/carousel-1.png',
+        title: this.i18n.t('dashboard.slides.whatsappTitle'),
+        description: this.i18n.t('dashboard.slides.whatsappDescription'),
+      },
+      {
+        image: '/carousel-2.png',
+        title: this.i18n.t('dashboard.slides.cartsTitle'),
+        description: this.i18n.t('dashboard.slides.cartsDescription'),
+      },
+      {
+        image: '/carousel-3.webp',
+        title: this.i18n.t('dashboard.slides.campaignsTitle'),
+        description: this.i18n.t('dashboard.slides.campaignsDescription'),
+      },
+      {
+        image: '/carousel-4.png',
+        title: this.i18n.t('dashboard.slides.behaviorTitle'),
+        description: this.i18n.t('dashboard.slides.behaviorDescription'),
+      },
+      {
+        image: '/carousel-5.png',
+        title: this.i18n.t('dashboard.slides.automationTitle'),
+        description: this.i18n.t('dashboard.slides.automationDescription'),
+      },
+    ];
   }
 
   private percentageChange(current: number, previous: number): string {
@@ -244,15 +326,15 @@ export class DashboardService {
       paymentStatus: this.paymentStatus(order),
       paymentClass: this.paymentClass(paymentMethod),
       shippingLabel: this.shippingLabel(order),
-      priceValue: this.orderAmount(order).toLocaleString(undefined, { maximumFractionDigits: 2 }),
-      priceCurrency: 'ريال',
+      priceValue: this.i18n.formatNumber(this.orderAmount(order), { maximumFractionDigits: 2 }),
+      priceCurrency: this.i18n.t('common.currency'),
       status: this.orderStatus(order),
       statusClass: this.orderStatusClass(order),
-      createdDate: createdAt ? createdAt.toLocaleDateString() : '--',
+      createdDate: createdAt ? this.i18n.formatDate(createdAt, { dateStyle: 'medium' }) : '--',
       createdTime: createdAt
-        ? createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        ? this.i18n.formatDate(createdAt, { hour: '2-digit', minute: '2-digit' })
         : '--',
-      actionLabel: 'View',
+      actionLabel: this.i18n.t('dashboard.order.view'),
     };
   }
 
@@ -267,11 +349,17 @@ export class DashboardService {
   }
 
   private paymentMethod(order: AdminOrderRecord): string {
-    return String(order.paymentMethod ?? 'Unknown').trim() || 'Unknown';
+    return (
+      String(order.paymentMethod ?? this.i18n.t('dashboard.order.unknown')).trim() ||
+      this.i18n.t('dashboard.order.unknown')
+    );
   }
 
   private paymentStatus(order: AdminOrderRecord): string {
-    return String(order.paymentStatus ?? 'Pending').trim() || 'Pending';
+    return (
+      String(order.paymentStatus ?? this.i18n.t('dashboard.order.pending')).trim() ||
+      this.i18n.t('dashboard.order.pending')
+    );
   }
 
   private paymentClass(value: string): string {
@@ -285,12 +373,13 @@ export class DashboardService {
 
   private shippingLabel(order: AdminOrderRecord): string {
     if (order.shipping) return String(order.shipping);
-    if (order.shippingAddress) return 'Shipping address provided';
-    return "Doesn't Require Shipping";
+    if (order.shippingAddress) return this.i18n.t('dashboard.order.shippingAddressProvided');
+    return this.i18n.t('dashboard.order.shippingNotRequired');
   }
 
   private orderStatus(order: AdminOrderRecord): string {
-    return String(order.orderStatus ?? order.status ?? 'Pending').trim() || 'Pending';
+    const fallback = this.i18n.t('dashboard.order.pending');
+    return String(order.orderStatus ?? order.status ?? fallback).trim() || fallback;
   }
 
   private orderStatusClass(order: AdminOrderRecord): string {
@@ -306,7 +395,7 @@ export class DashboardService {
     const user = order.user;
     if (order.customer?.name) return order.customer.name;
     if (user && typeof user !== 'string' && user.name) return user.name;
-    return 'Unknown customer';
+    return this.i18n.t('dashboard.order.unknownCustomer');
   }
 
   private customerPhone(order: AdminOrderRecord): string {
@@ -326,5 +415,28 @@ export class DashboardService {
 
   private recordId(order: AdminOrderRecord): string {
     return order._id ?? order.id ?? '';
+  }
+
+  private fallbackOrders(): AdminOrderRecord[] {
+    return ORDERS_DATA.map((order) => ({
+      _id: order.id,
+      id: order.id,
+      orderNumber: order.orderNumber,
+      source: order.source,
+      customer: {
+        name: order.customer,
+        phone: order.customerPhone,
+        email: order.customerEmail,
+      },
+      paymentMethod: order.payment,
+      paymentStatus: order.paymentStatus,
+      currency: order.currency,
+      shipping: order.shipping,
+      totalAmount: order.total,
+      orderStatus: order.status,
+      createdAt: order.createdDate,
+      updatedAt: order.updatedDate,
+      tags: order.tags,
+    }));
   }
 }

@@ -4,6 +4,7 @@ import { ToastOutletComponent } from './shared/toast/toast-outlet';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet, ToastOutletComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',

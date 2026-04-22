@@ -9,6 +9,7 @@ import { AuditLogService } from '../../services/audit-log.service';
 import { CanDisableDirective } from '../../shared/access/can-disable.directive';
 import { CategoryRecord, ProductPayload, ProductRecord, SubcategoryRecord } from '../../core/api/admin.models';
 import { ToastService } from '../../shared/toast/toast.service';
+import { TranslationService } from '../../core/i18n/translation.service';
 
 interface ProductFormState {
   id: string | null;
@@ -42,6 +43,7 @@ export class ProductsComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
+  readonly i18n = inject(TranslationService);
   private readonly pageSize = 10;
   private readonly pageWindowSize = 4;
 
@@ -169,8 +171,12 @@ export class ProductsComponent {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to load products from the backend.');
-        this.toastService.error(error?.error?.message || 'Unable to load products from the backend.');
+        this.errorMessage.set(
+          error?.error?.message || this.i18n.t('productsPage.messages.loadError'),
+        );
+        this.toastService.error(
+          error?.error?.message || this.i18n.t('productsPage.messages.loadError'),
+        );
         this.isLoading.set(false);
       },
       });
@@ -182,13 +188,13 @@ export class ProductsComponent {
     forkJoin({
       categories: this.adminApi.getCategories().pipe(
         catchError((error) => {
-          referenceError ||= this.getApiErrorMessage(error, 'Unable to load categories.');
+          referenceError ||= this.getApiErrorMessage(error, this.i18n.t('productsPage.messages.categoriesError'));
           return of([] as CategoryRecord[]);
         }),
       ),
       subcategories: this.adminApi.getSubcategories().pipe(
         catchError((error) => {
-          referenceError ||= this.getApiErrorMessage(error, 'Unable to load subcategories.');
+          referenceError ||= this.getApiErrorMessage(error, this.i18n.t('productsPage.messages.subcategoriesError'));
           return of([] as SubcategoryRecord[]);
         }),
       ),
@@ -473,11 +479,13 @@ export class ProductsComponent {
 
   productVisibilityLabel(product: ProductRecord | number): string {
     const stock = typeof product === 'number' ? product : this.stockValue(product);
-    return stock > 0 ? 'Published' : 'Hidden';
+    return stock > 0
+      ? this.i18n.t('productsPage.visibility.published')
+      : this.i18n.t('productsPage.visibility.hidden');
   }
 
   quantityLabel(stock: number): string {
-    return new Intl.NumberFormat('en-US').format(Math.max(0, stock));
+    return this.i18n.formatNumber(Math.max(0, stock));
   }
 
   priceValue(product: ProductRecord): number {

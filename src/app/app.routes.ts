@@ -12,13 +12,13 @@ export const routes: Routes = [
   {
     path: 'login',
     component: LoginPageComponent,
-    title: 'Login | Salla Dashboard',
+    data: { titleKey: 'routes.login' },
     canActivate: [guestOnlyGuard],
   },
   {
     path: 'forbidden',
     component: ForbiddenPageComponent,
-    title: 'Forbidden | Salla Dashboard',
+    data: { titleKey: 'routes.forbidden' },
   },
   {
     path: '',
@@ -29,16 +29,14 @@ export const routes: Routes = [
         path: '',
         component: MainContentComponent,
         pathMatch: 'full',
-        title: 'Dashboard | Salla Dashboard',
         canActivate: [permissionGuard],
-        data: { permissions: ['dashboard.view'] },
+        data: { permissions: ['dashboard.view'], titleKey: 'routes.dashboard' },
       },
       {
         path: 'dashboard',
         component: MainContentComponent,
-        title: 'Dashboard | Salla Dashboard',
         canActivate: [permissionGuard],
-        data: { permissions: ['dashboard.view'] },
+        data: { permissions: ['dashboard.view'], titleKey: 'routes.dashboard' },
       },
       {
         path: 'products',
@@ -61,14 +59,13 @@ export const routes: Routes = [
       {
         path: 'audit-logs',
         component: AuditLogsComponent,
-        title: 'Audit Log | Salla Dashboard',
+        data: { permissions: ['audit.read'], titleKey: 'routes.auditLog' },
         canActivate: [permissionGuard],
-        data: { permissions: ['audit.read'] },
       },
       {
         path: 'notifications',
         component: NotificationsPageComponent,
-        title: 'Notifications | Salla Dashboard',
+        data: { titleKey: 'routes.notifications' },
       },
     ],
   },

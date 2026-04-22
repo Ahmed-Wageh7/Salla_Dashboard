@@ -3,8 +3,8 @@
   display: grid;
   gap: 20px;
   background:
-    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 28%),
-    linear-gradient(180deg, #f8fafc 0%, #eef4f8 100%);
+    radial-gradient(circle at top right, rgba(108, 61, 235, 0.12), transparent 28%),
+    linear-gradient(180deg, #fbfbfe 0%, #f4f2ff 100%);
   min-height: 100%;
 }
 
@@ -39,7 +39,7 @@
 
 .audit-page__eyebrow {
   margin: 0;
-  color: #0f766e;
+  color: #6c3deb;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -49,22 +49,22 @@
 .audit-page__subtext {
   margin: 0;
   max-width: 720px;
-  color: #475569;
+  color: #5b6275;
   line-height: 1.6;
 }
 
 .audit-page__clear-btn,
 .audit-page__ghost-btn {
-  border: 1px solid #cbd5e1;
+  border: 1px solid rgba(108, 61, 235, 0.16);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.92);
-  color: #0f172a;
+  color: #24143f;
   padding: 12px 16px;
   cursor: pointer;
 }
 
 .audit-page__clear-btn {
-  color: #991b1b;
+  color: #6c3deb;
 }
 
 .audit-stats {
@@ -78,9 +78,9 @@
 .audit-empty,
 .audit-table {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid rgba(108, 61, 235, 0.1);
   border-radius: 18px;
-  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.07);
+  box-shadow: 0 22px 45px rgba(63, 39, 123, 0.08);
 }
 
 .audit-stat {
@@ -88,14 +88,14 @@
 
   span {
     display: block;
-    color: #64748b;
+    color: #7a8093;
     font-size: 13px;
     margin-bottom: 8px;
   }
 
   strong {
     font-size: 28px;
-    color: #0f172a;
+    color: #24143f;
   }
 }
 
@@ -107,12 +107,12 @@
 
   input,
   select {
-    border: 1px solid #dbe4ee;
+    border: 1px solid #e3dcfb;
     border-radius: 12px;
     padding: 12px 14px;
     font: inherit;
     background: #fff;
-    color: #0f172a;
+    color: #24143f;
   }
 }
 
@@ -120,7 +120,7 @@
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  color: #64748b;
+  color: #7a8093;
   font-size: 13px;
 }
 
@@ -130,12 +130,12 @@
 
   h2 {
     margin: 0 0 8px;
-    color: #0f172a;
+    color: #24143f;
   }
 
   p {
     margin: 0;
-    color: #64748b;
+    color: #7a8093;
   }
 }
 
@@ -153,8 +153,8 @@
 }
 
 .audit-table__header {
-  background: #f8fafc;
-  color: #475569;
+  background: #f7f4ff;
+  color: #665f7f;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -162,23 +162,23 @@
 }
 
 .audit-row {
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid #efeafd;
 
   strong {
     display: block;
-    color: #0f172a;
+    color: #24143f;
   }
 
   p {
     margin: 4px 0 0;
-    color: #64748b;
+    color: #7a8093;
     font-size: 13px;
     line-height: 1.5;
   }
 }
 
 .audit-row--metadata {
-  background: #fcfdff;
+  background: #fdfcff;
 }
 
 .audit-link {
@@ -186,7 +186,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #0f766e;
+  color: #6c3deb;
   font-weight: 600;
   cursor: pointer;
 }
@@ -200,11 +200,11 @@
 .audit-metadata__item {
   padding: 12px;
   border-radius: 12px;
-  background: #f8fafc;
+  background: #f7f4ff;
 
   span {
     display: block;
-    color: #64748b;
+    color: #7a8093;
     font-size: 12px;
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -221,17 +221,18 @@
   justify-content: flex-end;
 
   button {
-    border: 1px solid #cbd5e1;
+    border: 1px solid rgba(108, 61, 235, 0.16);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.94);
     padding: 10px 14px;
     cursor: pointer;
+    color: #24143f;
   }
 }
 
 .audit-pagination__page--active {
-  background: #0f766e !important;
-  border-color: #0f766e !important;
+  background: #6c3deb !important;
+  border-color: #6c3deb !important;
   color: #fff;
 }
 
@@ -245,18 +246,18 @@
 }
 
 .audit-status--success {
-  background: #dcfce7;
-  color: #166534;
+  background: #ede9ff;
+  color: #5b34c7;
 }
 
 .audit-status--warning {
-  background: #fef3c7;
-  color: #92400e;
+  background: #fff1df;
+  color: #b26b16;
 }
 
 .audit-status--error {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #ffe8ef;
+  color: #c2416a;
 }
 
 @media (max-width: 960px) {

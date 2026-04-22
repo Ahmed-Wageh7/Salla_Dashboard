@@ -15,10 +15,6 @@
     </div>
   </header>
 
-  @if (errorMessage()) {
-    <div class="catalog-detail__feedback catalog-detail__feedback--error">{{ errorMessage() }}</div>
-  }
-
   @if (isLoading()) {
     <section class="catalog-detail__panel">
       <div class="catalog-detail__state">Loading subcategory details...</div>

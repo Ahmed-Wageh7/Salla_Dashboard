@@ -7,13 +7,13 @@
     <main class="flex-1 overflow-y-auto">
       @if (isReadOnlyWorkspace()) {
         <div class="layout-banner">
-          <strong>Read-only workspace.</strong>
-          Your current role can browse data, but write actions are restricted.
+          <strong>{{ i18n.t('layout.readOnlyTitle') }}</strong>
+          {{ i18n.t('layout.readOnlyDescription') }}
         </div>
       } @else if (hasAttendanceWriteOnlyAccess()) {
         <div class="layout-banner">
-          <strong>Limited workspace access.</strong>
-          You can use staff check-in and check-out, but other write actions remain restricted.
+          <strong>{{ i18n.t('layout.limitedTitle') }}</strong>
+          {{ i18n.t('layout.limitedDescription') }}
         </div>
       }
       <router-outlet></router-outlet>

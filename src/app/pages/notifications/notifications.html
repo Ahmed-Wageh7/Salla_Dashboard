@@ -1,32 +1,34 @@
 <section class="notifications-page">
   <header class="notifications-page__header">
     <div>
-      <p class="notifications-page__eyebrow">Inbox</p>
-      <h1>Notifications</h1>
-      <p class="notifications-page__subtext">
-        Review the latest order activity in one dedicated place.
-      </p>
+      <p class="notifications-page__eyebrow">{{ i18n.t('notificationsPage.eyebrow') }}</p>
+      <h1>{{ i18n.t('notificationsPage.title') }}</h1>
+      <p class="notifications-page__subtext">{{ i18n.t('notificationsPage.subtext') }}</p>
     </div>
 
     <div class="notifications-page__header-actions">
       @if (orderNotifications.browserPermission() !== 'granted') {
-        <button type="button" class="notifications-page__ghost-btn" (click)="enableDesktopNotifications()">
-          Enable browser alerts
+        <button
+          type="button"
+          class="notifications-page__ghost-btn"
+          (click)="enableDesktopNotifications()"
+        >
+          {{ i18n.t('notificationsPage.enableBrowserAlerts') }}
         </button>
       }
       <button type="button" class="notifications-page__primary-link" (click)="openOrdersPage()">
-        View all orders
+        {{ i18n.t('notificationsPage.viewAllOrders') }}
       </button>
     </div>
   </header>
 
   <div class="notifications-page__summary">
     <article class="notifications-page__stat">
-      <span>Total notifications</span>
+      <span>{{ i18n.t('notificationsPage.totalNotifications') }}</span>
       <strong>{{ orderNotifications.notifications().length }}</strong>
     </article>
     <article class="notifications-page__stat">
-      <span>Unread notifications</span>
+      <span>{{ i18n.t('notificationsPage.unreadNotifications') }}</span>
       <strong>{{ orderNotifications.unreadCount() }}</strong>
     </article>
   </div>
@@ -37,11 +39,11 @@
         <table class="notifications-table">
           <thead>
             <tr>
-              <th>Order <span>Subject</span></th>
-              <th>Message</th>
-              <th>Source</th>
-              <th>Status</th>
-              <th>Created at</th>
+              <th>{{ i18n.t('notificationsPage.order') }} <span>{{ i18n.t('notificationsPage.subject') }}</span></th>
+              <th>{{ i18n.t('notificationsPage.message') }}</th>
+              <th>{{ i18n.t('notificationsPage.source') }}</th>
+              <th>{{ i18n.t('notificationsPage.status') }}</th>
+              <th>{{ i18n.t('notificationsPage.createdAt') }}</th>
               <th class="notifications-table__actions"></th>
             </tr>
           </thead>
@@ -70,7 +72,11 @@
                     class="notification-state"
                     [class.notification-state--unread]="!notification.read"
                   >
-                    {{ notification.read ? 'Read' : 'Unread' }}
+                    {{
+                      notification.read
+                        ? i18n.t('notificationsPage.read')
+                        : i18n.t('notificationsPage.unread')
+                    }}
                   </span>
                 </td>
                 <td>
@@ -81,7 +87,7 @@
                 <td>
                   <div class="row-actions">
                     <button type="button" class="btn btn--ghost" (click)="openOrder(notification)">
-                      View
+                      {{ i18n.t('common.view') }}
                     </button>
                   </div>
                 </td>
@@ -96,7 +102,7 @@
           <button
             class="pagination__arrow"
             type="button"
-            aria-label="Previous page"
+            [attr.aria-label]="i18n.t('notificationsPage.previousPage')"
             [disabled]="currentPage() === 1"
             (click)="previousPage()"
           >
@@ -119,7 +125,7 @@
           <button
             class="pagination__arrow"
             type="button"
-            aria-label="Next page"
+            [attr.aria-label]="i18n.t('notificationsPage.nextPage')"
             [disabled]="currentPage() === totalPages()"
             (click)="nextPage()"
           >
@@ -130,8 +136,8 @@
     </div>
   } @else {
     <div class="notifications-page__empty">
-      <h2>No notifications yet</h2>
-      <p>New orders will appear here as soon as they arrive.</p>
+      <h2>{{ i18n.t('notificationsPage.emptyTitle') }}</h2>
+      <p>{{ i18n.t('notificationsPage.emptyDescription') }}</p>
     </div>
   }
 </section>

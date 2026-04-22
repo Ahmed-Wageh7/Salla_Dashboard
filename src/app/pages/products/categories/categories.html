@@ -3,35 +3,31 @@
     <div class="admin-page__intro">
       <div class="admin-page__count">{{ filteredCategories().length }}</div>
       <div>
-        <h1>Categories</h1>
+        <h1>{{ i18n.t('categoryPage.title') }}</h1>
         <p class="admin-page__subtitle">
-          Organize your store into top-level catalog groups from one clear list view.
+          {{ i18n.t('categoryPage.subtitle') }}
         </p>
       </div>
     </div>
 
     <div class="admin-page__actions">
-      <button class="btn btn--ghost" type="button" routerLink="/products">Products</button>
+      <button class="btn btn--ghost" type="button" routerLink="/products">{{ i18n.t('productsPage.title') }}</button>
       <button class="btn btn--ghost" type="button" routerLink="/products/subcategories">
-        Subcategories
+        {{ i18n.t('productsPage.subcategories') }}
       </button>
-      <button class="btn btn--ghost" type="button" (click)="loadCategories()">Refresh</button>
+      <button class="btn btn--ghost" type="button" (click)="loadCategories()">{{ i18n.t('common.refresh') }}</button>
       <button class="btn btn--secondary" type="button" (click)="openCreateModal()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
-        New category
+        {{ i18n.t('categoryPage.newCategory') }}
       </button>
     </div>
   </header>
-
-  @if (errorMessage()) {
-    <div class="feedback feedback--error">{{ errorMessage() }}</div>
-  }
 
   <div class="grid">
     <section class="panel panel--list">
       <div class="panel__header panel__header--split">
         <div>
-          <h2>Category list</h2>
-          <small>View, edit, and delete your catalog groups.</small>
+          <h2>{{ i18n.t('categoryPage.listTitle') }}</h2>
+          <small>{{ i18n.t('categoryPage.listSubtitle') }}</small>
         </div>
 
         <div class="toolbar">
@@ -39,7 +35,7 @@
             <i class="fas fa-search"></i>
             <input
               type="search"
-              placeholder="Search categories"
+              [placeholder]="i18n.t('categoryPage.searchPlaceholder')"
               [ngModel]="searchQuery()"
               (ngModelChange)="updateSearch($event)"
             />
@@ -51,35 +47,56 @@
         <div class="state-card loading-state">
           <div class="loading-spinner" aria-hidden="true"></div>
           <div class="loading-copy">
-            <strong>Loading categories</strong>
-            <p>Fetching category data ..</p>
+            <strong>{{ i18n.t('categoryPage.loadingTitle') }}</strong>
+            <p>{{ i18n.t('categoryPage.loadingDescription') }}</p>
           </div>
         </div>
       } @else if (filteredCategories().length === 0) {
-        <div class="state-card">No categories matched the current search.</div>
+        <div class="state-card">{{ i18n.t('categoryPage.emptyState') }}</div>
       } @else {
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Name <span>ID</span></th>
-                <th>Description</th>
-                <th>Created <span>Updated</span></th>
+                <th class="table-check">
+                  <input type="checkbox" aria-label="Select all categories" />
+                </th>
+                <th>{{ i18n.t('categoryPage.columns.name') }} <span>ID</span></th>
+                <th>{{ i18n.t('categoryPage.columns.description') }}</th>
+                <th>
+                  {{ i18n.t('categoryPage.columns.created') }}
+                  <span>{{ i18n.t('categoryPage.columns.updated') }}</span>
+                </th>
                 <th class="table-actions"></th>
               </tr>
             </thead>
             <tbody>
               @for (category of filteredCategories(); track id(category)) {
                 <tr>
+                  <td class="table-check">
+                    <input
+                      type="checkbox"
+                      [attr.aria-label]="'Select ' + (category.name || 'category')"
+                    />
+                  </td>
                   <td>
-                    <div class="cell-stack">
-                      <a class="entity-link" [routerLink]="['/products/categories', id(category)]">
-                        {{ category.name || 'Untitled category' }}
-                      </a>
-                      <small>{{ id(category) || 'No ID' }}</small>
+                    <div class="product-cell">
+                      <div class="product-cell__thumb">
+                        <i class="fas fa-folder"></i>
+                      </div>
+                      <div class="cell-stack">
+                        <a class="entity-link" [routerLink]="['/products/categories', id(category)]">
+                          {{ category.name || i18n.t('categoryPage.untitled') }}
+                        </a>
+                        <small>{{ id(category) || i18n.t('categoryPage.noId') }}</small>
+                      </div>
                     </div>
                   </td>
-                  <td>{{ category.description || '--' }}</td>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ category.description || '--' }}</strong>
+                    </div>
+                  </td>
                   <td>
                     <div class="cell-stack">
                       <strong>{{ category.createdAt || '--' | slice: 0 : 10 }}</strong>
@@ -94,17 +111,8 @@
                         class="btn btn--ghost"
                         [routerLink]="['/products/categories', id(category)]"
                       >
-                        View
+                        {{ i18n.t('common.view') }}
                       </a>
-                      <button
-                        class="btn btn--primary"
-                        type="button"
-                        [appCanDisable]="'products.write'"
-                        [appCanDisableReason]="'Requires products.write permission'"
-                        (click)="selectCategory(category)"
-                      >
-                        Edit
-                      </button>
                       <button
                         class="btn btn--danger"
                         type="button"
@@ -112,7 +120,16 @@
                         [appCanDisableReason]="'Requires products.write permission'"
                         (click)="requestDelete(category)"
                       >
-                        Delete
+                        {{ i18n.t('productsPage.delete') }}
+                      </button>
+                      <button
+                        class="btn btn--primary"
+                        type="button"
+                        [appCanDisable]="'products.write'"
+                        [appCanDisableReason]="'Requires products.write permission'"
+                        (click)="selectCategory(category)"
+                      >
+                        {{ i18n.t('productsPage.edit') }}
                       </button>
                     </div>
                   </td>
@@ -128,18 +145,18 @@
 
 @if (isFormModalOpen()) {
   <div class="modal-backdrop" (click)="closeFormModal()"></div>
-  <section class="modal" role="dialog" aria-modal="true" aria-label="Category form">
+  <section class="modal" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t('categoryPage.formTitle')">
     <div class="modal__header">
       <div>
-        <p class="modal__eyebrow">Catalog structure</p>
-        <h2>{{ form().id ? 'Edit category' : 'Create category' }}</h2>
+        <p class="modal__eyebrow">{{ i18n.t('categoryPage.formEyebrow') }}</p>
+        <h2>{{ form().id ? i18n.t('categoryPage.editCategory') : i18n.t('categoryPage.createCategory') }}</h2>
       </div>
 
       <button
         class="modal__close"
         type="button"
         (click)="closeFormModal()"
-        aria-label="Close modal"
+        [attr.aria-label]="i18n.t('common.close')"
       >
         <i class="fas fa-times"></i>
       </button>
@@ -147,32 +164,32 @@
 
     <form class="form-grid" (ngSubmit)="saveCategory()">
       <label>
-        <span>Name</span>
+        <span>{{ i18n.t('categoryPage.columns.name') }}</span>
         <input
           type="text"
           [ngModel]="form().name"
           name="name"
           (ngModelChange)="updateForm('name', $event)"
-          placeholder="Electronics"
+          [placeholder]="i18n.t('categoryPage.namePlaceholder')"
           required
         />
       </label>
 
       <label class="form-grid__wide">
-        <span>Description</span>
+        <span>{{ i18n.t('categoryPage.columns.description') }}</span>
         <textarea
           rows="4"
           [ngModel]="form().description"
           name="description"
           (ngModelChange)="updateForm('description', $event)"
-          placeholder="Products in this category"
+          [placeholder]="i18n.t('categoryPage.descriptionPlaceholder')"
         ></textarea>
       </label>
 
       <div class="form-grid__actions">
-        <button class="btn btn--ghost" type="button" (click)="closeFormModal()">Cancel</button>
+        <button class="btn btn--ghost" type="button" (click)="closeFormModal()">{{ i18n.t('common.cancel') }}</button>
         <button class="btn btn--primary" type="submit" [disabled]="isSaving()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
-          {{ isSaving() ? 'Saving...' : form().id ? 'Update category' : 'Create category' }}
+          {{ isSaving() ? i18n.t('common.loading') : form().id ? i18n.t('categoryPage.updateCategory') : i18n.t('categoryPage.createCategory') }}
         </button>
       </div>
     </form>
@@ -185,28 +202,28 @@
     class="modal modal--confirm"
     role="dialog"
     aria-modal="true"
-    aria-label="Delete category"
+    [attr.aria-label]="i18n.t('categoryPage.deleteCategory')"
   >
     <div class="modal__header modal__header--compact">
       <div>
-        <p class="modal__eyebrow modal__eyebrow--danger">Delete category</p>
-        <h2>Remove {{ pendingDeleteCategory()?.name || 'this category' }}?</h2>
+        <p class="modal__eyebrow modal__eyebrow--danger">{{ i18n.t('categoryPage.deleteCategory') }}</p>
+        <h2>{{ i18n.t('categoryPage.deletePrompt', { name: pendingDeleteCategory()?.name || i18n.t('categoryPage.thisCategory') }) }}</h2>
       </div>
 
       <button
         class="modal__close"
         type="button"
         (click)="closeDeleteModal()"
-        aria-label="Close modal"
+        [attr.aria-label]="i18n.t('common.close')"
       >
         <i class="fas fa-times"></i>
       </button>
     </div>
 
-    <p class="modal__text">This action cannot be undone.</p>
+    <p class="modal__text">{{ i18n.t('categoryPage.deleteWarning') }}</p>
 
     <div class="form-grid__actions">
-      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">Cancel</button>
+      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">{{ i18n.t('common.cancel') }}</button>
       <button
         class="btn btn--danger"
         type="button"
@@ -215,7 +232,7 @@
         [appCanDisableReason]="'Requires products.write permission'"
         (click)="confirmDelete()"
       >
-        {{ isDeleting() ? 'Deleting...' : 'Delete category' }}
+        {{ isDeleting() ? i18n.t('common.loading') : i18n.t('categoryPage.deleteCategory') }}
       </button>
     </div>
   </section>

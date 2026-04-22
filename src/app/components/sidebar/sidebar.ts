@@ -3,21 +3,22 @@ import {
   Component,
   computed,
   EventEmitter,
+  HostListener,
   inject,
   Input,
-  Output,
   OnInit,
-  HostListener,
+  Output,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { IsActiveMatchOptions, Router, RouterModule } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { AccessControlService, Permission } from '../../core/auth/access-control.service';
+import { TranslationService } from '../../core/i18n/translation.service';
 
 export interface NavItem {
   id: string;
-  label: string;
+  labelKey: string;
   route?: string;
   icon?: string;
   badge?: number;
@@ -49,6 +50,7 @@ export interface NavItem {
 export class SidebarComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly accessControl = inject(AccessControlService);
+  readonly i18n = inject(TranslationService);
 
   @Input() isOpen = false;
   @Output() closeMenu = new EventEmitter<void>();
@@ -59,7 +61,7 @@ export class SidebarComponent implements OnInit {
   readonly mainNav: NavItem[] = [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      labelKey: 'sidebar.dashboard',
       route: '/dashboard',
       icon: 'dashboard',
       exact: true,
@@ -70,7 +72,7 @@ export class SidebarComponent implements OnInit {
   readonly expandableNav: NavItem[] = [
     {
       id: 'products',
-      label: 'Products',
+      labelKey: 'sidebar.products',
       icon: 'products',
       route: '/products',
       isExpandable: true,
@@ -78,20 +80,20 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           id: 'all-products',
-          label: 'All Products',
+          labelKey: 'sidebar.allProducts',
           route: '/products',
           exact: true,
           permissions: ['products.read'],
         },
         {
           id: 'categories',
-          label: 'Categories',
+          labelKey: 'sidebar.categories',
           route: '/products/categories',
           permissions: ['products.read'],
         },
         {
           id: 'subcategories',
-          label: 'Subcategories',
+          labelKey: 'sidebar.subcategories',
           route: '/products/subcategories',
           permissions: ['products.read'],
         },
@@ -99,7 +101,7 @@ export class SidebarComponent implements OnInit {
     },
     {
       id: 'orders',
-      label: 'Orders',
+      labelKey: 'sidebar.orders',
       icon: 'orders',
       route: '/orders',
       isExpandable: true,
@@ -107,7 +109,7 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           id: 'orders-overview',
-          label: 'All Orders',
+          labelKey: 'sidebar.allOrders',
           route: '/orders',
           exact: true,
           permissions: ['orders.read'],
@@ -116,27 +118,33 @@ export class SidebarComponent implements OnInit {
     },
     {
       id: 'staff',
-      label: 'Staff',
+      labelKey: 'sidebar.staff',
       icon: 'customers',
       route: '/staff',
       isExpandable: true,
       permissions: ['staff.read'],
       children: [
         {
+          id: 'members',
+          labelKey: 'routes.staffMembers',
+          route: '/staff/members',
+          permissions: ['staff.read'],
+        },
+        {
           id: 'attendance',
-          label: 'Attendance',
+          labelKey: 'sidebar.attendance',
           route: '/staff/attendance',
           permissions: ['staff.read'],
         },
         {
           id: 'deductions',
-          label: 'Deductions',
+          labelKey: 'sidebar.deductions',
           route: '/staff/deductions',
           permissions: ['staff.read'],
         },
         {
           id: 'salary',
-          label: 'Salary',
+          labelKey: 'sidebar.salary',
           route: '/staff/salary',
           permissions: ['staff.read'],
         },
@@ -149,7 +157,7 @@ export class SidebarComponent implements OnInit {
   readonly bottomNav: NavItem[] = [
     {
       id: 'audit-logs',
-      label: 'Audit Log',
+      labelKey: 'sidebar.auditLog',
       route: '/audit-logs',
       icon: 'analytics',
       permissions: ['audit.read'],
@@ -182,24 +190,31 @@ export class SidebarComponent implements OnInit {
   }
 
   isRouteActive(route?: string): boolean {
-    return this.routeMatches(this.router.url, route);
+    return this.routeMatches(route);
   }
 
   isItemRouteActive(item: NavItem): boolean {
-    return this.routeMatches(this.router.url, item.route, item.exact);
+    return this.routeMatches(item.route, item.exact);
   }
 
   private isNavItemActive(item: NavItem): boolean {
     return (
-      this.routeMatches(this.router.url, item.route, item.exact) ||
+      this.routeMatches(item.route, item.exact) ||
       (item.children?.some((child) => this.isNavItemActive(child)) ?? false)
     );
   }
 
-  private routeMatches(url: string, route?: string, exact = false): boolean {
+  private routeMatches(route?: string, exact = false): boolean {
     if (!route) return false;
-    if (exact) return url === route;
-    return url === route || url.startsWith(`${route}/`);
+
+    const matchOptions: IsActiveMatchOptions = {
+      paths: exact ? 'exact' : 'subset',
+      queryParams: 'ignored',
+      matrixParams: 'ignored',
+      fragment: 'ignored',
+    };
+
+    return this.router.isActive(this.router.createUrlTree([route]), matchOptions);
   }
 
   onNavigate(): void {

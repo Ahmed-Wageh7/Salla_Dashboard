@@ -22,7 +22,9 @@ describe('SidebarComponent', () => {
       imports: [
         RouterTestingModule.withRoutes([
           { path: 'staff', component: DummyRouteComponent },
+          { path: 'staff/members', component: DummyRouteComponent },
           { path: 'staff/attendance', component: DummyRouteComponent },
+          { path: 'products', component: DummyRouteComponent },
         ]),
         SidebarComponent,
       ],
@@ -54,6 +56,7 @@ describe('SidebarComponent', () => {
     const staffItem = component.expandableNav.find((item) => item.id === 'staff');
 
     expect(staffItem?.children?.map((item) => item.id)).toEqual([
+      'members',
       'attendance',
       'deductions',
       'salary',
@@ -70,5 +73,27 @@ describe('SidebarComponent', () => {
 
     expect(attendanceItem).toBeDefined();
     expect(component.isItemRouteActive(attendanceItem!)).toBe(true);
+  });
+
+  it('marks the staff members child as active on the members page', async () => {
+    await router.navigateByUrl('/staff/members');
+    fixture.detectChanges();
+
+    const membersItem = component.expandableNav
+      .find((item) => item.id === 'staff')
+      ?.children?.find((item) => item.id === 'members');
+
+    expect(membersItem).toBeDefined();
+    expect(component.isItemRouteActive(membersItem!)).toBe(true);
+  });
+
+  it('keeps parent product navigation active when query params are present', async () => {
+    await router.navigateByUrl('/products?tab=archived');
+    fixture.detectChanges();
+
+    const productsItem = component.expandableNav.find((item) => item.id === 'products');
+
+    expect(productsItem).toBeDefined();
+    expect(component.isItemRouteActive(productsItem!)).toBe(true);
   });
 });

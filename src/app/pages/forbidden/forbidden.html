@@ -1,14 +1,13 @@
 <section class="forbidden-page">
   <div class="forbidden-card">
-    <p class="forbidden-card__eyebrow">Restricted Access</p>
-    <h1>You do not have permission to view this workspace.</h1>
+    <p class="forbidden-card__eyebrow">{{ i18n.t('auth.forbidden.eyebrow') }}</p>
+    <h1>{{ i18n.t('auth.forbidden.title') }}</h1>
     <p>
-      Your current role does not include the required capability for this section. Return to the
-      dashboard or sign in with an account that has broader access.
+      {{ i18n.t('auth.forbidden.description') }}
     </p>
     <div class="forbidden-card__actions">
-      <a routerLink="/dashboard">Back to dashboard</a>
-      <a routerLink="/audit-logs">View audit log</a>
+      <a routerLink="/dashboard">{{ i18n.t('auth.forbidden.dashboard') }}</a>
+      <a routerLink="/audit-logs">{{ i18n.t('auth.forbidden.auditLog') }}</a>
     </div>
   </div>
 </section>

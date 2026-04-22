@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { OrderNotificationItem, OrderNotificationService } from '../../services/order-notification.service';
+import { TranslationService } from '../../core/i18n/translation.service';
 
 @Component({
   selector: 'app-notifications-page',
@@ -15,6 +16,7 @@ export class NotificationsPageComponent {
   private readonly pageSize = 7;
   private readonly pageWindowSize = 4;
 
+  readonly i18n = inject(TranslationService);
   readonly orderNotifications = inject(OrderNotificationService);
   private readonly router = inject(Router);
   readonly currentPage = signal(1);
@@ -73,10 +75,13 @@ export class NotificationsPageComponent {
   }
 
   sourceLabel(notification: OrderNotificationItem): string {
-    return notification.source.charAt(0).toUpperCase() + notification.source.slice(1);
+    return this.i18n.t(`notificationsPage.sources.${notification.source}`);
   }
 
   formatTimestamp(timestamp: string): string {
-    return new Date(timestamp).toLocaleString();
+    return this.i18n.formatDate(timestamp, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
   }
 }

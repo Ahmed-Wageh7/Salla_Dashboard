@@ -4,6 +4,8 @@ export interface ToastItem {
   id: number;
   message: string;
   tone: 'success' | 'error' | 'info';
+  variant: 'app' | 'notification';
+  durationMs: number;
   title?: string;
   actionLabel?: string;
   onAction?: () => void;
@@ -12,6 +14,7 @@ export interface ToastItem {
 export interface ToastOptions {
   title?: string;
   durationMs?: number;
+  variant?: 'app' | 'notification';
   actionLabel?: string;
   onAction?: () => void;
 }
@@ -23,9 +26,13 @@ export class ToastService {
     const activeToast = this.currentToast();
     return activeToast ? [activeToast] : [];
   });
+  readonly activeDurationMs = signal(0);
+  readonly activePaused = signal(false);
   private nextId = 1;
-  private readonly queue: Array<ToastItem & { durationMs: number }> = [];
+  private readonly queue: ToastItem[] = [];
   private dismissTimerId?: ReturnType<typeof setTimeout>;
+  private activeRemainingMs = 0;
+  private activeStartedAt = 0;
 
   success(message: string, options: ToastOptions = {}): void {
     this.push(message, 'success', options);
@@ -50,7 +57,31 @@ export class ToastService {
 
     this.clearDismissTimer();
     this.currentToast.set(null);
+    this.activeDurationMs.set(0);
+    this.activePaused.set(false);
+    this.activeRemainingMs = 0;
+    this.activeStartedAt = 0;
     this.showNextToast();
+  }
+
+  pause(id: number): void {
+    if (this.currentToast()?.id !== id || this.activePaused()) {
+      return;
+    }
+
+    const elapsed = Date.now() - this.activeStartedAt;
+    this.activeRemainingMs = Math.max(0, this.activeRemainingMs - elapsed);
+    this.clearDismissTimer();
+    this.activePaused.set(true);
+  }
+
+  resume(id: number): void {
+    if (this.currentToast()?.id !== id || !this.activePaused()) {
+      return;
+    }
+
+    this.activePaused.set(false);
+    this.startDismissTimer(this.activeRemainingMs);
   }
 
   triggerAction(id: number): void {
@@ -65,10 +96,11 @@ export class ToastService {
       id,
       message,
       tone,
+      variant: options.variant ?? 'app',
+      durationMs: options.durationMs ?? 2000,
       title: options.title,
       actionLabel: options.actionLabel,
       onAction: options.onAction,
-      durationMs: options.durationMs ?? 3200,
     });
     this.showNextToast();
   }
@@ -83,9 +115,10 @@ export class ToastService {
       return;
     }
 
-    const { durationMs, ...toast } = nextToast;
-    this.currentToast.set(toast);
-    this.dismissTimerId = setTimeout(() => this.dismiss(toast.id), durationMs);
+    this.currentToast.set(nextToast);
+    this.activeDurationMs.set(nextToast.durationMs);
+    this.activePaused.set(false);
+    this.startDismissTimer(nextToast.durationMs);
   }
 
   private clearDismissTimer(): void {
@@ -93,5 +126,17 @@ export class ToastService {
       clearTimeout(this.dismissTimerId);
       this.dismissTimerId = undefined;
     }
+  }
+
+  private startDismissTimer(durationMs: number): void {
+    const activeToast = this.currentToast();
+    if (!activeToast) {
+      return;
+    }
+
+    this.clearDismissTimer();
+    this.activeRemainingMs = durationMs;
+    this.activeStartedAt = Date.now();
+    this.dismissTimerId = setTimeout(() => this.dismiss(activeToast.id), durationMs);
   }
 }

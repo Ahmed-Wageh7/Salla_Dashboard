@@ -1,44 +1,40 @@
 <section class="catalog-detail">
   <header class="catalog-detail__header">
     <div>
-      <p class="catalog-detail__eyebrow">Staff record</p>
-      <h1>Staff details</h1>
+      <p class="catalog-detail__eyebrow">{{ i18n.t('staffPage.memberDetail.eyebrow') }}</p>
+      <h1>{{ i18n.t('staffPage.memberDetail.title') }}</h1>
       <p class="catalog-detail__subtitle">
-        Review one staff member in a full-width page, the same way product details are shown.
+        {{ i18n.t('staffPage.memberDetail.subtitle') }}
       </p>
     </div>
 
     <div class="catalog-detail__actions">
-      <a class="btn btn--ghost" routerLink="/staff/deductions">Deductions</a>
-      <a class="btn btn--ghost" routerLink="/staff/salary">Salary</a>
-      <a class="btn btn--secondary" routerLink="/staff/members">Back to staff</a>
+      <a class="btn btn--ghost" routerLink="/staff/deductions">{{ i18n.t('staffPage.deductions.title') }}</a>
+      <a class="btn btn--ghost" routerLink="/staff/salary">{{ i18n.t('staffPage.salary.title') }}</a>
+      <a class="btn btn--secondary" routerLink="/staff/members">{{ i18n.t('staffPage.memberDetail.back') }}</a>
     </div>
   </header>
 
-  @if (errorMessage()) {
-    <div class="catalog-detail__feedback catalog-detail__feedback--error">{{ errorMessage() }}</div>
-  }
-
   @if (isLoading()) {
     <section class="catalog-detail__panel">
-      <div class="catalog-detail__state">Loading staff details...</div>
+      <div class="catalog-detail__state">{{ i18n.t('staffPage.memberDetail.loading') }}</div>
     </section>
   } @else if (!staff()) {
     <section class="catalog-detail__panel">
-      <div class="catalog-detail__state">Staff member not found.</div>
+      <div class="catalog-detail__state">{{ i18n.t('staffPage.memberDetail.notFound') }}</div>
     </section>
   } @else if (staff(); as currentStaff) {
     <section class="catalog-detail__grid">
       <article class="catalog-detail__panel">
-        <p class="catalog-detail__eyebrow">Staff summary</p>
+        <p class="catalog-detail__eyebrow">{{ i18n.t('staffPage.memberDetail.summary') }}</p>
         <h2>{{ userName(currentStaff) }}</h2>
         <p class="catalog-detail__description">
-          {{ currentStaff.department || 'No department assigned yet.' }}
+          {{ currentStaff.department || i18n.t('staffPage.memberDetail.noDepartment') }}
         </p>
 
         <div class="catalog-detail__chips">
-          <span class="catalog-detail__chip">Daily salary: {{ currentStaff.dailySalary }} ريال</span>
-          <span class="catalog-detail__chip">Join date: {{ joinDateLabel(currentStaff) }}</span>
+          <span class="catalog-detail__chip">{{ i18n.t('staffPage.members.dailySalary') }}: {{ currentStaff.dailySalary }} {{ i18n.t('common.currency') }}</span>
+          <span class="catalog-detail__chip">{{ i18n.t('staffPage.members.joinDate') }}: {{ joinDateLabel(currentStaff) }}</span>
           <span
             class="catalog-detail__chip member-detail__chip"
             [class.member-detail__chip--inactive]="!currentStaff.isActive"
@@ -48,52 +44,52 @@
         </div>
 
         <div class="member-detail__actions">
-          <a class="btn btn--ghost" routerLink="/staff/deductions">Manage deductions</a>
-          <a class="btn btn--ghost" routerLink="/staff/salary">Manage salary</a>
+          <a class="btn btn--ghost" routerLink="/staff/deductions">{{ i18n.t('staffPage.memberDetail.manageDeductions') }}</a>
+          <a class="btn btn--ghost" routerLink="/staff/salary">{{ i18n.t('staffPage.memberDetail.manageSalary') }}</a>
         </div>
       </article>
 
       <article class="catalog-detail__panel">
-        <h3>Details</h3>
+        <h3>{{ i18n.t('staffPage.memberDetail.details') }}</h3>
         <dl class="catalog-detail__list">
           <div>
-            <dt>Staff ID</dt>
+            <dt>{{ i18n.t('staffPage.memberDetail.staffId') }}</dt>
             <dd>{{ id(currentStaff) || '--' }}</dd>
           </div>
           <div>
-            <dt>User ID</dt>
+            <dt>{{ i18n.t('staffPage.memberDetail.userId') }}</dt>
             <dd>{{ userId(currentStaff) || '--' }}</dd>
           </div>
           <div>
-            <dt>Name</dt>
+            <dt>{{ i18n.t('staffPage.memberDetail.name') }}</dt>
             <dd>{{ userName(currentStaff) }}</dd>
           </div>
           <div>
-            <dt>Email</dt>
+            <dt>{{ i18n.t('staffPage.memberDetail.email') }}</dt>
             <dd>{{ userEmail(currentStaff) || '--' }}</dd>
           </div>
           <div>
-            <dt>Department</dt>
+            <dt>{{ i18n.t('staffPage.members.columns.department') }}</dt>
             <dd>{{ currentStaff.department || '--' }}</dd>
           </div>
           <div>
-            <dt>Daily salary</dt>
-            <dd>{{ currentStaff.dailySalary }} ريال</dd>
+            <dt>{{ i18n.t('staffPage.members.dailySalary') }}</dt>
+            <dd>{{ currentStaff.dailySalary }} {{ i18n.t('common.currency') }}</dd>
           </div>
           <div>
-            <dt>Join date</dt>
+            <dt>{{ i18n.t('staffPage.members.joinDate') }}</dt>
             <dd>{{ joinDateLabel(currentStaff) }}</dd>
           </div>
           <div>
-            <dt>Status</dt>
+            <dt>{{ i18n.t('staffPage.members.columns.status') }}</dt>
             <dd>{{ statusLabel(currentStaff) }}</dd>
           </div>
           <div>
-            <dt>Created</dt>
+            <dt>{{ i18n.t('categoryPage.columns.created') }}</dt>
             <dd>{{ currentStaff.createdAt || '--' | slice: 0 : 19 }}</dd>
           </div>
           <div>
-            <dt>Updated</dt>
+            <dt>{{ i18n.t('categoryPage.columns.updated') }}</dt>
             <dd>{{ currentStaff.updatedAt || currentStaff.createdAt || '--' | slice: 0 : 19 }}</dd>
           </div>
         </dl>

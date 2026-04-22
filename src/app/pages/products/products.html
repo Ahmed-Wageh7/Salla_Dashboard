@@ -3,35 +3,31 @@
     <div class="admin-page__intro">
       <div class="admin-page__count">{{ filteredProducts().length }}</div>
       <div>
-        <h1>Products</h1>
-        <p class="admin-page__subtitle">Control your catalog, stock, and pricing from one place.</p>
+        <h1>{{ i18n.t('productsPage.title') }}</h1>
+        <p class="admin-page__subtitle">{{ i18n.t('productsPage.subtitle') }}</p>
       </div>
     </div>
 
     <div class="admin-page__actions">
       <button class="btn btn--ghost" type="button" routerLink="/products/categories">
-        Categories
+        {{ i18n.t('productsPage.categories') }}
       </button>
       <button class="btn btn--ghost" type="button" routerLink="/products/subcategories">
-        Subcategories
+        {{ i18n.t('productsPage.subcategories') }}
       </button>
-      <button class="btn btn--ghost" type="button" (click)="loadProducts()">Refresh</button>
+      <button class="btn btn--ghost" type="button" (click)="loadProducts()">{{ i18n.t('productsPage.refresh') }}</button>
       <button class="btn btn--secondary" type="button" (click)="openCreateModal()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
-        New product
+        {{ i18n.t('productsPage.newProduct') }}
       </button>
     </div>
   </header>
-
-  @if (errorMessage()) {
-    <div class="feedback feedback--error">{{ errorMessage() }}</div>
-  }
 
   <div class="grid">
     <section class="panel panel--list">
       <div class="panel__header panel__header--split">
         <div>
-          <h2>products</h2>
-          <small>Manage all of your store's products.</small>
+          <h2>{{ i18n.t('productsPage.tableTitle') }}</h2>
+          <small>{{ i18n.t('productsPage.tableSubtitle') }}</small>
         </div>
 
         <div class="toolbar">
@@ -39,31 +35,31 @@
             <i class="fas fa-search"></i>
             <input
               type="search"
-              placeholder="Search products"
+              [placeholder]="i18n.t('productsPage.searchPlaceholder')"
               [ngModel]="searchQuery()"
               (ngModelChange)="updateSearch($event)"
             />
           </div>
 
           <select [ngModel]="sort()" (ngModelChange)="updateSort($event)">
-            <option value="-createdAt">Newest</option>
-            <option value="price">Price: low to high</option>
-            <option value="-price">Price: high to low</option>
-            <option value="name">Name A-Z</option>
+            <option value="-createdAt">{{ i18n.t('productsPage.sort.newest') }}</option>
+            <option value="price">{{ i18n.t('productsPage.sort.priceAsc') }}</option>
+            <option value="-price">{{ i18n.t('productsPage.sort.priceDesc') }}</option>
+            <option value="name">{{ i18n.t('productsPage.sort.nameAsc') }}</option>
           </select>
         </div>
       </div>
 
       @if (isLoading()) {
         <div class="state-card loading-state">
-          <div class="loading-spinner" aria-hidden="true"></div>
-          <div class="loading-copy">
-            <strong>Loading products</strong>
-            <p>Fetching product data ..</p>
-          </div>
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <div class="loading-copy">
+          <strong>{{ i18n.t('productsPage.loadingTitle') }}</strong>
+          <p>{{ i18n.t('productsPage.loadingDescription') }}</p>
         </div>
-      } @else if (filteredProducts().length === 0) {
-        <div class="state-card">No products were returned by the current API filters.</div>
+      </div>
+    } @else if (filteredProducts().length === 0) {
+        <div class="state-card">{{ i18n.t('productsPage.emptyState') }}</div>
       } @else {
         <div class="table-wrap" [@pageSwap]="currentPage()">
           <table>
@@ -72,11 +68,11 @@
                 <th class="table-check">
                   <input type="checkbox" aria-label="Select all products" />
                 </th>
-                <th>Name <span>SKU code</span></th>
-                <th>Quantity</th>
-                <th>Price <span>Currency</span></th>
-                <th class="table-head-accent">Status</th>
-                <th>Created date <span>Updated date</span></th>
+                <th>{{ i18n.t('productsPage.columns.name') }} <span>{{ i18n.t('productsPage.columns.sku') }}</span></th>
+                <th>{{ i18n.t('productsPage.columns.quantity') }}</th>
+                <th>{{ i18n.t('productsPage.columns.price') }} <span>{{ i18n.t('productsPage.columns.currency') }}</span></th>
+                <th class="table-head-accent">{{ i18n.t('productsPage.columns.status') }}</th>
+                <th>{{ i18n.t('productsPage.columns.createdDate') }} <span>{{ i18n.t('productsPage.columns.updatedDate') }}</span></th>
                 <th class="table-actions"></th>
               </tr>
             </thead>
@@ -96,13 +92,13 @@
                       </div>
                       <div class="cell-stack">
                         <a class="entity-link" [routerLink]="['/products', id(product)]">
-                          {{ product.name || 'Untitled product' }}
+                          {{ product.name || i18n.t('productsPage.untitledProduct') }}
                         </a>
                         <small
-                          >{{ categoryLabel(product) || 'No category' }} /
-                          {{ subcategoryLabel(product) || 'No subcategory' }}</small
+                          >{{ categoryLabel(product) || i18n.t('productsPage.noCategory') }} /
+                          {{ subcategoryLabel(product) || i18n.t('productsPage.noSubcategory') }}</small
                         >
-                        <small>{{ id(product) || 'No SKU code' }}</small>
+                        <small>{{ id(product) || i18n.t('productsPage.noSku') }}</small>
                       </div>
                     </div>
                   </td>
@@ -114,7 +110,7 @@
                   <td>
                     <div class="cell-stack">
                       <strong>{{ priceValue(product) | number: '1.2-2' }}</strong>
-                      <small>ريال</small>
+                      <small>{{ i18n.t('common.currency') }}</small>
                     </div>
                   </td>
                   <td>
@@ -139,7 +135,7 @@
                   </td>
                   <td>
                     <div class="row-actions row-actions--product">
-                      <a class="btn btn--ghost" [routerLink]="['/products', id(product)]"> View </a>
+                      <a class="btn btn--ghost" [routerLink]="['/products', id(product)]"> {{ i18n.t('common.view') }} </a>
                       <button
                         class="btn btn--danger"
                         type="button"
@@ -147,7 +143,7 @@
                         [appCanDisableReason]="'Requires products.write permission'"
                         (click)="requestDelete(product)"
                       >
-                        Delete
+                        {{ i18n.t('productsPage.delete') }}
                       </button>
                       <button
                         class="btn btn--primary"
@@ -156,7 +152,7 @@
                         [appCanDisableReason]="'Requires products.write permission'"
                         (click)="selectProduct(product)"
                       >
-                        Edit
+                        {{ i18n.t('productsPage.edit') }}
                       </button>
                     </div>
                   </td>

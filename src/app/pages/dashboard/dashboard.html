@@ -1,11 +1,6 @@
 <div class="main-content">
   @if (isLoading()) {
-    <div class="dashboard-state">Loading dashboard data...</div>
-  } @else if (errorMessage()) {
-    <div class="dashboard-state error">
-      <p>{{ errorMessage() }}</p>
-      <button class="retry-btn" type="button" (click)="loadDashboardData()">Retry</button>
-    </div>
+    <div class="dashboard-state">{{ i18n.t('dashboard.loading') }}</div>
   } @else if (dashboardData() && goals() && growth) {
     <!-- Welcome Section -->
     <div class="welcome-section">
@@ -103,7 +98,7 @@
           </div>
           <div class="stat-footer">
             <button class="dropdown-btn">
-              Default
+              {{ i18n.t('dashboard.defaultPreset') }}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -138,7 +133,7 @@
               class="carousel-control"
               type="button"
               (click)="prevSlide()"
-              aria-label="Previous slide"
+              [attr.aria-label]="i18n.t('dashboard.previousSlide')"
             >
               &#10094;
             </button>
@@ -146,7 +141,7 @@
               class="carousel-control"
               type="button"
               (click)="nextSlide()"
-              aria-label="Next slide"
+              [attr.aria-label]="i18n.t('dashboard.nextSlide')"
             >
               &#10095;
             </button>
@@ -166,7 +161,7 @@
                 class="dot"
                 [class.active]="i === currentIndex()"
                 (click)="goToSlide(i)"
-                [attr.aria-label]="'Go to slide ' + (i + 1)"
+                [attr.aria-label]="i18n.t('dashboard.goToSlide', { index: i + 1 })"
               ></button>
             }
           </div>
@@ -181,8 +176,8 @@
         </div>
 
         <div class="goals-tabs">
-          <button class="tab-btn active">Monthly</button>
-          <button class="tab-btn">Annual</button>
+          <button class="tab-btn active">{{ i18n.t('dashboard.monthly') }}</button>
+          <button class="tab-btn">{{ i18n.t('dashboard.annual') }}</button>
         </div>
 
         <div class="progress-section">
@@ -202,15 +197,15 @@
 
         <div class="goals-stats">
           <div class="goal-stat">
-            <span class="stat-label-small">Current orders</span>
+            <span class="stat-label-small">{{ i18n.t('dashboard.currentOrders') }}</span>
             <span class="stat-number">{{ goals().currentOrders }}</span>
           </div>
           <div class="goal-stat">
-            <span class="stat-label-small">Goal</span>
+            <span class="stat-label-small">{{ i18n.t('dashboard.goal') }}</span>
             <span class="stat-number">{{ goals().goal }}</span>
           </div>
           <div class="goal-stat">
-            <span class="stat-label-small">Orders to goal</span>
+            <span class="stat-label-small">{{ i18n.t('dashboard.ordersToGoal') }}</span>
             <span class="stat-number">{{ goals().ordersToGoal }}</span>
           </div>
         </div>
@@ -236,7 +231,7 @@
 
           <div class="growth-filters">
             <div class="filter-group">
-              <label>Select indicator</label>
+              <label>{{ i18n.t('dashboard.selectIndicator') }}</label>
               <div class="custom-select">
                 <span>{{ growth.indicatorValue }}</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -313,12 +308,16 @@
 
       <div class="orders-card">
         <div class="orders-table-header">
-          <div class="col-customer">Customer<span>Mobile</span></div>
-          <div class="col-payment">Payment<span>Payment status</span></div>
-          <div class="col-shipping">Shipping</div>
-          <div class="col-price">Price</div>
-          <div class="col-status">Order status</div>
-          <div class="col-date">Created date</div>
+          <div class="col-customer">
+            {{ i18n.t('dashboard.customer') }}<span>{{ i18n.t('dashboard.mobile') }}</span>
+          </div>
+          <div class="col-payment">
+            {{ i18n.t('dashboard.payment') }}<span>{{ i18n.t('dashboard.paymentStatus') }}</span>
+          </div>
+          <div class="col-shipping">{{ i18n.t('dashboard.shipping') }}</div>
+          <div class="col-price">{{ i18n.t('dashboard.price') }}</div>
+          <div class="col-status">{{ i18n.t('dashboard.orderStatus') }}</div>
+          <div class="col-date">{{ i18n.t('dashboard.createdDate') }}</div>
           <div class="col-action"></div>
         </div>
 
@@ -388,10 +387,10 @@
   <!-- Footer -->
   <footer class="dashboard-footer">
     <div class="footer-left">
-      <span>© Salla 2026. All rights reserved.</span>
+      <span>{{ i18n.t('dashboard.footerCopy') }}</span>
     </div>
     <div class="footer-right">
-      <span class="footer-note">Built for modern merchants</span>
+      <span class="footer-note">{{ i18n.t('dashboard.builtForMerchants') }}</span>
     </div>
   </footer>
 </div>

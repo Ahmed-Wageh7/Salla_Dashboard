@@ -9,6 +9,7 @@ import { AuditLogService } from '../../services/audit-log.service';
 import { CanDisableDirective } from '../../shared/access/can-disable.directive';
 import { ToastService } from '../../shared/toast/toast.service';
 import { OrderNotificationService } from '../../services/order-notification.service';
+import { TranslationService } from '../../core/i18n/translation.service';
 
 interface OrderMenuState {
   id: string;
@@ -62,6 +63,7 @@ export class OrdersComponent {
   private readonly auditLogService = inject(AuditLogService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  readonly i18n = inject(TranslationService);
   readonly orderNotifications = inject(OrderNotificationService);
   private readonly pageSize = 10;
   private readonly pageWindowSize = 4;
@@ -185,8 +187,10 @@ export class OrdersComponent {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to load admin orders.');
-        this.toastService.error(error?.error?.message || 'Unable to load admin orders.');
+        this.errorMessage.set(error?.error?.message || this.i18n.t('ordersPage.messages.loadError'));
+        this.toastService.error(
+          error?.error?.message || this.i18n.t('ordersPage.messages.loadError'),
+        );
         this.isLoading.set(false);
       },
     });
@@ -257,11 +261,13 @@ export class OrdersComponent {
           summary: `Order ${updated.orderNumber} status changed to ${updated.status}.`,
         });
         this.replaceOrder(updated);
-        this.toastService.success('Order status updated successfully.');
+        this.toastService.success(this.i18n.t('ordersPage.messages.statusUpdated'));
         this.closeMenu();
       },
       error: (error) => {
-        this.toastService.error(error?.error?.message || 'Unable to update order status.');
+        this.toastService.error(
+          error?.error?.message || this.i18n.t('ordersPage.messages.statusUpdateError'),
+        );
       },
     });
   }
@@ -290,7 +296,7 @@ export class OrdersComponent {
       !form.shippingCountry.trim() ||
       !form.shippingPostalCode.trim()
     ) {
-      const message = 'Customer, phone, and full shipping address are required.';
+      const message = this.i18n.t('ordersPage.messages.requiredAddress');
       this.errorMessage.set(message);
       this.toastService.error(message);
       return;
@@ -334,11 +340,11 @@ export class OrdersComponent {
         this.currentPage.set(1);
         this.persistCurrentPage();
         this.isSaving.set(false);
-        this.toastService.success('Order created successfully.');
+        this.toastService.success(this.i18n.t('ordersPage.messages.created'));
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message || 'Unable to create order.');
-        this.toastService.error(error?.error?.message || 'Unable to create order.');
+        this.errorMessage.set(error?.error?.message || this.i18n.t('ordersPage.messages.createError'));
+        this.toastService.error(error?.error?.message || this.i18n.t('ordersPage.messages.createError'));
         this.isSaving.set(false);
       },
     });
@@ -356,7 +362,7 @@ export class OrdersComponent {
     link.download = 'salla-orders.json';
     link.click();
     window.URL.revokeObjectURL(url);
-    this.toastService.info('Orders exported successfully.');
+    this.toastService.info(this.i18n.t('ordersPage.messages.exported'));
   }
 
   nextPage(): void {
@@ -407,6 +413,28 @@ export class OrdersComponent {
 
   shippingTone(shipping: string): string {
     return shipping.toLowerCase().includes("doesn't require shipping") ? 'muted' : 'accent';
+  }
+
+  tabLabel(label: string): string {
+    const normalized = label.trim().toLowerCase().replace(/\s+/g, '-');
+    return this.i18n.t(`ordersPage.tabs.${normalized}`);
+  }
+
+  sourceLabel(source: string): string {
+    return this.i18n.t(`ordersPage.sources.${source.trim().toLowerCase()}`);
+  }
+
+  paymentLabel(payment: string): string {
+    const key = payment.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    return this.i18n.t(`ordersPage.payments.${key}`);
+  }
+
+  paymentStatusLabel(status: string): string {
+    return this.i18n.t(`ordersPage.paymentStatuses.${status.trim().toLowerCase()}`);
+  }
+
+  orderStatusLabel(status: string): string {
+    return this.i18n.t(`ordersPage.statuses.${status.trim().toLowerCase().replace(/\s+/g, '-')}`);
   }
 
   private replaceOrder(updated: Order): void {

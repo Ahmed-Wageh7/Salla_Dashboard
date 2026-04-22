@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { AdminApiService } from '../../../core/api/admin-api.service';
 import { StaffRecord } from '../../../core/api/admin.models';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 @Component({
   selector: 'app-staff-member-detail',
@@ -18,6 +19,7 @@ export class StaffMemberDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly adminApi = inject(AdminApiService);
   private readonly destroyRef = inject(DestroyRef);
+  readonly i18n = inject(TranslationService);
 
   readonly staff = signal<StaffRecord | null>(null);
   readonly isLoading = signal(true);
@@ -45,7 +47,7 @@ export class StaffMemberDetailComponent {
           this.isLoading.set(false);
         },
         error: (error) => {
-          this.errorMessage.set(error?.error?.message || 'Unable to load staff details.');
+          this.errorMessage.set(error?.error?.message || this.i18n.t('staffPage.memberDetail.messages.loadError'));
           this.isLoading.set(false);
         },
       });
@@ -64,7 +66,7 @@ export class StaffMemberDetailComponent {
 
   userName(record: StaffRecord | null | undefined): string {
     const user = record?.user;
-    if (!user) return 'Unknown user';
+    if (!user) return this.i18n.t('staffPage.shared.unknownUser');
     return typeof user === 'string' ? user : user.name?.trim() || user.email?.trim() || this.userId(record);
   }
 
@@ -79,6 +81,6 @@ export class StaffMemberDetailComponent {
   }
 
   statusLabel(record: StaffRecord | null | undefined): string {
-    return record?.isActive ? 'Active' : 'Inactive';
+    return record?.isActive ? this.i18n.t('staffPage.shared.active') : this.i18n.t('staffPage.shared.inactive');
   }
 }

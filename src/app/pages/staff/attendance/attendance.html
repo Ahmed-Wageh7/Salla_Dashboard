@@ -1,20 +1,15 @@
 <section class="admin-page">
   <header class="admin-page__header">
     <div>
-      <p class="admin-page__eyebrow">Staff operations</p>
-      <h1>Attendance</h1>
+      <p class="admin-page__eyebrow">{{ i18n.t('staffPage.eyebrow') }}</p>
+      <h1>{{ i18n.t('staffPage.attendance.title') }}</h1>
       <p class="admin-page__subtitle">
-        Run check-in and check-out actions from one place and keep the active workspace visible in
-        both the page switcher and the sidebar.
+        {{ i18n.t('staffPage.attendance.subtitle') }}
       </p>
     </div>
   </header>
 
   <app-staff-workspace-nav></app-staff-workspace-nav>
-
-  @if (errorMessage()) {
-    <div class="feedback feedback--error">{{ errorMessage() }}</div>
-  }
 
   @if (feedback()) {
     <div class="feedback feedback--success">{{ feedback() }}</div>
@@ -22,32 +17,32 @@
 
   <div class="summary-grid">
     <section class="panel stat">
-      <p>Check in</p>
-      <h2>Start shift</h2>
-      <small>Creates a check-in record for the current staff context.</small>
+      <p>{{ i18n.t('staffPage.attendance.checkInLabel') }}</p>
+      <h2>{{ i18n.t('staffPage.attendance.startShift') }}</h2>
+      <small>{{ i18n.t('staffPage.attendance.checkInHelp') }}</small>
       <div class="action-row">
         <button class="btn btn--primary" type="button" [disabled]="isBusy()" [appCanDisable]="'attendance.write'" [appCanDisableReason]="'Requires attendance.write permission'" (click)="checkIn()">
-          Check in
+          {{ i18n.t('staffPage.attendance.checkInLabel') }}
         </button>
       </div>
     </section>
 
     <section class="panel stat">
-      <p>Check out</p>
-      <h2>End shift</h2>
-      <small>Closes the active attendance session and returns worked hours.</small>
+      <p>{{ i18n.t('staffPage.attendance.checkOutLabel') }}</p>
+      <h2>{{ i18n.t('staffPage.attendance.endShift') }}</h2>
+      <small>{{ i18n.t('staffPage.attendance.checkOutHelp') }}</small>
       <div class="action-row">
         <button class="btn btn--secondary" type="button" [disabled]="isBusy()" [appCanDisable]="'attendance.write'" [appCanDisableReason]="'Requires attendance.write permission'" (click)="checkOut()">
-          Check out
+          {{ i18n.t('staffPage.attendance.checkOutLabel') }}
         </button>
       </div>
     </section>
 
     <section class="panel stat">
-      <p>Status</p>
-      <h2>{{ feedback() ? 'Updated' : 'Ready' }}</h2>
+      <p>{{ i18n.t('staffPage.attendance.status') }}</p>
+      <h2>{{ feedback() ? i18n.t('staffPage.attendance.updated') : i18n.t('staffPage.attendance.ready') }}</h2>
       <small>
-        {{ feedback() ? 'Attendance action completed successfully.' : 'Run check-in or check-out when needed.' }}
+        {{ feedback() ? i18n.t('staffPage.attendance.success') : i18n.t('staffPage.attendance.idleHelp') }}
       </small>
     </section>
   </div>

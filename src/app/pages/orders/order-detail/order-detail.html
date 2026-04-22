@@ -8,10 +8,6 @@
     <a class="order-detail__back" routerLink="/orders">Back to Orders</a>
   </div>
 
-  @if (errorMessage()) {
-    <div class="order-detail__feedback order-detail__feedback--error">{{ errorMessage() }}</div>
-  }
-
   @if (isLoading()) {
     <section class="order-detail__panel">
       <div class="order-detail__state">Loading order details...</div>

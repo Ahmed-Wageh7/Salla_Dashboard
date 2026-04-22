@@ -7,10 +7,18 @@ import { SubcategoryDetailComponent } from './subcategory-detail/subcategory-det
 import { SubcategoriesComponent } from './subcategories/subcategories';
 
 export const PRODUCTS_ROUTES: Routes = [
-  { path: 'categories', component: CategoriesComponent, title: 'Categories | Salla Dashboard' },
-  { path: 'categories/:id', component: CategoryDetailComponent, title: 'Category Details | Salla Dashboard' },
-  { path: 'subcategories', component: SubcategoriesComponent, title: 'Subcategories | Salla Dashboard' },
-  { path: 'subcategories/:id', component: SubcategoryDetailComponent, title: 'Subcategory Details | Salla Dashboard' },
-  { path: ':id', component: ProductDetailComponent, title: 'Product Details | Salla Dashboard' },
-  { path: '', component: ProductsComponent, title: 'Products | Salla Dashboard' },
+  { path: 'categories', component: CategoriesComponent, data: { titleKey: 'routes.categories' } },
+  {
+    path: 'categories/:id',
+    component: CategoryDetailComponent,
+    data: { titleKey: 'routes.categoryDetails' },
+  },
+  { path: 'subcategories', component: SubcategoriesComponent, data: { titleKey: 'routes.subcategories' } },
+  {
+    path: 'subcategories/:id',
+    component: SubcategoryDetailComponent,
+    data: { titleKey: 'routes.subcategoryDetails' },
+  },
+  { path: ':id', component: ProductDetailComponent, data: { titleKey: 'routes.productDetails' } },
+  { path: '', component: ProductsComponent, data: { titleKey: 'routes.products' } },
 ];

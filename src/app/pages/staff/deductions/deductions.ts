@@ -6,6 +6,7 @@ import { AdminApiService } from '../../../core/api/admin-api.service';
 import { StaffRecord } from '../../../core/api/admin.models';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { StaffWorkspaceNavComponent } from '../workspace-nav/staff-workspace-nav';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 @Component({
   selector: 'app-staff-deductions',
@@ -18,6 +19,7 @@ import { StaffWorkspaceNavComponent } from '../workspace-nav/staff-workspace-nav
 export class StaffDeductionsComponent {
   private readonly adminApi = inject(AdminApiService);
   private readonly toastService = inject(ToastService);
+  readonly i18n = inject(TranslationService);
 
   readonly staffMembers = signal<StaffRecord[]>([]);
   readonly searchQuery = signal('');
@@ -59,7 +61,7 @@ export class StaffDeductionsComponent {
         this.isLoadingStaff.set(false);
       },
       error: (error) => {
-        const message = this.getApiErrorMessage(error, 'Unable to load staff members.');
+        const message = this.getApiErrorMessage(error, this.i18n.t('staffPage.deductions.messages.loadError'));
         this.errorMessage.set(message);
         this.toastService.error(message);
         this.isLoadingStaff.set(false);
@@ -88,7 +90,7 @@ export class StaffDeductionsComponent {
 
   userName(record: StaffRecord | null | undefined): string {
     const user = record?.user;
-    if (!user) return 'Unknown user';
+    if (!user) return this.i18n.t('staffPage.shared.unknownUser');
     return typeof user === 'string' ? user : user.name?.trim() || user.email?.trim() || this.userId(record);
   }
 
@@ -99,7 +101,7 @@ export class StaffDeductionsComponent {
   }
 
   statusLabel(record: StaffRecord | null | undefined): string {
-    return record?.isActive ? 'Active' : 'Inactive';
+    return record?.isActive ? this.i18n.t('staffPage.shared.active') : this.i18n.t('staffPage.shared.inactive');
   }
 
   joinDateLabel(record: StaffRecord | null | undefined): string {
