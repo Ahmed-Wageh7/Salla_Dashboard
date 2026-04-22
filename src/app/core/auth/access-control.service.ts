@@ -1,7 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { AuthService } from './auth.service';
 
-export type UserRole = 'owner' | 'manager' | 'staff';
+export type UserRole = 'admin' | 'staff' | 'user';
 
 export type Permission =
   | 'dashboard.view'
@@ -17,7 +17,7 @@ export type Permission =
   | 'audit.read';
 
 const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  owner: [
+  admin: [
     'dashboard.view',
     'products.read',
     'products.write',
@@ -30,18 +30,14 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'deductions.write',
     'audit.read',
   ],
-  manager: [
+  staff: [
     'dashboard.view',
     'products.read',
-    'products.write',
     'orders.read',
-    'orders.write',
     'staff.read',
     'attendance.write',
-    'deductions.write',
-    'audit.read',
   ],
-  staff: ['dashboard.view', 'products.read', 'orders.read', 'staff.read', 'attendance.write'],
+  user: ['dashboard.view'],
 };
 
 @Injectable({ providedIn: 'root' })

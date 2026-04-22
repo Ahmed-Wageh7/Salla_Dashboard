@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type { Permission, UserRole } from './access-control.service';
@@ -20,8 +21,14 @@ interface AuthSession {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly sessionKey = 'auth_session';
+  private expiryTimeoutId: number | null = null;
   readonly session = signal<AuthSession | null>(this.readStoredSession());
+
+  constructor() {
+    this.syncSessionExpiry(this.session());
+  }
 
   login(payload: LoginPayload): Observable<void> {
     return this.http.post<unknown>(this.url('/auth/login'), payload).pipe(
@@ -31,13 +38,7 @@ export class AuthService {
   }
 
   logout(): void {
-    if (typeof window === 'undefined') return;
-
-    window.localStorage.removeItem('auth_token');
-    window.localStorage.removeItem('access_token');
-    window.localStorage.removeItem('token');
-    window.localStorage.removeItem(this.sessionKey);
-    this.session.set(null);
+    this.clearSession();
   }
 
   isAuthenticated(): boolean {
@@ -46,19 +47,32 @@ export class AuthService {
 
   getToken(): string {
     const sessionToken = this.session()?.token?.trim();
-    if (sessionToken) return sessionToken;
+    if (sessionToken) {
+      if (this.isTokenExpired(sessionToken)) {
+        this.handleExpiredSession();
+        return '';
+      }
+
+      return sessionToken;
+    }
     if (typeof window === 'undefined') return '';
 
-    return (
+    const storedToken =
       window.localStorage.getItem('auth_token') ||
       window.localStorage.getItem('access_token') ||
       window.localStorage.getItem('token') ||
-      ''
-    );
+      '';
+
+    if (storedToken && this.isTokenExpired(storedToken)) {
+      this.handleExpiredSession();
+      return '';
+    }
+
+    return storedToken;
   }
 
   currentRole(): UserRole {
-    return this.session()?.role ?? this.inferRoleFromToken(this.getToken()) ?? 'owner';
+    return this.session()?.role ?? this.inferRoleFromToken(this.getToken()) ?? 'user';
   }
 
   currentPermissions(): Permission[] {
@@ -75,6 +89,7 @@ export class AuthService {
     window.localStorage.setItem('auth_token', session.token);
     window.localStorage.setItem(this.sessionKey, JSON.stringify(session));
     this.session.set(session);
+    this.syncSessionExpiry(session);
   }
 
   private extractSession(response: unknown): AuthSession {
@@ -115,6 +130,10 @@ export class AuthService {
 
       const parsed = JSON.parse(raw) as Partial<AuthSession>;
       if (!parsed?.token) return null;
+      if (this.isTokenExpired(parsed.token)) {
+        this.clearStoredSession();
+        return null;
+      }
 
       return {
         token: parsed.token,
@@ -126,6 +145,54 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  private clearSession(): void {
+    this.clearExpiryTimeout();
+    this.clearStoredSession();
+    this.session.set(null);
+  }
+
+  private handleExpiredSession(): void {
+    this.clearSession();
+
+    if (typeof window === 'undefined' || window.location.hash.includes('/login')) {
+      return;
+    }
+
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
+  }
+
+  private syncSessionExpiry(session: AuthSession | null): void {
+    this.clearExpiryTimeout();
+    if (!session) return;
+
+    const expiration = this.getTokenExpiration(session.token);
+    if (!expiration) return;
+
+    const msUntilExpiry = expiration * 1000 - Date.now();
+    if (msUntilExpiry <= 0) {
+      this.handleExpiredSession();
+      return;
+    }
+
+    this.expiryTimeoutId = window.setTimeout(() => this.handleExpiredSession(), msUntilExpiry);
+  }
+
+  private clearExpiryTimeout(): void {
+    if (this.expiryTimeoutId === null) return;
+
+    clearTimeout(this.expiryTimeoutId);
+    this.expiryTimeoutId = null;
+  }
+
+  private clearStoredSession(): void {
+    if (typeof window === 'undefined') return;
+
+    window.localStorage.removeItem('auth_token');
+    window.localStorage.removeItem('access_token');
+    window.localStorage.removeItem('token');
+    window.localStorage.removeItem(this.sessionKey);
   }
 
   private collectStringCandidates(value: unknown): string[] {
@@ -182,6 +249,18 @@ export class AuthService {
     }
   }
 
+  private getTokenExpiration(token: string): number | null {
+    const exp = this.decodeTokenPayload(token)?.['exp'];
+    const expiration = typeof exp === 'number' ? exp : Number(exp);
+
+    return Number.isFinite(expiration) && expiration > 0 ? expiration : null;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    const expiration = this.getTokenExpiration(token);
+    return expiration !== null && expiration * 1000 <= Date.now();
+  }
+
   private inferRoleFromToken(token: string): UserRole | null {
     const payload = this.decodeTokenPayload(token);
     if (!payload) return null;
@@ -196,12 +275,12 @@ export class AuthService {
     return Array.isArray(value) ? value[0] : undefined;
   }
 
-  private normalizeRole(value: unknown, fallbackToOwner = true): UserRole {
+  private normalizeRole(value: unknown, fallbackToUser = true): UserRole {
     const normalized = String(value ?? '').trim().toLowerCase();
-    if (['owner', 'super-admin', 'superadmin', 'admin'].includes(normalized)) return 'owner';
-    if (['manager', 'editor', 'supervisor'].includes(normalized)) return 'manager';
+    if (['owner', 'super-admin', 'superadmin', 'admin'].includes(normalized)) return 'admin';
     if (['staff', 'agent', 'viewer'].includes(normalized)) return 'staff';
-    return fallbackToOwner ? 'owner' : 'manager';
+    if (['manager', 'editor', 'supervisor', 'user'].includes(normalized)) return 'user';
+    return fallbackToUser ? 'user' : 'staff';
   }
 
   private normalizePermissions(value: unknown): Permission[] {
