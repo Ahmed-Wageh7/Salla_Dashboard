@@ -519,6 +519,34 @@ th {
   background: #f2fbf4;
 }
 
+:host-context([dir='rtl']) {
+  .admin-page__intro,
+  .panel__header,
+  .panel__header h2,
+  .panel__header small,
+  .state-card,
+  .cell-stack,
+  th,
+  td,
+  label,
+  input {
+    text-align: right;
+  }
+
+  .toolbar,
+  .action-row,
+  .filters__actions,
+  .form-grid__actions,
+  .salary-actions__buttons,
+  .row-actions {
+    direction: rtl;
+  }
+
+  .row-actions--product {
+    justify-content: flex-start;
+  }
+}
+
 .btn {
   border: 0;
   border-radius: 999px;

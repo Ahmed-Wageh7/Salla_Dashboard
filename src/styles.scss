@@ -35,6 +35,16 @@ html[dir='rtl'] button {
   text-align: right;
 }
 
+html[dir='rtl'] .pagination__page,
+html[dir='rtl'] .pagination__arrow,
+html[dir='rtl'] .audit-pagination button,
+html[dir='rtl'] .header__language-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 html[dir='rtl'] .fa-chevron-right,
 html[dir='rtl'] .fa-angle-right,
 html[dir='rtl'] .fa-arrow-right,
