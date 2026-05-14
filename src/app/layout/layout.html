@@ -1,0 +1,22 @@
+<div class="flex h-screen overflow-hidden bg-gray-50">
+  <app-sidebar [isOpen]="sidebarOpen()" (closeMenu)="closeSidebar()"></app-sidebar>
+
+  <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+    <app-header (menuToggle)="toggleSidebar()"></app-header>
+
+    <main class="flex-1 overflow-y-auto">
+      @if (isReadOnlyWorkspace()) {
+        <div class="layout-banner">
+          <strong>{{ i18n.t('layout.readOnlyTitle') }}</strong>
+          {{ i18n.t('layout.readOnlyDescription') }}
+        </div>
+      } @else if (hasAttendanceWriteOnlyAccess()) {
+        <div class="layout-banner">
+          <strong>{{ i18n.t('layout.limitedTitle') }}</strong>
+          {{ i18n.t('layout.limitedDescription') }}
+        </div>
+      }
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

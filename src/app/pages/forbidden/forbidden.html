@@ -1,0 +1,13 @@
+<section class="forbidden-page">
+  <div class="forbidden-card">
+    <p class="forbidden-card__eyebrow">{{ i18n.t('auth.forbidden.eyebrow') }}</p>
+    <h1>{{ i18n.t('auth.forbidden.title') }}</h1>
+    <p>
+      {{ i18n.t('auth.forbidden.description') }}
+    </p>
+    <div class="forbidden-card__actions">
+      <a routerLink="/dashboard">{{ i18n.t('auth.forbidden.dashboard') }}</a>
+      <a routerLink="/audit-logs">{{ i18n.t('auth.forbidden.auditLog') }}</a>
+    </div>
+  </div>
+</section>

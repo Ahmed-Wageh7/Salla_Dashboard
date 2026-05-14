@@ -1,0 +1,17 @@
+.deduction-detail__chip--inactive {
+  background: #fff4e8;
+  color: #a7631f;
+}
+
+.deduction-detail__toolbar {
+  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.deduction-detail__table-panel {
+  display: grid;
+  gap: 18px;
+}

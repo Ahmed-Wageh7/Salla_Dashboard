@@ -1,0 +1,225 @@
+<section class="admin-page">
+  <header class="admin-page__header">
+    <div class="admin-page__intro">
+      <div class="admin-page__count">{{ filteredStaff().length }}</div>
+      <div>
+        <p class="admin-page__eyebrow">{{ i18n.t('staffPage.members.eyebrow') }}</p>
+        <h1>{{ i18n.t('staffPage.members.title') }}</h1>
+        <p class="admin-page__subtitle">
+          {{ i18n.t('staffPage.members.subtitle') }}
+        </p>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn--ghost" type="button" routerLink="/staff/attendance">
+        {{ i18n.t('staffPage.members.attendance') }}
+      </button>
+      <button class="btn btn--secondary" type="button" (click)="loadStaff()">{{ i18n.t('common.refresh') }}</button>
+      <button class="btn btn--primary" type="button" (click)="openCreateModal()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'">
+        {{ i18n.t('staffPage.members.newStaff') }}
+      </button>
+    </div>
+  </header>
+
+  <app-staff-workspace-nav />
+
+  <div class="grid">
+    <section class="panel panel--list">
+      <div class="panel__header panel__header--split">
+        <div>
+          <h2>{{ i18n.t('staffPage.members.listTitle') }}</h2>
+          <small>{{ i18n.t('staffPage.members.listSubtitle') }}</small>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-field">
+            <i class="fas fa-search"></i>
+            <input
+              type="search"
+              [placeholder]="i18n.t('staffPage.members.searchPlaceholder')"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+            />
+          </div>
+        </div>
+      </div>
+
+      @if (isLoading()) {
+        <div class="state-card">{{ i18n.t('staffPage.members.loading') }}</div>
+      } @else if (filteredStaff().length === 0) {
+        <div class="state-card">{{ i18n.t('staffPage.members.empty') }}</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ i18n.t('staffPage.members.columns.staff') }}</th>
+                <th>{{ i18n.t('staffPage.members.columns.department') }}</th>
+                <th>{{ i18n.t('staffPage.members.columns.salary') }}</th>
+                <th>{{ i18n.t('staffPage.members.columns.status') }}</th>
+                <th class="table-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (record of filteredStaff(); track id(record)) {
+                <tr>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ userName(record) }}</strong>
+                    </div>
+                  </td>
+                  <td>{{ record.department || '--' }}</td>
+                  <td>{{ record.dailySalary }} {{ i18n.t('common.currency') }}</td>
+                  <td>
+                    <span class="status-pill" [class.status-pill--inactive]="!record.isActive">
+                      {{ statusLabel(record) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="row-actions row-actions--product">
+                      <a class="btn btn--ghost" [routerLink]="['/staff/members', id(record)]">{{ i18n.t('common.view') }}</a>
+                      <button class="btn btn--danger" type="button" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="requestDelete(record)">
+                        {{ i18n.t('productsPage.delete') }}
+                      </button>
+                      <button class="btn btn--primary" type="button" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="openEditModal(record)">
+                        {{ i18n.t('productsPage.edit') }}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+</section>
+
+@if (isFormModalOpen()) {
+  <div class="modal-backdrop" (click)="closeFormModal()"></div>
+  <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t('staffPage.members.formTitle')">
+    <div class="modal-card__header">
+      <div>
+        <p class="modal-card__eyebrow">{{ i18n.t('staffPage.members.formEyebrow') }}</p>
+        <h2>{{ form().id ? i18n.t('staffPage.members.editStaff') : i18n.t('staffPage.members.createStaff') }}</h2>
+      </div>
+
+      <button
+        class="modal-card__close"
+        type="button"
+        (click)="closeFormModal()"
+        [attr.aria-label]="i18n.t('common.close')"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form class="form-grid" (ngSubmit)="saveStaff()">
+      @if (!form().id) {
+        <label class="form-grid__wide">
+          <span>{{ i18n.t('staffPage.members.userId') }}</span>
+          <input
+            type="text"
+            [ngModel]="form().user"
+            name="user"
+            (ngModelChange)="updateForm('user', $event)"
+            [placeholder]="i18n.t('staffPage.members.userIdPlaceholder')"
+            required
+          />
+        </label>
+      } @else {
+        <label class="form-grid__wide">
+          <span>{{ i18n.t('staffPage.members.linkedUser') }}</span>
+          <input type="text" [value]="form().user || i18n.t('staffPage.members.existingLinkedUser')" readonly />
+        </label>
+      }
+
+      <label>
+        <span>{{ i18n.t('staffPage.members.dailySalary') }}</span>
+        <input
+          type="number"
+          [ngModel]="form().dailySalary"
+          name="dailySalary"
+          (ngModelChange)="updateForm('dailySalary', $event)"
+          [placeholder]="i18n.t('staffPage.members.dailySalaryPlaceholder')"
+          min="0"
+          required
+        />
+      </label>
+
+      <label>
+        <span>{{ i18n.t('staffPage.members.joinDate') }}</span>
+        <input
+          type="date"
+          [ngModel]="form().joinDate"
+          name="joinDate"
+          (ngModelChange)="updateForm('joinDate', $event)"
+          required
+        />
+      </label>
+
+      <label class="form-grid__wide">
+        <span>{{ i18n.t('staffPage.members.columns.department') }}</span>
+        <input
+          type="text"
+          [ngModel]="form().department"
+          name="department"
+          (ngModelChange)="updateForm('department', $event)"
+          [placeholder]="i18n.t('staffPage.members.departmentPlaceholder')"
+          required
+        />
+      </label>
+
+      <label class="members-checkbox">
+        <input
+          type="checkbox"
+          [ngModel]="form().isActive"
+          name="isActive"
+          (ngModelChange)="updateForm('isActive', $event)"
+        />
+        <span>{{ i18n.t('staffPage.members.activeLabel') }}</span>
+      </label>
+
+      <div class="form-grid__actions">
+        <button class="btn btn--ghost" type="button" (click)="closeFormModal()">{{ i18n.t('common.cancel') }}</button>
+        <button class="btn btn--primary" type="submit" [disabled]="isSaving()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'">
+          {{ isSaving() ? i18n.t('common.loading') : form().id ? i18n.t('staffPage.members.updateStaff') : i18n.t('staffPage.members.createStaff') }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+
+@if (isDeleteModalOpen()) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
+  <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t('staffPage.members.deleteStaff')">
+    <div class="modal-card__header">
+      <div>
+        <p class="modal-card__eyebrow">{{ i18n.t('staffPage.members.deleteStaff') }}</p>
+        <h2>{{ i18n.t('staffPage.members.deletePrompt', { name: userName(pendingDeleteStaff()) }) }}</h2>
+      </div>
+
+      <button
+        class="modal-card__close"
+        type="button"
+        (click)="closeDeleteModal()"
+        [attr.aria-label]="i18n.t('common.close')"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <p class="members-delete-copy">
+      {{ i18n.t('staffPage.members.deleteDescription') }}
+    </p>
+
+    <div class="form-grid__actions">
+      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">{{ i18n.t('common.cancel') }}</button>
+      <button class="btn btn--danger" type="button" [disabled]="isDeleting()" [appCanDisable]="'staff.write'" [appCanDisableReason]="'Requires staff.write permission'" (click)="confirmDelete()">
+        {{ isDeleting() ? i18n.t('common.loading') : i18n.t('staffPage.members.deleteStaff') }}
+      </button>
+    </div>
+  </section>
+}

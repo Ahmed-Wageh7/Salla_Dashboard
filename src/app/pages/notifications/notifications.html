@@ -1,0 +1,143 @@
+<section class="notifications-page">
+  <header class="notifications-page__header">
+    <div>
+      <p class="notifications-page__eyebrow">{{ i18n.t('notificationsPage.eyebrow') }}</p>
+      <h1>{{ i18n.t('notificationsPage.title') }}</h1>
+      <p class="notifications-page__subtext">{{ i18n.t('notificationsPage.subtext') }}</p>
+    </div>
+
+    <div class="notifications-page__header-actions">
+      @if (orderNotifications.browserPermission() !== 'granted') {
+        <button
+          type="button"
+          class="notifications-page__ghost-btn"
+          (click)="enableDesktopNotifications()"
+        >
+          {{ i18n.t('notificationsPage.enableBrowserAlerts') }}
+        </button>
+      }
+      <button type="button" class="notifications-page__primary-link" (click)="openOrdersPage()">
+        {{ i18n.t('notificationsPage.viewAllOrders') }}
+      </button>
+    </div>
+  </header>
+
+  <div class="notifications-page__summary">
+    <article class="notifications-page__stat">
+      <span>{{ i18n.t('notificationsPage.totalNotifications') }}</span>
+      <strong>{{ orderNotifications.notifications().length }}</strong>
+    </article>
+    <article class="notifications-page__stat">
+      <span>{{ i18n.t('notificationsPage.unreadNotifications') }}</span>
+      <strong>{{ orderNotifications.unreadCount() }}</strong>
+    </article>
+  </div>
+
+  @if (orderNotifications.notifications().length) {
+    <div class="notifications-list">
+      <div class="table-wrap">
+        <table class="notifications-table">
+          <thead>
+            <tr>
+              <th>{{ i18n.t('notificationsPage.order') }} <span>{{ i18n.t('notificationsPage.subject') }}</span></th>
+              <th>{{ i18n.t('notificationsPage.message') }}</th>
+              <th>{{ i18n.t('notificationsPage.source') }}</th>
+              <th>{{ i18n.t('notificationsPage.status') }}</th>
+              <th>{{ i18n.t('notificationsPage.createdAt') }}</th>
+              <th class="notifications-table__actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (notification of paginatedNotifications(); track notification.id) {
+              <tr [class.notifications-table__row--unread]="!notification.read">
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ notification.orderNumber }}</strong>
+                    <small>{{ notification.subject || notification.title }}</small>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ notification.title }}</strong>
+                    <span>{{ notification.message }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="notification-source">
+                    {{ sourceLabel(notification) }}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    class="notification-state"
+                    [class.notification-state--unread]="!notification.read"
+                  >
+                    {{
+                      notification.read
+                        ? i18n.t('notificationsPage.read')
+                        : i18n.t('notificationsPage.unread')
+                    }}
+                  </span>
+                </td>
+                <td>
+                  <div class="cell-stack">
+                    <strong>{{ formatTimestamp(notification.createdAt) }}</strong>
+                  </div>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="btn btn--ghost" (click)="openOrder(notification)">
+                      {{ i18n.t('common.view') }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button
+            class="pagination__arrow"
+            type="button"
+            [attr.aria-label]="i18n.t('notificationsPage.previousPage')"
+            [disabled]="currentPage() === 1"
+            (click)="previousPage()"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="pagination__pages">
+            @for (page of paginationItems(); track page) {
+              <button
+                class="pagination__page"
+                type="button"
+                [class.pagination__page--active]="page === currentPage()"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            class="pagination__arrow"
+            type="button"
+            [attr.aria-label]="i18n.t('notificationsPage.nextPage')"
+            [disabled]="currentPage() === totalPages()"
+            (click)="nextPage()"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="notifications-page__empty">
+      <h2>{{ i18n.t('notificationsPage.emptyTitle') }}</h2>
+      <p>{{ i18n.t('notificationsPage.emptyDescription') }}</p>
+    </div>
+  }
+</section>

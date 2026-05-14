@@ -1,0 +1,106 @@
+<section class="catalog-detail">
+  <header class="catalog-detail__header">
+    <div>
+      <p class="catalog-detail__eyebrow">{{ i18n.t('staffPage.salaryDetail.eyebrow') }}</p>
+      <h1>{{ i18n.t('staffPage.salaryDetail.title') }}</h1>
+      <p class="catalog-detail__subtitle">
+        {{ i18n.t('staffPage.salaryDetail.subtitle') }}
+      </p>
+    </div>
+
+    <div class="catalog-detail__actions">
+      <a class="btn btn--ghost" routerLink="/staff/members">{{ i18n.t('staffPage.members.title') }}</a>
+      <a class="btn btn--ghost" routerLink="/staff/deductions">{{ i18n.t('staffPage.deductions.title') }}</a>
+      <a class="btn btn--secondary" routerLink="/staff/salary">{{ i18n.t('staffPage.salaryDetail.back') }}</a>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <section class="catalog-detail__panel">
+      <div class="catalog-detail__state">{{ i18n.t('staffPage.salaryDetail.loading') }}</div>
+    </section>
+  } @else if (!staff()) {
+    <section class="catalog-detail__panel">
+      <div class="catalog-detail__state">{{ i18n.t('staffPage.salaryDetail.notFound') }}</div>
+    </section>
+  } @else if (staff(); as currentStaff) {
+    <section class="catalog-detail__grid">
+      <article class="catalog-detail__panel">
+        <p class="catalog-detail__eyebrow">{{ i18n.t('staffPage.salaryDetail.summary') }}</p>
+        <h2>{{ userName(currentStaff) }}</h2>
+        <p class="catalog-detail__description">{{ currentStaff.department || '--' }}</p>
+
+        <div class="catalog-detail__chips">
+          <span class="catalog-detail__chip">{{ i18n.t('staffPage.salaryDetail.baseSalary') }}: {{ baseSalary() | number: '1.2-2' }} {{ i18n.t('common.currency') }}</span>
+          <span class="catalog-detail__chip">{{ i18n.t('staffPage.salaryDetail.netSalary') }}: {{ netSalary() | number: '1.2-2' }} {{ i18n.t('common.currency') }}</span>
+          <span class="catalog-detail__chip salary-detail__chip" [class.salary-detail__chip--inactive]="salaryStatus() !== 'Paid'">
+            {{ salaryStatus() }}
+          </span>
+        </div>
+
+        <div class="salary-detail__toolbar">
+          <label>
+            <span>{{ i18n.t('staffPage.shared.month') }}</span>
+            <input type="month" [ngModel]="month()" (ngModelChange)="setMonth($event)" />
+          </label>
+          <button class="btn btn--secondary" type="button" (click)="loadSalary()">{{ i18n.t('staffPage.salaryDetail.loadSalary') }}</button>
+        </div>
+      </article>
+
+      <article class="catalog-detail__panel">
+        <h3>{{ i18n.t('staffPage.salaryDetail.staffDetails') }}</h3>
+        <dl class="catalog-detail__list">
+          <div><dt>{{ i18n.t('staffPage.memberDetail.staffId') }}</dt><dd>{{ id(currentStaff) || '--' }}</dd></div>
+          <div><dt>{{ i18n.t('staffPage.memberDetail.userId') }}</dt><dd>{{ userId(currentStaff) || '--' }}</dd></div>
+          <div><dt>{{ i18n.t('staffPage.memberDetail.email') }}</dt><dd>{{ userEmail(currentStaff) || '--' }}</dd></div>
+          <div><dt>{{ i18n.t('staffPage.members.joinDate') }}</dt><dd>{{ joinDateLabel(currentStaff) }}</dd></div>
+          <div><dt>{{ i18n.t('staffPage.members.dailySalary') }}</dt><dd>{{ currentStaff.dailySalary }} {{ i18n.t('common.currency') }}</dd></div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="catalog-detail__grid">
+      <article class="catalog-detail__panel">
+        <h3>{{ i18n.t('staffPage.salaryDetail.salarySummary') }}</h3>
+        @if (salary()) {
+          <dl class="catalog-detail__list">
+            <div><dt>{{ i18n.t('staffPage.shared.month') }}</dt><dd>{{ month() }}</dd></div>
+            <div><dt>{{ i18n.t('staffPage.salaryDetail.baseSalary') }}</dt><dd>{{ baseSalary() | number: '1.2-2' }} {{ i18n.t('common.currency') }}</dd></div>
+            <div><dt>{{ i18n.t('staffPage.salaryDetail.totalDeductions') }}</dt><dd>{{ totalDeductions() | number: '1.2-2' }} {{ i18n.t('common.currency') }}</dd></div>
+            <div><dt>{{ i18n.t('staffPage.salaryDetail.finalSalary') }}</dt><dd>{{ netSalary() | number: '1.2-2' }} {{ i18n.t('common.currency') }}</dd></div>
+            <div><dt>{{ i18n.t('staffPage.members.columns.status') }}</dt><dd>{{ salaryStatus() }}</dd></div>
+          </dl>
+        } @else {
+          <div class="catalog-detail__state">{{ i18n.t('staffPage.salaryDetail.noSalary') }}</div>
+        }
+      </article>
+
+      <article class="catalog-detail__panel">
+        <h3>{{ i18n.t('staffPage.salaryDetail.actions') }}</h3>
+        <div class="salary-actions">
+          <label>
+            <span>{{ i18n.t('staffPage.salaryDetail.adjustmentAmount') }}</span>
+            <input type="number" [ngModel]="adjustmentAmount()" (ngModelChange)="adjustmentAmount.set($event)" />
+          </label>
+          <label>
+            <span>{{ i18n.t('staffPage.salaryDetail.adjustmentReason') }}</span>
+            <input type="text" [ngModel]="adjustmentReason()" (ngModelChange)="adjustmentReason.set($event)" [placeholder]="i18n.t('staffPage.salaryDetail.adjustmentPlaceholder')" />
+          </label>
+          <section class="panel stat">
+            <p>{{ i18n.t('staffPage.salaryDetail.deductions') }}</p>
+            <h2>{{ totalDeductions() | number: '1.2-2' }} {{ i18n.t('common.currency') }}</h2>
+            <small>{{ i18n.t('staffPage.salaryDetail.deductionsHelp') }}</small>
+          </section>
+          <div class="salary-actions__buttons">
+            <button class="btn btn--secondary" type="button" [disabled]="isBusy()" [appCanDisable]="'salary.write'" [appCanDisableReason]="'Requires salary.write permission'" (click)="adjustSalary()">
+              {{ i18n.t('staffPage.salaryDetail.adjustSalary') }}
+            </button>
+            <button class="btn btn--primary" type="button" [disabled]="isBusy()" [appCanDisable]="'salary.write'" [appCanDisableReason]="'Requires salary.write permission'" (click)="paySalary()">
+              {{ i18n.t('staffPage.salaryDetail.markPaid') }}
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+  }
+</section>

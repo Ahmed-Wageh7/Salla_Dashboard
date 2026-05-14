@@ -1,0 +1,286 @@
+<section class="admin-page">
+  <header class="admin-page__header">
+    <div class="admin-page__intro">
+      <div class="admin-page__count">{{ filteredSubcategories().length }}</div>
+      <div>
+        <h1>{{ i18n.t('subcategoryPage.title') }}</h1>
+        <p class="admin-page__subtitle">
+          {{ i18n.t('subcategoryPage.subtitle') }}
+        </p>
+      </div>
+    </div>
+
+    <div class="admin-page__actions">
+      <button class="btn btn--ghost" type="button" routerLink="/products">{{ i18n.t('productsPage.title') }}</button>
+      <button class="btn btn--ghost" type="button" routerLink="/products/categories">
+        {{ i18n.t('productsPage.categories') }}
+      </button>
+      <button class="btn btn--ghost" type="button" (click)="loadData()">{{ i18n.t('common.refresh') }}</button>
+      <button class="btn btn--secondary" type="button" (click)="openCreateModal()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
+        {{ i18n.t('subcategoryPage.newSubcategory') }}
+      </button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="panel panel--list">
+      <div class="panel__header panel__header--split">
+        <div>
+          <h2>{{ i18n.t('subcategoryPage.listTitle') }}</h2>
+          <small>{{ i18n.t('subcategoryPage.listSubtitle') }}</small>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-field">
+            <i class="fas fa-search"></i>
+            <input
+              type="search"
+              [placeholder]="i18n.t('subcategoryPage.searchPlaceholder')"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+            />
+          </div>
+
+          <select
+            class="filter-select"
+            [ngModel]="categoryFilter()"
+            (ngModelChange)="updateCategoryFilter($event)"
+          >
+            <option value="all">{{ i18n.t('subcategoryPage.allCategories') }}</option>
+            @for (category of categories(); track categoryId(category)) {
+              <option [ngValue]="categoryId(category)">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (isLoading()) {
+        <div class="state-card loading-state">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <div class="loading-copy">
+            <strong>{{ i18n.t('subcategoryPage.loadingTitle') }}</strong>
+            <p>{{ i18n.t('subcategoryPage.loadingDescription') }}</p>
+          </div>
+        </div>
+      } @else if (filteredSubcategories().length === 0) {
+        <div class="state-card">{{ i18n.t('subcategoryPage.emptyState') }}</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ i18n.t('subcategoryPage.columns.name') }} <span>ID</span></th>
+                <th>{{ i18n.t('subcategoryPage.columns.parentCategory') }}</th>
+                <th>{{ i18n.t('subcategoryPage.columns.description') }}</th>
+                <th>{{ i18n.t('subcategoryPage.columns.created') }} <span>{{ i18n.t('subcategoryPage.columns.updated') }}</span></th>
+                <th class="table-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (subcategory of paginatedSubcategories(); track id(subcategory)) {
+                <tr>
+                  <td>
+                    <div class="cell-stack">
+                      <a
+                        class="entity-link"
+                        [routerLink]="['/products/subcategories', id(subcategory)]"
+                      >
+                        {{ subcategory.name || i18n.t('subcategoryPage.untitled') }}
+                      </a>
+                      <small>{{ id(subcategory) || i18n.t('subcategoryPage.noId') }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge">{{ categoryLabel(subcategory) || i18n.t('productsPage.noCategory') }}</span>
+                  </td>
+                  <td>{{ subcategory.description || '--' }}</td>
+                  <td>
+                    <div class="cell-stack">
+                      <strong>{{ subcategory.createdAt || '--' | slice: 0 : 10 }}</strong>
+                      <small>{{
+                        subcategory.updatedAt || subcategory.createdAt || '--' | slice: 0 : 10
+                      }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="row-actions row-actions--product">
+                      <a
+                        class="btn btn--ghost"
+                        [routerLink]="['/products/subcategories', id(subcategory)]"
+                      >
+                        {{ i18n.t('common.view') }}
+                      </a>
+                      <button
+                        class="btn btn--primary"
+                        type="button"
+                        [appCanDisable]="'products.write'"
+                        [appCanDisableReason]="'Requires products.write permission'"
+                        (click)="selectSubcategory(subcategory)"
+                      >
+                        {{ i18n.t('productsPage.edit') }}
+                      </button>
+                      <button
+                        class="btn btn--danger"
+                        type="button"
+                        [appCanDisable]="'products.write'"
+                        [appCanDisableReason]="'Requires products.write permission'"
+                        (click)="requestDelete(subcategory)"
+                      >
+                        {{ i18n.t('productsPage.delete') }}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <button
+            class="pagination__arrow"
+            type="button"
+            [attr.aria-label]="i18n.t('ordersPage.previousPage')"
+            [disabled]="currentPage() === 1 || isLoading()"
+            (click)="previousPage()"
+          >
+            <i class="fas" [class.fa-chevron-left]="!i18n.isRtl()" [class.fa-chevron-right]="i18n.isRtl()"></i>
+          </button>
+
+          <div class="pagination__pages">
+            @for (page of paginationItems(); track page) {
+              <button
+                class="pagination__page"
+                type="button"
+                [class.pagination__page--active]="page === currentPage()"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            class="pagination__arrow"
+            type="button"
+            [attr.aria-label]="i18n.t('ordersPage.nextPage')"
+            [disabled]="currentPage() === totalPages() || isLoading()"
+            (click)="nextPage()"
+          >
+            <i class="fas" [class.fa-chevron-right]="!i18n.isRtl()" [class.fa-chevron-left]="i18n.isRtl()"></i>
+          </button>
+        </div>
+      }
+    </section>
+  </div>
+</section>
+
+@if (isFormModalOpen()) {
+  <div class="modal-backdrop" (click)="closeFormModal()"></div>
+  <section class="modal" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t('subcategoryPage.formTitle')">
+    <div class="modal__header">
+      <div>
+        <p class="modal__eyebrow">{{ i18n.t('subcategoryPage.formEyebrow') }}</p>
+        <h2>{{ form().id ? i18n.t('subcategoryPage.editSubcategory') : i18n.t('subcategoryPage.createSubcategory') }}</h2>
+      </div>
+
+      <button
+        class="modal__close"
+        type="button"
+        (click)="closeFormModal()"
+        [attr.aria-label]="i18n.t('common.close')"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form class="form-grid" (ngSubmit)="saveSubcategory()">
+      <label>
+        <span>{{ i18n.t('subcategoryPage.columns.name') }}</span>
+        <input
+          type="text"
+          [ngModel]="form().name"
+          name="name"
+          (ngModelChange)="updateForm('name', $event)"
+          [placeholder]="i18n.t('subcategoryPage.namePlaceholder')"
+          required
+        />
+      </label>
+
+      <label>
+        <span>{{ i18n.t('subcategoryPage.columns.parentCategory') }}</span>
+        <select
+          [ngModel]="form().category"
+          name="category"
+          (ngModelChange)="updateForm('category', $event)"
+          required
+        >
+          <option value="">{{ i18n.t('subcategoryPage.selectCategory') }}</option>
+          @for (category of categories(); track categoryId(category)) {
+            <option [ngValue]="categoryId(category)">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="form-grid__wide">
+        <span>{{ i18n.t('subcategoryPage.columns.description') }}</span>
+        <textarea
+          rows="4"
+          [ngModel]="form().description"
+          name="description"
+          (ngModelChange)="updateForm('description', $event)"
+          [placeholder]="i18n.t('subcategoryPage.descriptionPlaceholder')"
+        ></textarea>
+      </label>
+
+      <div class="form-grid__actions">
+        <button class="btn btn--ghost" type="button" (click)="closeFormModal()">{{ i18n.t('common.cancel') }}</button>
+        <button class="btn btn--primary" type="submit" [disabled]="isSaving()" [appCanDisable]="'products.write'" [appCanDisableReason]="'Requires products.write permission'">
+          {{ isSaving() ? i18n.t('common.loading') : form().id ? i18n.t('subcategoryPage.updateSubcategory') : i18n.t('subcategoryPage.createSubcategory') }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+
+@if (isDeleteModalOpen()) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
+  <section
+    class="modal modal--confirm"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="i18n.t('subcategoryPage.deleteSubcategory')"
+  >
+    <div class="modal__header modal__header--compact">
+      <div>
+        <p class="modal__eyebrow modal__eyebrow--danger">{{ i18n.t('subcategoryPage.deleteSubcategory') }}</p>
+        <h2>{{ i18n.t('subcategoryPage.deletePrompt', { name: pendingDeleteSubcategory()?.name || i18n.t('subcategoryPage.thisSubcategory') }) }}</h2>
+      </div>
+
+      <button
+        class="modal__close"
+        type="button"
+        (click)="closeDeleteModal()"
+        [attr.aria-label]="i18n.t('common.close')"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <p class="modal__text">{{ i18n.t('subcategoryPage.deleteWarning') }}</p>
+
+    <div class="form-grid__actions">
+      <button class="btn btn--ghost" type="button" (click)="closeDeleteModal()">{{ i18n.t('common.cancel') }}</button>
+      <button
+        class="btn btn--danger"
+        type="button"
+        [disabled]="isDeleting()"
+        [appCanDisable]="'products.write'"
+        [appCanDisableReason]="'Requires products.write permission'"
+        (click)="confirmDelete()"
+      >
+        {{ isDeleting() ? i18n.t('common.loading') : i18n.t('subcategoryPage.deleteSubcategory') }}
+      </button>
+    </div>
+  </section>
+}
